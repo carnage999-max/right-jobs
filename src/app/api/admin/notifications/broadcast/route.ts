@@ -1,0 +1,76 @@
+import { NextResponse } from "next/server";
+import { auth } from "@/lib/auth";
+import prisma from "@/lib/prisma";
+import { resend } from "@/lib/mail";
+import { logAdminAction } from "@/lib/audit";
+import { z } from "zod";
+
+const broadcastSchema = z.object({
+  subject: z.string().min(5),
+  content: z.string().min(10),
+  target: z.enum(["ALL", "JOB_SEEKERS", "ADMINS"]),
+});
+
+export async function POST(req: Request) {
+  try {
+    const session = await auth();
+    
+    if (!session || session.user.role !== "ADMIN") {
+      return NextResponse.json({ ok: false, message: "Unauthorized" }, { status: 401 });
+    }
+
+    if (!session.user.mfaComplete) {
+      return NextResponse.json({ ok: false, message: "MFA required" }, { status: 403 });
+    }
+
+    const body = await req.json();
+    const { subject, content, target } = broadcastSchema.parse(body);
+
+    // Fetch targets
+    let targetUsers;
+    if (target === "ALL") {
+      targetUsers = await prisma.user.findMany({ select: { email: true } });
+    } else if (target === "ADMINS") {
+      targetUsers = await prisma.user.findMany({ where: { role: "ADMIN" }, select: { email: true } });
+    } else {
+      targetUsers = await prisma.user.findMany({ where: { role: "USER" }, select: { email: true } });
+    }
+
+    const emails = targetUsers.map(u => u.email);
+
+    if (emails.length > 0) {
+      // resend.emails.send supports up to 50 recipients in 'to' as an array for simple plans, 
+      // but for "broadcast" it's better to loop or use their batch API if available.
+      // We'll do a simple batch send.
+      await resend.emails.send({
+        from: process.env.EMAIL_FROM || "onboarding@resend.dev",
+        to: emails,
+        subject: subject,
+        html: `
+          <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 40px; border: 1px solid #eee; border-radius: 20px;">
+            <h1 style="color: #014D9F; font-size: 24px; font-weight: 900; margin-bottom: 20px;">System Notification</h1>
+            <div style="color: #333; line-height: 1.6; font-size: 16px;">
+              ${content.replace(/\n/g, '<br>')}
+            </div>
+            <hr style="margin: 40px 0; border: none; border-top: 1px solid #eee;" />
+            <p style="color: #999; font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;">
+              This is an official administrative broadcast from RightJobs.
+            </p>
+          </div>
+        `,
+      });
+    }
+
+    await logAdminAction({
+      actorAdminId: session.user.id,
+      action: `BROADCAST_${target}`,
+      entityType: "SYSTEM",
+      entityId: "BROADCAST",
+    });
+
+    return NextResponse.json({ ok: true, message: `Broadcast sent to ${emails.length} users` });
+  } catch (error) {
+    console.error("Admin broadcast error:", error);
+    return NextResponse.json({ ok: false, message: "Internal server error" }, { status: 500 });
+  }
+}

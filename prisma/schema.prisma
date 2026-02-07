@@ -1,0 +1,191 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum VerificationStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+enum JobType {
+  FULL_TIME
+  PART_TIME
+  CONTRACT
+  INTERNSHIP
+  REMOTE
+}
+
+enum ApplicationStatus {
+  PENDING
+  REVIEWING
+  INTERVIEWING
+  OFFERED
+  REJECTED
+  WITHDRAWN
+}
+
+model User {
+  id              String    @id @default(uuid())
+  email           String    @unique
+  passwordHash    String
+  role            UserRole  @default(USER)
+  emailVerifiedAt DateTime?
+  mfaEnabled      Boolean   @default(false)
+  name            String?
+  avatarUrl       String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  isSuspended     Boolean   @default(false)
+
+  profile         Profile?
+  employerProfile EmployerProfile?
+  jobsCreated     Job[]     @relation("JobCreator")
+  applications    Application[]
+  reviewsMade     Review[]  @relation("Reviewer")
+  reviewsReceived Review[]  @relation("ReviewTarget")
+  idVerification  IdVerification?
+  payments        Payment[]
+  auditLogs       AuditLog[]
+}
+
+model VerificationToken {
+  id        String   @id @default(uuid())
+  email     String
+  token     String   @unique
+  expiresAt DateTime
+  type      String   // e.g., "EMAIL_VERIFICATION", "PASSWORD_RESET"
+  createdAt DateTime @default(now())
+
+  @@unique([email, token])
+}
+
+model AdminOtp {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  otp       String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+model Profile {
+  id                 String             @id @default(uuid())
+  userId             String             @unique
+  user               User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bio                String?            @db.Text
+  location           String?
+  skills             String[]
+  resumeUrl          String?
+  verificationStatus VerificationStatus @default(PENDING)
+  updatedAt          DateTime           @updatedAt
+}
+
+model EmployerProfile {
+  id          String   @id @default(uuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  companyName String
+  website     String?
+  description String?  @db.Text
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Job {
+  id           String        @id @default(uuid())
+  title        String
+  companyName  String
+  location     String
+  type         JobType
+  category     String
+  description  String        @db.Text
+  salaryRange  String?
+  isActive     Boolean       @default(true)
+  createdById  String?
+  createdBy    User?         @relation("JobCreator", fields: [createdById], references: [id])
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  applications Application[]
+}
+
+model Application {
+  id          String            @id @default(uuid())
+  jobId       String
+  job         Job               @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status      ApplicationStatus @default(PENDING)
+  coverLetter String?           @db.Text
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+}
+
+model Review {
+  id           String             @id @default(uuid())
+  reviewerId   String
+  reviewer     User               @relation("Reviewer", fields: [reviewerId], references: [id])
+  targetUserId String
+  targetUser   User               @relation("ReviewTarget", fields: [targetUserId], references: [id])
+  rating       Int
+  text         String             @db.Text
+  status       VerificationStatus @default(PENDING)
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+}
+
+model IdVerification {
+  id           String             @id @default(uuid())
+  userId       String             @unique
+  user         User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  docFrontUrl  String
+  docBackUrl   String?
+  selfieUrl    String?
+  status       VerificationStatus @default(PENDING)
+  adminNotes   String?
+  reviewedById String?
+  reviewedAt   DateTime?
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+}
+
+model Payment {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  provider    String   @default("stripe")
+  providerRef String?
+  amount      Int
+  currency    String   @default("USD")
+  status      String
+  createdAt   DateTime @default(now())
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  audience  String   // e.g., "ALL", "USER_ID"
+  title     String
+  body      String   @db.Text
+  createdAt DateTime @default(now())
+}
+
+model AuditLog {
+  id            String   @id @default(uuid())
+  actorAdminId  String?
+  actorAdmin    User?    @relation(fields: [actorAdminId], references: [id])
+  action        String
+  entityType    String
+  entityId      String
+  metaJson      Json?
+  ip            String?
+  createdAt     DateTime @default(now())
+}
