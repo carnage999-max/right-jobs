@@ -22,10 +22,10 @@ export default function ContactPage() {
 
               <div className="space-y-8">
                 {[
-                  { icon: Mail, title: "Email Us", detail: "support@rightjobs.com", sub: "General inquiries & support" },
+                  { icon: Mail, title: "Email Us", detail: "info@right-jobs.com", sub: "General inquiries & support" },
                   { icon: MessageSquare, title: "Direct Chat", detail: "Available in Dashboard", sub: "Fastest response time" },
-                  { icon: MapPin, title: "Our Office", detail: "San Francisco, CA", sub: "123 Tech Center, Suite 400" },
-                  { icon: Phone, title: "Call center", detail: "Coming Soon", sub: "Enterprise clients only" }
+                  { icon: MapPin, title: "Mailing Address", detail: "PO Box 52, Detroit, ME 04929", sub: "Official Correspondence" },
+                  { icon: Phone, title: "Phone", detail: "207-947-1999", sub: "Mon-Fri, 9am - 5pm EST" }
                 ].map((item, idx) => (
                   <div key={idx} className="flex gap-4 items-start group">
                     <div className="h-12 w-12 rounded-2xl bg-white border border-slate-200 shadow-sm flex items-center justify-center transition-all group-hover:bg-primary group-hover:text-white shrink-0">
