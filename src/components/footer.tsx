@@ -105,11 +105,11 @@ export function Footer() {
               <ul className="space-y-4">
                 <li className="flex items-center gap-3 text-slate-600 font-semibold">
                   <Mail className="h-4 w-4 text-primary" />
-                  <span className="truncate">support@rightjobs.com</span>
+                  <span className="truncate">info@right-jobs.com</span>
                 </li>
-                <li className="flex items-center gap-3 text-slate-600 font-semibold">
-                  <MapPin className="h-4 w-4 text-primary" />
-                  San Francisco, CA
+                <li className="flex items-start gap-3 text-slate-600 font-semibold">
+                  <MapPin className="h-4 w-4 text-primary shrink-0 mt-1" />
+                  <span>PO Box 52<br/>Detroit, ME 04929</span>
                 </li>
               </ul>
             </div>
