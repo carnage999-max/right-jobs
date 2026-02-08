@@ -203,37 +203,28 @@ export function UnifiedAuth({ initialMode = "login" }: { initialMode?: "login" |
 
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
-              <AnimatePresence mode="wait">
-                {mode === "signup" && (
-                  <motion.div
-                    key="name-field"
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
-                  >
-                    <FormField
-                      control={form.control}
-                      name="name"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-slate-700 font-bold">Full Name</FormLabel>
-                          <FormControl>
-                            <div className="relative group">
-                              <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-primary transition-colors" />
-                              <Input 
-                                placeholder="John Doe" 
-                                className="pl-10 h-12 bg-slate-50 border-slate-200 focus:bg-white transition-all rounded-xl" 
-                                {...field} 
-                              />
-                            </div>
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </motion.div>
-                )}
-              </AnimatePresence>
+              {mode === "signup" && (
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-slate-700 font-bold">Full Name</FormLabel>
+                      <FormControl>
+                        <div className="relative group">
+                          <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-primary transition-colors" />
+                          <Input 
+                            placeholder="John Doe" 
+                            className="pl-10 h-12 bg-slate-50 border-slate-200 focus:bg-white transition-all rounded-xl" 
+                            {...field} 
+                          />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
 
               <FormField
                 control={form.control}
