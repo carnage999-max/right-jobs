@@ -16,7 +16,9 @@ import {
   User as UserIcon, 
   ArrowRight,
   ShieldCheck,
-  CheckCircle2
+  CheckCircle2,
+  Eye,
+  EyeOff
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -43,6 +45,7 @@ type AuthFormValues = z.infer<typeof authSchema>;
 export function UnifiedAuth({ initialMode = "login" }: { initialMode?: "login" | "signup" }) {
   const [mode, setMode] = useState<"login" | "signup">(initialMode);
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -248,34 +251,45 @@ export function UnifiedAuth({ initialMode = "login" }: { initialMode?: "login" |
                 )}
               />
 
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <div className="flex items-center justify-between">
-                      <FormLabel className="text-slate-700 font-bold">Password</FormLabel>
-                      {mode === "login" && (
-                        <Link href="/auth/forgot-password" className="text-xs text-primary hover:underline font-bold">
-                          Forgot password?
-                        </Link>
-                      )}
-                    </div>
-                    <FormControl>
-                      <div className="relative group">
-                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-primary transition-colors" />
-                        <Input 
-                          placeholder="••••••••" 
-                          type="password" 
-                          className="pl-10 h-12 bg-slate-50 border-slate-200 focus:bg-white transition-all rounded-xl" 
-                          {...field} 
-                        />
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <div className="flex items-center justify-between">
+                        <FormLabel className="text-slate-700 font-bold">Password</FormLabel>
+                        {mode === "login" && (
+                          <Link href="/auth/forgot-password" className="text-xs text-primary hover:underline font-bold">
+                            Forgot password?
+                          </Link>
+                        )}
                       </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                      <FormControl>
+                        <div className="relative group">
+                          <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-primary transition-colors" />
+                          <Input 
+                            placeholder="••••••••" 
+                            type={showPassword ? "text" : "password"} 
+                            className="pl-10 pr-10 h-12 bg-slate-50 border-slate-200 focus:bg-white transition-all rounded-xl" 
+                            {...field} 
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none"
+                          >
+                            {showPassword ? (
+                              <EyeOff className="h-4 w-4" />
+                            ) : (
+                              <Eye className="h-4 w-4" />
+                            )}
+                          </button>
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
               <Button type="submit" className="w-full h-12 text-lg ios-button shadow-xl shadow-primary/20" disabled={isLoading}>
                 {isLoading ? (
