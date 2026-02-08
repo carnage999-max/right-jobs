@@ -78,7 +78,11 @@ export function UnifiedAuth({ initialMode = "login" }: { initialMode?: "login" |
         });
 
         if (result?.error) {
-          toast.error("Invalid email or password");
+          if (result.error === "EmailNotVerified" || result.code === "EmailNotVerified") {
+            toast.error("Please verify your email before signing in.");
+          } else {
+            toast.error("Invalid email or password");
+          }
         } else {
           toast.success("Welcome back!");
           router.push("/app");
@@ -283,8 +287,14 @@ export function UnifiedAuth({ initialMode = "login" }: { initialMode?: "login" |
               />
 
               <Button type="submit" className="w-full h-12 text-lg ios-button shadow-xl shadow-primary/20" disabled={isLoading}>
-                {isLoading && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
-                {mode === "login" ? "Sign In Now" : "Create My Account"}
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                    {mode === "login" ? "Signing In..." : "Creating Account..."}
+                  </>
+                ) : (
+                  mode === "login" ? "Sign In Now" : "Create My Account"
+                )}
               </Button>
 
               {mode === "signup" && (
