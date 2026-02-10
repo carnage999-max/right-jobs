@@ -32,7 +32,6 @@ import { SharedThreeBg } from "@/components/shared-three-bg";
 const routes = [
   { label: "Browse Jobs", href: "/jobs" },
   { label: "Post a Job", href: "/auth/signup" },
-  { label: "Post a Resume", href: "/profile" },
   { label: "Pricing", href: "/pricing" },
 ];
 

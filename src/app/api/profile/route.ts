@@ -8,6 +8,7 @@ const profileSchema = z.object({
   bio: z.string().optional(),
   location: z.string().optional(),
   skills: z.array(z.string()).optional(),
+  resumeUrl: z.string().url().optional(),
 });
 
 export async function GET() {
@@ -73,6 +74,7 @@ export async function PATCH(req: Request) {
         bio: validatedData.bio,
         location: validatedData.location,
         skills: validatedData.skills,
+        resumeUrl: validatedData.resumeUrl,
       }
     });
 

@@ -36,6 +36,9 @@ export default function ProfilePage() {
   const [skills, setSkills] = useState<string[]>([]);
   const [newSkill, setNewSkill] = useState("");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [resumeUrl, setResumeUrl] = useState<string | null>(null);
+  const [isUploadingResume, setIsUploadingResume] = useState(false);
+  const resumeInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     async function fetchProfile() {
@@ -49,6 +52,7 @@ export default function ProfilePage() {
           setLocation(data.data.location || "");
           setSkills(data.data.skills || []);
           setAvatarUrl(data.data.user.avatarUrl || null);
+          setResumeUrl(data.data.resumeUrl || null);
         }
       } catch (e) {
         toast.error("Failed to load profile");
@@ -64,7 +68,7 @@ export default function ProfilePage() {
     try {
       const resp = await fetch("/api/profile", {
         method: "PATCH",
-        body: JSON.stringify({ name, bio, location, skills }),
+        body: JSON.stringify({ name, bio, location, skills, resumeUrl }),
         headers: { "Content-Type": "application/json" },
       });
       const data = await resp.json();
@@ -82,6 +86,66 @@ export default function ProfilePage() {
 
   const handleAvatarClick = () => {
     fileInputRef.current?.click();
+  };
+
+  const handleResumeClick = () => {
+    resumeInputRef.current?.click();
+  };
+
+  const handleResumeChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.type !== "application/pdf") {
+      toast.error("Please select a PDF file");
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("Resume must be less than 10MB");
+      return;
+    }
+
+    setIsUploadingResume(true);
+    try {
+      const presignResp = await fetch("/api/upload/presign", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          filename: file.name,
+          contentType: file.type,
+        }),
+      });
+
+      const presignData = await presignResp.json();
+      if (!presignData.ok) throw new Error("Failed to get upload URL");
+
+      const uploadResp = await fetch(presignData.url, {
+        method: "PUT",
+        body: file,
+        headers: { "Content-Type": file.type },
+      });
+
+      if (!uploadResp.ok) throw new Error("Failed to upload file");
+
+      const updateResp = await fetch("/api/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ resumeUrl: presignData.publicUrl }),
+      });
+
+      const updateData = await updateResp.json();
+      if (updateData.ok) {
+        setResumeUrl(presignData.publicUrl);
+        toast.success("Resume updated!");
+      } else {
+        throw new Error("Failed to save resume");
+      }
+    } catch (error) {
+      toast.error("Failed to upload resume");
+    } finally {
+      setIsUploadingResume(false);
+    }
   };
 
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -344,11 +408,30 @@ export default function ProfilePage() {
                           <CheckCircle2 className="h-5 w-5 sm:h-6 sm:w-6" />
                        </div>
                        <div className="min-w-0">
-                          <p className="text-xs sm:text-sm font-black text-slate-900 truncate">Global_Portfolio_Standard.pdf</p>
-                          <p className="text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Verified System Sync</p>
+                          <p className="text-xs sm:text-sm font-black text-slate-900 truncate">
+                            {resumeUrl ? "Master_Resume_Verified.pdf" : "No resume uploaded"}
+                          </p>
+                          <p className="text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
+                            {resumeUrl ? "Verified System Sync" : "Sync required for top roles"}
+                          </p>
                        </div>
                     </div>
-                    <Button variant="ghost" className="font-black text-primary text-[10px] sm:text-xs tracking-widest uppercase hover:bg-primary/5 shrink-0">Replace</Button>
+                    <input 
+                      ref={resumeInputRef}
+                      type="file"
+                      accept=".pdf"
+                      onChange={handleResumeChange}
+                      className="hidden"
+                    />
+                    <Button 
+                      variant="ghost" 
+                      onClick={handleResumeClick}
+                      disabled={isUploadingResume}
+                      className="font-black text-primary text-[10px] sm:text-xs tracking-widest uppercase hover:bg-primary/5 shrink-0"
+                    >
+                      {isUploadingResume ? <Loader2 className="h-3 w-3 animate-spin mr-2" /> : null}
+                      {resumeUrl ? "Replace" : "Upload"}
+                    </Button>
                  </div>
               </CardContent>
            </Card>
