@@ -173,17 +173,23 @@ export function Navbar() {
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               aria-label="Toggle Menu"
             >
-              <motion.span
-                animate={isMenuOpen ? { rotate: 45, y: 7 } : { rotate: 0, y: 0 }}
-                className={cn("h-0.5 w-6 rounded-full transition-colors duration-500", isMenuOpen ? "bg-white" : "bg-slate-900")}
+              <span
+                className={cn(
+                  "h-0.5 w-6 rounded-full transition-all duration-300",
+                  isMenuOpen ? "bg-white rotate-45 translate-y-2" : "bg-slate-900"
+                )}
               />
-              <motion.span
-                animate={isMenuOpen ? { opacity: 0 } : { opacity: 1 }}
-                className={cn("h-0.5 w-6 rounded-full transition-colors duration-500", isMenuOpen ? "bg-white" : "bg-slate-900")}
+              <span
+                className={cn(
+                  "h-0.5 w-6 rounded-full transition-all duration-300",
+                  isMenuOpen ? "bg-white opacity-0" : "bg-slate-900 opacity-100"
+                )}
               />
-              <motion.span
-                animate={isMenuOpen ? { rotate: -45, y: -7 } : { rotate: 0, y: 0 }}
-                className={cn("h-0.5 w-6 rounded-full transition-colors duration-500", isMenuOpen ? "bg-white" : "bg-slate-900")}
+              <span
+                className={cn(
+                  "h-0.5 w-6 rounded-full transition-all duration-300",
+                  isMenuOpen ? "bg-white -rotate-45 -translate-y-2" : "bg-slate-900"
+                )}
               />
             </button>
           </div>
@@ -191,73 +197,60 @@ export function Navbar() {
       </nav>
 
       {/* Mobile Menu Backdrop */}
-      <AnimatePresence>
-        {isMenuOpen && (
-          <motion.div
-            initial={{ clipPath: "circle(0% at 100% 0%)" }}
-            animate={{ clipPath: "circle(150% at 100% 0%)" }}
-            exit={{ clipPath: "circle(0% at 100% 0%)" }}
-            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-            className="fixed inset-0 z-50 overflow-y-auto bg-slate-950 px-4 pt-24 pb-12"
-          >
-            <SharedThreeBg className="opacity-40" />
-            <div className="relative z-10 flex flex-col items-center gap-6 text-center">
-               <div className="mb-4 relative h-32 w-32 shrink-0">
+      {isMenuOpen && (
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950 px-4 pt-24 pb-12 animate-in slide-in-from-top-10 fade-in duration-300">
+          <div className="relative z-10 flex flex-col items-center gap-6 text-center">
+              <div className="mb-4 relative h-32 w-32 shrink-0">
                   <Image 
                     src="/right-jobs-logo-nobg.png" 
                     alt="Logo" 
                     fill
                     className="object-contain"
                   />
-               </div>
-              <div className="flex flex-col gap-4">
-                {routes.map((route, i) => (
-                  <motion.div
-                    key={route.href}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.2 + i * 0.1 }}
-                  >
-                    <Link
-                      href={route.href}
-                      className="text-4xl font-black tracking-tighter text-white hover:text-primary transition-colors"
-                    >
-                      {route.label}
-                    </Link>
-                  </motion.div>
-                ))}
               </div>
-              
-              <motion.div 
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.6 }}
-                className="mt-8 flex flex-col gap-4 w-full min-w-[280px]"
-              >
-                 {status === "authenticated" ? (
-                   <Button size="lg" className="ios-button h-16 text-xl" asChild>
-                     <Link href="/app">Go to Dashboard</Link>
-                   </Button>
-                 ) : (
-                   <>
-                     <Button size="lg" className="ios-button h-16 text-xl" asChild>
-                       <Link href="/auth/signup">Join Now</Link>
-                     </Button>
-                     <Button 
-                        size="lg" 
-                        variant="ghost" 
-                        className="ios-button h-16 text-xl text-white hover:bg-white/10 border border-white/10" 
-                        asChild
-                      >
-                       <Link href="/auth/login">Login</Link>
-                     </Button>
-                   </>
-                 )}
-              </motion.div>
+            <div className="flex flex-col gap-4">
+              {routes.map((route, i) => (
+                <div
+                  key={route.href}
+                  className="animate-in slide-in-from-bottom-5 fade-in duration-500 fill-mode-backwards"
+                  style={{ animationDelay: `${i * 100}ms` }}
+                >
+                  <Link
+                    href={route.href}
+                    className="text-4xl font-black tracking-tighter text-white hover:text-primary transition-colors"
+                  >
+                    {route.label}
+                  </Link>
+                </div>
+              ))}
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            
+            <div 
+              className="mt-8 flex flex-col gap-4 w-full min-w-[280px] animate-in zoom-in-95 fade-in duration-500 delay-300 fill-mode-backwards"
+            >
+                {status === "authenticated" ? (
+                  <Button size="lg" className="ios-button h-16 text-xl" asChild>
+                    <Link href="/app">Go to Dashboard</Link>
+                  </Button>
+                ) : (
+                  <>
+                    <Button size="lg" className="ios-button h-16 text-xl" asChild>
+                      <Link href="/auth/signup">Join Now</Link>
+                    </Button>
+                    <Button 
+                      size="lg" 
+                      variant="ghost" 
+                      className="ios-button h-16 text-xl text-white hover:bg-white/10 border border-white/10" 
+                      asChild
+                    >
+                      <Link href="/auth/login">Login</Link>
+                    </Button>
+                  </>
+                )}
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

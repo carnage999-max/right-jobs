@@ -13,14 +13,16 @@ export const sendVerificationEmail = async (email: string, token: string) => {
   });
 };
 
+import { resetPasswordTemplate } from "@/lib/email-templates";
+
 export const sendPasswordResetEmail = async (email: string, token: string) => {
-  const resetLink = `${process.env.NEXT_PUBLIC_APP_URL}/auth/reset-password?token=${token}`;
+  const resetLink = `${process.env.NEXT_PUBLIC_APP_URL}/auth/reset-password/${token}`;
 
   await resend.emails.send({
-    from: process.env.EMAIL_FROM || "onboarding@resend.dev",
+    from: "Right Jobs <info@right-jobs.com>",
     to: email,
-    subject: "Reset your password - RightJobs",
-    html: `<p>Click <a href="${resetLink}">here</a> to reset your password.</p>`,
+    subject: "Reset your password",
+    html: resetPasswordTemplate(resetLink),
   });
 };
 
