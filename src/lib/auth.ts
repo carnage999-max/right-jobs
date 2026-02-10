@@ -9,12 +9,14 @@ import { UserRole } from "@prisma/client";
 declare module "next-auth" {
   interface User {
     role?: UserRole;
+    emailVerified?: boolean;
   }
   interface Session {
     user: {
       id: string;
       role: UserRole;
       mfaComplete?: boolean;
+      isEmailVerified?: boolean;
     } & DefaultSession["user"];
   }
 }
@@ -40,15 +42,15 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
           if (!user) return null;
           const passwordsMatch = await bcrypt.compare(password, user.passwordHash);
 
-            if (passwordsMatch) {
-              return {
-                id: user.id,
-                email: user.email,
-                name: user.name,
-                role: user.role,
-                emailVerified: user.emailVerifiedAt ? true : false,
-              };
-            }
+          if (passwordsMatch) {
+            return {
+              id: user.id,
+              email: user.email,
+              name: user.name,
+              role: user.role,
+              emailVerified: user.emailVerifiedAt ? true : false,
+            };
+          }
         }
 
         return null;
@@ -56,22 +58,19 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
     }),
   ],
   callbacks: {
-    async signIn({ user }) {
-      // Block login if email is not verified
-      if (!(user as any).emailVerified) {
-        return "/auth/login?error=EmailNotVerified";
-      }
-      return true;
-    },
     async jwt({ token, user, trigger, session }) {
       if (user) {
         token.role = user.role;
         token.id = user.id;
+        token.emailVerified = (user as any).emailVerified ?? false;
         token.mfaComplete = user.role !== "ADMIN"; 
       }
       
       if (trigger === "update" && session?.mfaComplete !== undefined) {
         token.mfaComplete = session.mfaComplete;
+      }
+      if (trigger === "update" && session?.emailVerified !== undefined) {
+        token.emailVerified = session.emailVerified;
       }
       
       return token;
@@ -84,6 +83,7 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
         session.user.id = token.id as string;
       }
       session.user.mfaComplete = !!token?.mfaComplete;
+      session.user.isEmailVerified = !!token?.emailVerified;
       
       return session;
     },

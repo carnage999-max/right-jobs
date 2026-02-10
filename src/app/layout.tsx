@@ -17,6 +17,7 @@ import { Footer } from "@/components/footer";
 import { Toaster } from "@/components/ui/sonner";
 import { Providers } from "@/components/providers";
 import { ButtonClickEffect } from "@/components/button-click-effect";
+import { EmailVerificationBanner } from "@/components/email-verification-banner";
 
 export const metadata: Metadata = {
   title: "RightJobs | Find Your Next Opportunity",
@@ -36,6 +37,7 @@ export default function RootLayout({
         <Providers>
           <ButtonClickEffect />
           <Navbar />
+          <EmailVerificationBanner />
           <main className="flex-1">{children}</main>
           <Footer />
           <Toaster />

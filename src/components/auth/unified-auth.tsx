@@ -68,10 +68,6 @@ export function UnifiedAuth({ initialMode = "login" }: { initialMode?: "login" |
     if (searchParams.get("verified") === "true") {
         toast.success("Email verified! You can now sign in.");
     }
-    
-    if (searchParams.get("error") === "EmailNotVerified") {
-        toast.error("Please verify your email before signing in. Check your inbox for the verification link.");
-    }
   }, [searchParams]);
 
   async function onSubmit(values: AuthFormValues) {
@@ -85,18 +81,7 @@ export function UnifiedAuth({ initialMode = "login" }: { initialMode?: "login" |
         });
 
         if (result?.error) {
-          // Check if the URL contains the EmailNotVerified error
-          const isEmailNotVerified = result.url?.includes("error=EmailNotVerified") ||
-            result.error === "EmailNotVerified" ||
-            result.code === "EmailNotVerified";
-            
-          if (isEmailNotVerified) {
-            toast.error("Please verify your email before signing in. Check your inbox for the verification link.");
-          } else {
-            toast.error("Invalid email or password.");
-          }
-        } else if (result?.url?.includes("error=EmailNotVerified")) {
-          toast.error("Please verify your email before signing in. Check your inbox for the verification link.");
+          toast.error("Invalid email or password.");
         } else {
           toast.success("Welcome back!");
           router.push("/app");
@@ -111,8 +96,20 @@ export function UnifiedAuth({ initialMode = "login" }: { initialMode?: "login" |
         const data = await response.json();
 
         if (data.ok) {
-          toast.success("Account created! Please check your email to verify.");
-          setMode("login");
+          toast.success("Account created! Signing you in...");
+          // Auto-login after successful signup
+          const loginResult = await signIn("credentials", {
+            email: values.email,
+            password: values.password,
+            redirect: false,
+          });
+          if (loginResult?.error) {
+            // Fallback: redirect to login page
+            toast.info("Please sign in with your new credentials.");
+            setMode("login");
+          } else {
+            router.push("/app");
+          }
         } else {
           toast.error(data.message || "Signup failed");
         }
