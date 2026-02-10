@@ -1,6 +1,7 @@
 const BRAND_COLOR = "#ea580c";
 const DARK_BG = "#0f172a";
 const YEAR = new Date().getFullYear();
+const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://right-jobs.com";
 
 function baseLayout(title: string, body: string): string {
   return `
@@ -33,7 +34,7 @@ function baseLayout(title: string, body: string): string {
             <td style="background: #f1f5f9; padding: 24px; text-align: center; font-size: 12px; color: #64748b;">
               &copy; ${YEAR} RightJobs Inc. All rights reserved.<br>
               PO Box 52, Detroit, ME 04929<br><br>
-              <a href="https://right-jobs.com" style="color: ${BRAND_COLOR}; text-decoration: none;">right-jobs.com</a>
+              <a href="${SITE_URL}" style="color: ${BRAND_COLOR}; text-decoration: none;">${SITE_URL.replace('https://', '')}</a>
             </td>
           </tr>
         </table>
@@ -92,6 +93,7 @@ export function resetPasswordTemplate(resetLink: string): string {
 // ─── Password Changed Notice ─────────────────────────────────────────
 
 export function passwordChangedTemplate(): string {
+  const supportEmail = process.env.SUPPORT_EMAIL || "info@right-jobs.com";
   return baseLayout("Password Changed", `
     <div style="text-align: center; margin-bottom: 24px;">
       <div style="display: inline-block; background: #fef2f2; border-radius: 50%; padding: 16px;">
@@ -101,7 +103,7 @@ export function passwordChangedTemplate(): string {
     <h1 style="font-size: 24px; font-weight: 700; color: #0f172a; margin: 0 0 16px 0; text-align: center;">Your Password Was Changed</h1>
     <p style="margin-bottom: 24px; font-size: 16px;">Your RightJobs account password was successfully updated. If you made this change, no further action is required.</p>
     <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 12px; padding: 16px; margin-bottom: 24px;">
-      <p style="margin: 0; font-size: 14px; color: #991b1b;"><strong>Didn't make this change?</strong> Your account may be compromised. Please reset your password immediately and contact our support team at <a href="mailto:info@right-jobs.com" style="color: ${BRAND_COLOR}; text-decoration: none;">info@right-jobs.com</a>.</p>
+      <p style="margin: 0; font-size: 14px; color: #991b1b;"><strong>Didn't make this change?</strong> Your account may be compromised. Please reset your password immediately and contact our support team at <a href="mailto:${supportEmail}" style="color: ${BRAND_COLOR}; text-decoration: none;">${supportEmail}</a>.</p>
     </div>
   `);
 }
@@ -150,7 +152,7 @@ export function applicationConfirmationTemplate(jobTitle: string): string {
     <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; padding: 16px; margin-bottom: 24px;">
       <p style="margin: 0; font-size: 14px; color: #166534;"><strong>What's next?</strong> The hiring team will review your application and get back to you. You can track your application status on your dashboard.</p>
     </div>
-    ${ctaButton("View My Dashboard", "https://right-jobs.com/app")}
+    ${ctaButton("View My Dashboard", `${SITE_URL}/app`)}
   `);
 }
 
@@ -177,6 +179,6 @@ export function verificationStatusTemplate(status: "VERIFIED" | "REJECTED", note
     <div style="background: ${bgColor}; border: 1px solid ${borderColor}; border-radius: 12px; padding: 16px; margin-bottom: 24px;">
       <p style="margin: 0; font-size: 15px; color: ${textColor};">${message}</p>
     </div>
-    ${isVerified ? ctaButton("Browse Jobs Now", "https://right-jobs.com/jobs") : ctaButton("Try Again", "https://right-jobs.com/verify-id")}
+    ${isVerified ? ctaButton("Browse Jobs Now", `${SITE_URL}/jobs`) : ctaButton("Try Again", `${SITE_URL}/verify-id`)}
   `);
 }

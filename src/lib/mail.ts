@@ -16,7 +16,7 @@ const FROM = process.env.EMAIL_FROM || "Right Jobs <info@se7eninc.com>";
 // ─── Email Verification ──────────────────────────────────────────────
 
 export const sendVerificationEmail = async (email: string, token: string) => {
-  const confirmLink = `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/verify-email?token=${token}`;
+  const confirmLink = `${process.env.NEXT_PUBLIC_APP_URL}/auth/verify-email?token=${token}`;
 
   await resend.emails.send({
     from: FROM,
