@@ -84,7 +84,8 @@ export function UnifiedAuth({ initialMode = "login" }: { initialMode?: "login" |
           toast.error("Invalid email or password.");
         } else {
           toast.success("Welcome back!");
-          router.push("/app");
+          const callbackUrl = searchParams.get("callbackUrl") || "/app";
+          router.push(callbackUrl);
         }
       } else {
         const response = await fetch("/api/auth/signup", {
@@ -108,7 +109,8 @@ export function UnifiedAuth({ initialMode = "login" }: { initialMode?: "login" |
             toast.info("Please sign in with your new credentials.");
             setMode("login");
           } else {
-            router.push("/app");
+            const callbackUrl = searchParams.get("callbackUrl") || "/app";
+            router.push(callbackUrl);
           }
         } else {
           toast.error(data.message || "Signup failed");

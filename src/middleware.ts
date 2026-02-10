@@ -28,24 +28,41 @@ export default auth((req) => {
   const isAdminRoute = nextUrl.pathname.startsWith("/admin");
   const isAppRoute = nextUrl.pathname.startsWith("/app");
   const isMfaRoute = nextUrl.pathname === "/auth/mfa";
+  const isVerifyEmailRoute = nextUrl.pathname === "/auth/verify-email";
+  const isResetPasswordRoute = nextUrl.pathname.startsWith("/auth/reset-password");
 
   if (isApiAuthRoute) {
     return NextResponse.next();
   }
 
   if (isAuthRoute) {
-    if (isLoggedIn && !isMfaRoute) {
-      // If logged in as admin and need MFA, let them go to MFA
-      if (req.auth?.user.role === "ADMIN" && !req.auth?.user.mfaComplete) {
-         return NextResponse.next();
+    if (isLoggedIn) {
+      // If it's a login or signup page, redirect to app
+      if (nextUrl.pathname === "/auth/login" || nextUrl.pathname === "/auth/signup") {
+        return NextResponse.redirect(new URL("/app", nextUrl));
       }
-      return NextResponse.redirect(new URL("/app", nextUrl));
+
+      // If it's MFA route, let them through if they need it
+      if (isMfaRoute) {
+        if (req.auth?.user.role === "ADMIN" && !req.auth?.user.mfaComplete) {
+          return NextResponse.next();
+        }
+        return NextResponse.redirect(new URL("/app", nextUrl));
+      }
+
+      // Allow verify-email and reset-password even when logged in? 
+      // verify-email: definitely yes (user might verify while logged in)
+      // reset-password: usually yes (user might click link from email)
+      return NextResponse.next();
     }
     return NextResponse.next();
   }
 
   if (!isLoggedIn && !isPublicRoute) {
-    return NextResponse.redirect(new URL("/auth/login", nextUrl));
+    const callbackUrl = nextUrl.pathname + nextUrl.search;
+    const loginUrl = new URL("/auth/login", nextUrl);
+    loginUrl.searchParams.set("callbackUrl", callbackUrl);
+    return NextResponse.redirect(loginUrl);
   }
 
   if (isLoggedIn) {

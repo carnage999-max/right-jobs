@@ -114,7 +114,7 @@ export function Navbar() {
                       </Avatar>
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-56 mt-2 rounded-xl" align="end" forceMount>
+                  <DropdownMenuContent className="w-56 rounded-xl z-[80]" align="end" sideOffset={12} forceMount>
                     <DropdownMenuLabel className="font-normal">
                       <div className="flex flex-col space-y-1">
                         <p className="text-sm font-bold leading-none">{session?.user?.name}</p>
