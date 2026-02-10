@@ -33,6 +33,15 @@ export async function GET(req: Request) {
       return NextResponse.json({ ok: false, message: "Email does not exist" }, { status: 400 });
     }
 
+    // If already verified, just return success
+    if (user.emailVerifiedAt) {
+      await prisma.verificationToken.delete({
+        where: { id: verificationToken.id }
+      }).catch(() => {}); // Ignore if already deleted
+      
+      return NextResponse.json({ ok: true, message: "Email already verified" });
+    }
+
     await prisma.user.update({
       where: { id: user.id },
       data: { emailVerifiedAt: new Date() },
@@ -43,7 +52,7 @@ export async function GET(req: Request) {
       where: { id: verificationToken.id }
     });
 
-    return NextResponse.redirect(new URL("/auth/login?verified=true", req.url));
+    return NextResponse.json({ ok: true, message: "Email verified successfully" });
   } catch (error) {
     console.error("Verification error:", error);
     return NextResponse.json({ ok: false, message: "Something went wrong" }, { status: 500 });
