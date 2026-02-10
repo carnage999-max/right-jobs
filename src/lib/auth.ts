@@ -41,14 +41,12 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
           const passwordsMatch = await bcrypt.compare(password, user.passwordHash);
 
             if (passwordsMatch) {
-              if (!user.emailVerifiedAt) {
-                 throw new Error("EmailNotVerified");
-              }
               return {
                 id: user.id,
                 email: user.email,
                 name: user.name,
                 role: user.role,
+                emailVerified: user.emailVerifiedAt ? true : false,
               };
             }
         }
@@ -58,15 +56,20 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
     }),
   ],
   callbacks: {
+    async signIn({ user }) {
+      // Block login if email is not verified
+      if (!(user as any).emailVerified) {
+        return "/auth/login?error=EmailNotVerified";
+      }
+      return true;
+    },
     async jwt({ token, user, trigger, session }) {
       if (user) {
         token.role = user.role;
         token.id = user.id;
-        // Default to false for admins, true for standard users (or handle per instruction)
         token.mfaComplete = user.role !== "ADMIN"; 
       }
       
-      // Allow manual update of mfaComplete
       if (trigger === "update" && session?.mfaComplete !== undefined) {
         token.mfaComplete = session.mfaComplete;
       }

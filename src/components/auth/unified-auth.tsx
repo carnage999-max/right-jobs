@@ -68,6 +68,10 @@ export function UnifiedAuth({ initialMode = "login" }: { initialMode?: "login" |
     if (searchParams.get("verified") === "true") {
         toast.success("Email verified! You can now sign in.");
     }
+    
+    if (searchParams.get("error") === "EmailNotVerified") {
+        toast.error("Please verify your email before signing in. Check your inbox for the verification link.");
+    }
   }, [searchParams]);
 
   async function onSubmit(values: AuthFormValues) {
@@ -81,11 +85,18 @@ export function UnifiedAuth({ initialMode = "login" }: { initialMode?: "login" |
         });
 
         if (result?.error) {
-          if (result.error === "EmailNotVerified" || result.code === "EmailNotVerified") {
-            toast.error("Please verify your email before signing in.");
+          // Check if the URL contains the EmailNotVerified error
+          const isEmailNotVerified = result.url?.includes("error=EmailNotVerified") ||
+            result.error === "EmailNotVerified" ||
+            result.code === "EmailNotVerified";
+            
+          if (isEmailNotVerified) {
+            toast.error("Please verify your email before signing in. Check your inbox for the verification link.");
           } else {
-            toast.error("Invalid email or password");
+            toast.error("Invalid email or password.");
           }
+        } else if (result?.url?.includes("error=EmailNotVerified")) {
+          toast.error("Please verify your email before signing in. Check your inbox for the verification link.");
         } else {
           toast.success("Welcome back!");
           router.push("/app");

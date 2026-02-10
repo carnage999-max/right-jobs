@@ -1,79 +1,99 @@
 import { Resend } from "resend";
+import {
+  verifyEmailTemplate,
+  resetPasswordTemplate,
+  passwordChangedTemplate,
+  passwordChangeVerificationTemplate,
+  otpTemplate,
+  applicationConfirmationTemplate,
+  verificationStatusTemplate,
+} from "@/lib/email-templates";
 
 export const resend = new Resend(process.env.RESEND_API_KEY || "re_placeholder");
 
+const FROM = process.env.EMAIL_FROM || "Right Jobs <info@se7eninc.com>";
+
+// ─── Email Verification ──────────────────────────────────────────────
+
 export const sendVerificationEmail = async (email: string, token: string) => {
-  const confirmLink = `${process.env.NEXT_PUBLIC_APP_URL}/auth/verify-email?token=${token}`;
+  const confirmLink = `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/verify-email?token=${token}`;
 
   await resend.emails.send({
-    from: process.env.EMAIL_FROM || "onboarding@resend.dev",
+    from: FROM,
     to: email,
-    subject: "Verify your email - RightJobs",
-    html: `<p>Click <a href="${confirmLink}">here</a> to verify your email.</p>`,
+    subject: "Verify your email — RightJobs",
+    html: verifyEmailTemplate(confirmLink),
   });
 };
 
-import { resetPasswordTemplate } from "@/lib/email-templates";
+// ─── Password Reset ──────────────────────────────────────────────────
 
 export const sendPasswordResetEmail = async (email: string, token: string) => {
   const resetLink = `${process.env.NEXT_PUBLIC_APP_URL}/auth/reset-password/${token}`;
 
   await resend.emails.send({
-    from: "Right Jobs <info@right-jobs.com>",
+    from: FROM,
     to: email,
-    subject: "Reset your password",
+    subject: "Reset your password — RightJobs",
     html: resetPasswordTemplate(resetLink),
   });
 };
 
+// ─── Admin OTP ───────────────────────────────────────────────────────
+
 export const sendOTPEmail = async (email: string, otp: string) => {
   await resend.emails.send({
-    from: process.env.EMAIL_FROM || "onboarding@resend.dev",
+    from: FROM,
     to: email,
-    subject: "Your Admin OTP - RightJobs",
-    html: `<p>Your OTP code is: <strong>${otp}</strong>. It expires in 10 minutes.</p>`,
+    subject: "Your security code — RightJobs",
+    html: otpTemplate(otp),
   });
 };
+
+// ─── Application Confirmation ────────────────────────────────────────
 
 export const sendApplicationConfirmationEmail = async (email: string, jobTitle: string) => {
   await resend.emails.send({
-    from: process.env.EMAIL_FROM || "onboarding@resend.dev",
+    from: FROM,
     to: email,
-    subject: `Application Received: ${jobTitle}`,
-    html: `<p>Your application for <strong>${jobTitle}</strong> has been received by the hiring team.</p><p>You can track your status on your dashboard.</p>`,
+    subject: `Application Received: ${jobTitle} — RightJobs`,
+    html: applicationConfirmationTemplate(jobTitle),
   });
 };
+
+// ─── Identity Verification Status ────────────────────────────────────
 
 export const sendVerificationStatusEmail = async (email: string, status: "VERIFIED" | "REJECTED", notes?: string) => {
   const subject = status === "VERIFIED" ? "Identity Verified!" : "Identity Verification Update";
-  const message = status === "VERIFIED" 
-    ? "Congratulations! Your identity has been verified. You now have full access to apply for all jobs."
-    : `Unfortunately, your identity verification was not successful. ${notes ? `Reason: ${notes}` : "Please try again with clearer documents."}`;
 
   await resend.emails.send({
-    from: process.env.EMAIL_FROM || "onboarding@resend.dev",
+    from: FROM,
     to: email,
-    subject: `${subject} - RightJobs`,
-    html: `<p>${message}</p>`,
+    subject: `${subject} — RightJobs`,
+    html: verificationStatusTemplate(status, notes),
   });
 };
 
+// ─── Password Change Verification ────────────────────────────────────
+
 export const sendPasswordChangeVerificationEmail = async (email: string, token: string) => {
-    const confirmLink = `${process.env.NEXT_PUBLIC_APP_URL}/auth/change-password?token=${token}`;
-  
-    await resend.emails.send({
-      from: process.env.EMAIL_FROM || "onboarding@resend.dev",
-      to: email,
-      subject: "Confirm password change - RightJobs",
-      html: `<p>Click <a href="${confirmLink}">here</a> to confirm you want to change your password.</p><p>If you didn't request this, please secure your account immediately.</p>`,
-    });
-  };
+  const confirmLink = `${process.env.NEXT_PUBLIC_APP_URL}/auth/change-password?token=${token}`;
+
+  await resend.emails.send({
+    from: FROM,
+    to: email,
+    subject: "Confirm password change — RightJobs",
+    html: passwordChangeVerificationTemplate(confirmLink),
+  });
+};
+
+// ─── Password Changed Notice ─────────────────────────────────────────
 
 export const sendPasswordChangedNoticeEmail = async (email: string) => {
-    await resend.emails.send({
-      from: process.env.EMAIL_FROM || "onboarding@resend.dev",
-      to: email,
-      subject: "Security Alert: Password Changed",
-      html: `<p>Your RightJobs password was successfully changed. If this wasn't you, please contact support immediately.</p>`,
-    });
-  };
+  await resend.emails.send({
+    from: FROM,
+    to: email,
+    subject: "Security Alert: Password Changed — RightJobs",
+    html: passwordChangedTemplate(),
+  });
+};
