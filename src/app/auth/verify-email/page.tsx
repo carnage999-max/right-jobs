@@ -8,6 +8,7 @@ import { Loader2, CheckCircle2, XCircle } from "lucide-react";
 import Link from "next/link";
 
 import { useSession } from "next-auth/react";
+import { cn } from "@/lib/utils";
 
 function VerifyEmailContent() {
   const searchParams = useSearchParams();
