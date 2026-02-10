@@ -46,6 +46,16 @@ export function Navbar() {
     setIsMenuOpen(false);
   }, [pathname]);
 
+  const dynamicRoutes = routes.map(route => {
+    if (route.label === "Post a Job") {
+      return {
+        ...route,
+        href: status === "authenticated" ? "/jobs/post" : "/auth/signup"
+      };
+    }
+    return route;
+  });
+
   // Lock scroll when menu is open
   useEffect(() => {
     if (isMenuOpen) {
@@ -64,7 +74,7 @@ export function Navbar() {
         <div className="container mx-auto flex h-24 items-center justify-between px-4 relative">
           {/* Left: Navigation Links */}
           <div className="hidden md:flex md:gap-6 items-center flex-1">
-            {routes.map((route) => (
+            {dynamicRoutes.map((route) => (
               <Link
                 key={route.href}
                 href={route.href}
@@ -209,7 +219,7 @@ export function Navbar() {
                   />
               </div>
             <div className="flex flex-col gap-4">
-              {routes.map((route, i) => (
+              {dynamicRoutes.map((route, i) => (
                 <div
                   key={route.href}
                   className="animate-in slide-in-from-bottom-5 fade-in duration-500 fill-mode-backwards"

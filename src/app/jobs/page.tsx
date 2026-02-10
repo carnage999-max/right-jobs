@@ -1,149 +1,200 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Search, MapPin, Briefcase, DollarSign, Clock, Filter } from "lucide-react";
+import { Search, MapPin, Briefcase, DollarSign, Clock, Filter, Loader2, Sparkles } from "lucide-react";
 import Link from "next/link";
-
-// Mock data for initial UI
-const MOCK_JOBS = [
-  {
-    id: "550e8400-e29b-41d4-a716-446655440000",
-    title: "Senior Frontend Engineer",
-    companyName: "TechFlow Systems",
-    location: "San Francisco, CA",
-    type: "FULL_TIME",
-    category: "Engineering",
-    salaryRange: "$140k - $180k",
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: "6ba7b810-9dad-11d1-80b4-00c04fd430c8",
-    title: "Product Designer",
-    companyName: "CreativeBits",
-    location: "Remote",
-    type: "FULL_TIME",
-    category: "Design",
-    salaryRange: "$100k - $130k",
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: "6ba7b811-9dad-11d1-80b4-00c04fd430c8",
-    title: "Project Manager",
-    companyName: "BuildIt Corp",
-    location: "Austin, TX",
-    type: "CONTRACT",
-    category: "Management",
-    salaryRange: "$80/hr",
-    createdAt: new Date().toISOString(),
-  }
-];
+import { cn } from "@/lib/utils";
+import { formatDate } from "@/lib/utils";
 
 export default function JobsPage() {
+  const [jobs, setJobs] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [filters, setFilters] = useState({
+    type: "all",
+    category: "all"
+  });
+
+  async function fetchJobs() {
+    setIsLoading(true);
+    try {
+      const params = new URLSearchParams();
+      if (search) params.append("search", search);
+      if (filters.type !== "all") params.append("type", filters.type);
+      if (filters.category !== "all") params.append("category", filters.category);
+
+      const res = await fetch(`/api/jobs?${params.toString()}`);
+      const data = await res.json();
+      if (data.ok) {
+        setJobs(data.jobs);
+      }
+    } catch (error) {
+      console.error("Failed to fetch jobs:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    fetchJobs();
+  }, [filters]);
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    fetchJobs();
+  };
+
   return (
-    <div className="container mx-auto px-4 py-10">
-      <div className="mb-10 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-        <div className="flex-1 space-y-4">
-          <h1 className="text-4xl font-bold tracking-tight text-slate-900">Explore Opportunities</h1>
-          <p className="text-slate-600">Find the role that matches your skills and ambitions.</p>
-          <div className="flex max-w-2xl gap-2">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
-              <Input className="h-12 pl-10 ios-button" placeholder="Search jobs, companies, or keywords..." />
-            </div>
-            <Button className="h-12 px-6 ios-button">Search</Button>
-          </div>
+    <div className="container mx-auto px-4 py-16 max-w-7xl animate-in fade-in duration-700">
+      <div className="mb-16 space-y-8">
+        <div className="space-y-4 max-w-3xl">
+           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-wider">
+              <Sparkles className="h-3 w-3" />
+              Live Opportunities
+           </div>
+           <h1 className="text-5xl md:text-6xl font-black tracking-tighter text-slate-900 leading-[0.9]">
+             Find Your Next <span className="text-primary italic">Adventure</span>
+           </h1>
+           <p className="text-slate-500 text-lg md:text-xl font-medium">
+             Discover curated roles from innovative companies around the world.
+           </p>
         </div>
-        <Button variant="outline" className="h-12 ios-button">
-          <Filter className="mr-2 h-5 w-5" /> Filters
-        </Button>
+
+        <form onSubmit={handleSearch} className="flex flex-col md:flex-row gap-4 max-w-4xl p-2 bg-white rounded-[2rem] shadow-2xl shadow-slate-200/50 border border-slate-100">
+          <div className="relative flex-1">
+            <Search className="absolute left-6 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
+            <Input 
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="h-16 pl-14 pr-6 bg-transparent border-none focus-visible:ring-0 text-lg font-medium placeholder:text-slate-400" 
+              placeholder="Job title, company, or keywords..." 
+            />
+          </div>
+          <Button type="submit" className="h-14 px-10 ios-button text-lg shadow-xl shadow-primary/20">Search Jobs</Button>
+        </form>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-[1fr_3fr]">
-        {/* Sidebar Filters - Desktop */}
-        <aside className="hidden h-fit space-y-8 md:block">
-          <div>
-            <h3 className="mb-4 font-semibold">Job Type</h3>
-            <div className="space-y-2">
-               {["Full-time", "Part-time", "Contract", "Internship", "Remote"].map(type => (
-                 <label key={type} className="flex items-center gap-2 text-sm text-slate-600 hover:text-primary cursor-pointer">
-                   <input type="checkbox" className="rounded border-slate-300 text-primary focus:ring-primary" />
-                   {type}
-                 </label>
+      <div className="grid gap-12 lg:grid-cols-[280px_1fr]">
+        <aside className="sticky top-32 h-fit space-y-10 hidden lg:block">
+          <div className="space-y-6">
+            <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-400">Employment Type</h3>
+            <div className="space-y-3">
+               {[
+                 { label: "All Types", value: "all" },
+                 { label: "Full-time", value: "FULL_TIME" },
+                 { label: "Part-time", value: "PART_TIME" },
+                 { label: "Contract", value: "CONTRACT" },
+                 { label: "Remote", value: "REMOTE" }
+               ].map(type => (
+                 <button 
+                   key={type.value}
+                   onClick={() => setFilters({ ...filters, type: type.value })}
+                   className={cn(
+                     "flex w-full items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-bold transition-all",
+                     filters.type === type.value 
+                        ? "bg-primary text-white shadow-lg shadow-primary/20" 
+                        : "text-slate-500 hover:bg-slate-100"
+                   )}
+                 >
+                   <div className={cn("h-1.5 w-1.5 rounded-full", filters.type === type.value ? "bg-white" : "bg-slate-300")} />
+                   {type.label}
+                 </button>
                ))}
             </div>
           </div>
-          <div>
-            <h3 className="mb-4 font-semibold">Category</h3>
-            <div className="space-y-2">
-               {["Engineering", "Design", "Marketing", "Sales", "Management"].map(cat => (
-                 <label key={cat} className="flex items-center gap-2 text-sm text-slate-600 hover:text-primary cursor-pointer">
-                   <input type="checkbox" className="rounded border-slate-300 text-primary focus:ring-primary" />
-                   {cat}
-                 </label>
+
+          <div className="space-y-6">
+            <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-400">Popular Categories</h3>
+            <div className="space-y-3">
+               {[
+                 { label: "All Categories", value: "all" },
+                 { label: "Engineering", value: "Engineering" },
+                 { label: "Design", value: "Design" },
+                 { label: "Marketing", value: "Marketing" },
+                 { label: "Management", value: "Management" }
+               ].map(cat => (
+                 <button 
+                  key={cat.value}
+                  onClick={() => setFilters({ ...filters, category: cat.value })}
+                  className={cn(
+                    "flex w-full items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-bold transition-all",
+                    filters.category === cat.value 
+                      ? "bg-slate-900 text-white shadow-lg" 
+                      : "text-slate-500 hover:bg-slate-100"
+                  )}
+                 >
+                   {cat.label}
+                 </button>
                ))}
             </div>
           </div>
         </aside>
 
-        {/* Job List */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-muted-foreground">Showing {MOCK_JOBS.length} jobs</span>
-            <div className="flex items-center gap-2">
-                <span className="text-sm font-medium">Sort by:</span>
-                <select className="bg-transparent text-sm font-semibold text-primary outline-none">
-                  <option>Newest First</option>
-                  <option>Salary: High to Low</option>
-                </select>
-            </div>
+        <div className="space-y-6">
+          <div className="flex items-center justify-between px-2">
+            <h2 className="text-sm font-black uppercase tracking-widest text-slate-400">
+              {isLoading ? "Fetching records..." : `${jobs.length} Positions found`}
+            </h2>
           </div>
 
-          <div className="grid gap-4">
-            {MOCK_JOBS.map((job) => (
-              <Card key={job.id} className="ios-card overflow-hidden">
-                <CardHeader className="pb-2">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <CardTitle className="text-xl font-bold hover:text-primary transition-colors cursor-pointer">
-                        <Link href={`/jobs/${job.id}`}>{job.title}</Link>
-                      </CardTitle>
-                      <p className="mt-1 text-sm font-medium text-slate-500">{job.companyName}</p>
-                    </div>
-                    <Badge variant="secondary" className="rounded-md font-medium">
-                      {job.type.replace("_", " ")}
-                    </Badge>
-                  </div>
-                </CardHeader>
-                <CardContent className="pb-4">
-                  <div className="flex flex-wrap gap-4 text-sm text-slate-600">
-                    <div className="flex items-center gap-1.5">
-                      <MapPin className="h-4 w-4" />
-                      {job.location}
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <Briefcase className="h-4 w-4" />
-                      {job.category}
-                    </div>
-                    {job.salaryRange && (
-                      <div className="flex items-center gap-1.5">
-                        <DollarSign className="h-4 w-4" />
-                        {job.salaryRange}
+          <div className="grid gap-6">
+            {isLoading ? (
+              <div className="flex flex-col items-center justify-center py-32 space-y-4">
+                <Loader2 className="h-12 w-12 animate-spin text-primary opacity-20" />
+                <p className="text-slate-400 font-bold text-sm tracking-widest uppercase">Initializing Stream</p>
+              </div>
+            ) : jobs.length > 0 ? (
+              jobs.map((job) => (
+                <Card key={job.id} className="ios-card bg-white/70 backdrop-blur-sm group hover:scale-[1.01] transition-all duration-500 border-none shadow-xl hover:shadow-2xl">
+                  <CardContent className="p-8">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                      <div className="flex-1 space-y-4">
+                        <div className="space-y-1">
+                          <Link href={`/jobs/${job.id}`} className="inline-block group-hover:text-primary transition-colors">
+                            <h3 className="text-2xl font-black tracking-tight text-slate-900 group-hover:underline decoration-4 underline-offset-4">{job.title}</h3>
+                          </Link>
+                          <div className="flex items-center gap-2">
+                            <Briefcase className="h-4 w-4 text-primary" />
+                            <p className="text-lg font-bold text-slate-900">{job.companyName}</p>
+                          </div>
+                        </div>
+
+                        <div className="flex flex-wrap gap-4 text-sm font-bold text-slate-400">
+                          <div className="flex items-center gap-1.5"><MapPin className="h-4 w-4" /> {job.location}</div>
+                          <div className="flex items-center gap-1.5"><Sparkles className="h-4 w-4" /> {job.category}</div>
+                          <div className="flex items-center gap-1.5"><DollarSign className="h-4 w-4" /> {job.salaryRange || 'Competitive'}</div>
+                          <div className="flex items-center gap-1.5"><Clock className="h-4 w-4" /> {formatDate(job.createdAt)}</div>
+                        </div>
                       </div>
-                    )}
-                    <div className="flex items-center gap-1.5">
-                      <Clock className="h-4 w-4" />
-                      Just now
+
+                      <div className="flex flex-col md:items-end gap-4 min-w-[140px]">
+                        <Badge className="bg-slate-100 text-slate-900 border-none py-1.5 px-4 rounded-xl text-xs font-black tracking-widest uppercase">
+                          {job.type.replace("_", " ")}
+                        </Badge>
+                        <Button asChild className="ios-button h-12 px-8 shadow-lg shadow-primary/20 group/btn">
+                          <Link href={`/jobs/${job.id}`} className="flex items-center gap-2">
+                            View Details <Sparkles className="h-4 w-4 opacity-0 group-hover/btn:opacity-100 transition-all scale-0 group-hover/btn:scale-100" />
+                          </Link>
+                        </Button>
+                      </div>
                     </div>
-                  </div>
-                </CardContent>
-                <CardFooter className="bg-slate-50/50 pt-4 border-t">
-                  <Button asChild variant="outline" size="sm" className="ml-auto ios-button">
-                    <Link href={`/jobs/${job.id}`}>View Details</Link>
-                  </Button>
-                </CardFooter>
-              </Card>
-            ))}
+                  </CardContent>
+                </Card>
+              ))
+            ) : (
+              <div className="text-center py-32 rounded-[3rem] bg-white/50 border-2 border-dashed border-slate-200">
+                <div className="inline-flex h-20 w-20 items-center justify-center rounded-[2rem] bg-slate-100 text-slate-400 mb-6">
+                   <Briefcase className="h-10 w-10" />
+                </div>
+                <h3 className="text-2xl font-black text-slate-900 tracking-tight">No open roles found</h3>
+                <p className="text-slate-500 font-medium mt-2">Try adjusting your filters or check back later.</p>
+                <Button variant="ghost" className="mt-6 font-bold text-primary" onClick={() => { setSearch(""); setFilters({ type: 'all', category: 'all' }); }}>Clear all filters</Button>
+              </div>
+            )}
           </div>
         </div>
       </div>

@@ -22,7 +22,7 @@ export default auth((req) => {
     "/auth/verify-email",
     "/auth/forgot-password",
     "/auth/reset-password",
-  ].includes(nextUrl.pathname) || nextUrl.pathname.startsWith("/jobs/");
+  ].includes(nextUrl.pathname) || (nextUrl.pathname.startsWith("/jobs/") && nextUrl.pathname !== "/jobs/post");
 
   const isAuthRoute = nextUrl.pathname.startsWith("/auth");
   const isAdminRoute = nextUrl.pathname.startsWith("/admin");

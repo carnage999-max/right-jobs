@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, use } from "react";
+import { useState, useEffect, use } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
 import { 
   MapPin, 
   Briefcase, 
@@ -15,7 +16,9 @@ import {
   Lock,
   MessageSquare,
   FileText,
-  Bookmark
+  Bookmark,
+  Building2,
+  Sparkles
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -30,42 +33,36 @@ import {
   DialogFooter
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-
-// Mock data for a single job
-const JOB = {
-  id: "550e8400-e29b-41d4-a716-446655440000",
-  title: "Senior Frontend Engineer",
-  companyName: "TechFlow Systems",
-  location: "San Francisco, CA",
-  type: "FULL_TIME",
-  category: "Engineering",
-  salaryRange: "$140k - $180k",
-  description: `
-    ## About the Role
-    We are looking for a Senior Frontend Engineer who is passionate about building beautiful, responsive, and high-performance user interfaces. You will be working closely with our design and backend teams to deliver a seamless experience to our users.
-
-    ## Requirements
-    - 5+ years of experience with React and modern JavaScript.
-    - Deep understanding of CSS and responsive design.
-    - Experience with Next.js and Tailwind CSS is a plus.
-    - Ability to work in a fast-paced, collaborative environment.
-
-    ## What We Offer
-    - Competitive salary and equity.
-    - Comprehensive health and dental coverage.
-    - Flexible working hours and remote options.
-    - A collaborative and inclusive company culture.
-  `,
-  createdAt: "2024-02-01",
-  isVerified: true
-};
+import { formatDate } from "@/lib/utils";
 
 export default function JobDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
   const router = useRouter();
+  const [job, setJob] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [isApplying, setIsApplying] = useState(false);
   const [isApplied, setIsApplied] = useState(false);
   const [coverLetter, setCoverLetter] = useState("");
+
+  useEffect(() => {
+    async function fetchJob() {
+      try {
+        const response = await fetch(`/api/jobs/${resolvedParams.id}`);
+        const data = await response.json();
+        if (data.ok) {
+          setJob(data.job);
+        } else {
+          toast.error(data.message || "Job not found");
+          router.push("/jobs");
+        }
+      } catch (error) {
+        toast.error("Failed to load job details");
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    fetchJob();
+  }, [resolvedParams.id]);
 
   const handleApply = async () => {
     setIsApplying(true);
@@ -91,124 +88,175 @@ export default function JobDetailsPage({ params }: { params: Promise<{ id: strin
     }
   };
 
+  if (isLoading) {
+    return (
+      <div className="container mx-auto px-4 py-32 flex flex-col items-center justify-center space-y-6">
+        <Loader2 className="h-16 w-16 animate-spin text-primary opacity-20" />
+        <div className="text-center space-y-2">
+           <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Secure Retrieval</p>
+           <h2 className="text-xl font-bold text-slate-900">Loading Job Details</h2>
+        </div>
+      </div>
+    );
+  }
+
+  if (!job) return null;
+
+  const isVerified = job.createdBy?.idVerification?.status === "VERIFIED";
+
   return (
-    <div className="container mx-auto px-4 py-10 max-w-4xl">
-      <Button variant="ghost" className="mb-6 ios-button text-slate-500 hover:text-primary" onClick={() => router.back()}>
-        <ArrowLeft className="mr-2 h-4 w-4" /> Back to Jobs
+    <div className="container mx-auto px-4 py-16 max-w-6xl animate-in fade-in slide-in-from-bottom-5 duration-700">
+      <Button variant="ghost" className="mb-8 ios-button group font-bold text-slate-500 hover:text-primary transition-all" onClick={() => router.back()}>
+        <ArrowLeft className="mr-2 h-4 w-4 transition-transform group-hover:-translate-x-1" /> Back to Search Results
       </Button>
 
-      <div className="grid gap-8 lg:grid-cols-[2fr_1fr]">
-        <div className="space-y-8">
-           <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                 <Badge variant="secondary" className="rounded-md font-medium">
-                   {JOB.type.replace("_", " ")}
+      <div className="grid gap-10 lg:grid-cols-[1fr_380px]">
+        <div className="space-y-12">
+           <div className="space-y-6">
+              <div className="flex flex-wrap items-center gap-3">
+                 <Badge className="bg-primary/10 text-primary border-none rounded-xl py-1.5 px-4 text-xs font-black tracking-widest uppercase">
+                   {job.type.replace("_", " ")}
                  </Badge>
-                 {JOB.isVerified && (
-                   <Badge className="bg-green-100 text-green-700 hover:bg-green-100 border-none rounded-md font-medium">
-                     <CheckCircle2 className="mr-1 h-3 w-3" /> Verified Employer
+                 {isVerified && (
+                   <Badge className="bg-green-500/10 text-green-600 border-none rounded-xl py-1.5 px-4 text-xs font-black tracking-widest uppercase flex items-center gap-1.5">
+                     <CheckCircle2 className="h-3 w-3" /> Verified Employer
                    </Badge>
                  )}
               </div>
-              <h1 className="text-4xl font-extrabold tracking-tight text-slate-900">{JOB.title}</h1>
-              <div className="flex flex-wrap gap-6 text-sm text-slate-500 font-medium">
-                 <div className="flex items-center gap-1.5"><Briefcase className="h-4 w-4 text-primary" /> {JOB.companyName}</div>
-                 <div className="flex items-center gap-1.5"><MapPin className="h-4 w-4 text-primary" /> {JOB.location}</div>
-                 <div className="flex items-center gap-1.5"><DollarSign className="h-4 w-4 text-primary" /> {JOB.salaryRange}</div>
+              <div className="space-y-2">
+                 <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-slate-900 leading-tight">{job.title}</h1>
+                 <div className="flex items-center gap-3 text-primary">
+                    <Building2 className="h-6 w-6" />
+                    <span className="text-2xl font-black italic tracking-tight">{job.companyName}</span>
+                 </div>
+              </div>
+              
+              <div className="flex flex-wrap gap-x-8 gap-y-4 pt-4 border-y border-slate-100 py-8">
+                 <div className="space-y-1">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Location</p>
+                    <div className="flex items-center gap-2 font-bold text-slate-900"><MapPin className="h-4 w-4 text-primary" /> {job.location}</div>
+                 </div>
+                 <div className="space-y-1">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Category</p>
+                    <div className="flex items-center gap-2 font-bold text-slate-900"><Sparkles className="h-4 w-4 text-primary" /> {job.category}</div>
+                 </div>
+                 <div className="space-y-1">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Salary Range</p>
+                    <div className="flex items-center gap-2 font-bold text-slate-900"><DollarSign className="h-4 w-4 text-primary" /> {job.salaryRange || 'Competitive'}</div>
+                 </div>
+                 <div className="space-y-1">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Posted On</p>
+                    <div className="flex items-center gap-2 font-bold text-slate-900"><Clock className="h-4 w-4 text-primary" /> {formatDate(job.createdAt)}</div>
+                 </div>
               </div>
            </div>
 
-           <div className="prose prose-slate max-w-none">
-              <div dangerouslySetInnerHTML={{ __html: JOB.description.replace(/\n/g, '<br/>') }} />
+           <div className="space-y-8">
+              <h3 className="text-2xl font-black tracking-tight flex items-center gap-3">
+                 <FileText className="h-6 w-6 text-primary" /> 
+                 Job Description
+              </h3>
+              <div className="prose prose-slate max-w-none prose-p:text-slate-600 prose-p:leading-relaxed prose-headings:font-black prose-headings:tracking-tight prose-strong:text-slate-900 text-lg">
+                 <div dangerouslySetInnerHTML={{ __html: job.description.replace(/\n/g, '<br/>') }} />
+              </div>
            </div>
         </div>
 
-        <aside className="space-y-6">
-           <Card className="ios-card sticky top-24">
-              <CardHeader>
-                 <CardTitle className="text-xl font-bold">Interested?</CardTitle>
-                 <CardDescription>Apply today to jumpstart your career.</CardDescription>
+        <aside className="space-y-8">
+           <Card className="rounded-[2.5rem] border-none shadow-[0_32px_64px_-16px_rgba(0,0,0,0.14)] bg-white overflow-hidden sticky top-32">
+              <div className="h-2 bg-primary" />
+              <CardHeader className="space-y-2 pt-8">
+                 <CardTitle className="text-3xl font-black tracking-tighter">Ready to Apply?</CardTitle>
+                 <CardDescription className="font-medium">Submit your interest for this position directly to the hiring team.</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-4 pb-8">
                  {isApplied ? (
-                    <div className="flex flex-col items-center justify-center p-6 text-center space-y-4 bg-green-50 rounded-2xl border border-green-100">
-                       <div className="h-12 w-12 rounded-full bg-green-100 text-green-600 flex items-center justify-center">
-                          <CheckCircle2 className="h-6 w-6" />
+                    <div className="flex flex-col items-center justify-center p-8 text-center space-y-4 bg-green-500/5 rounded-[2rem] border-2 border-dashed border-green-500/20 animate-in zoom-in-95">
+                       <div className="h-16 w-16 rounded-[2rem] bg-green-500 text-white flex items-center justify-center shadow-lg shadow-green-500/30">
+                          <CheckCircle2 className="h-8 w-8" />
                        </div>
                        <div>
-                          <p className="font-bold text-green-800">Applied Successfully</p>
-                          <p className="text-xs text-green-600">You'll hear from us soon via email.</p>
+                          <p className="font-black text-xl text-green-900">Application Sent!</p>
+                          <p className="text-sm font-medium text-green-700">The hiring team has been notified. We wish you the best of luck!</p>
                        </div>
-                       <Button variant="outline" className="w-full ios-button bg-white" asChild>
-                          <Link href="/applications">Track Application</Link>
+                       <Button variant="outline" className="w-full ios-button bg-white border-green-200 text-green-700 hover:bg-green-50 h-14 font-black tracking-tight" asChild>
+                          <Link href="/applications">Track My Progress</Link>
                        </Button>
                     </div>
                  ) : (
                     <Dialog>
                        <DialogTrigger asChild>
-                          <Button className="w-full ios-button h-12 text-lg">Apply Now</Button>
+                          <Button className="w-full ios-button h-16 text-xl shadow-2xl shadow-primary/20 font-black tracking-tight group">
+                            Apply Now <Sparkles className="ml-2 h-5 w-5 opacity-0 group-hover:opacity-100 transition-all scale-0 group-hover:scale-100" />
+                          </Button>
                        </DialogTrigger>
-                       <DialogContent className="sm:max-w-[500px] rounded-3xl">
-                          <DialogHeader>
-                             <DialogTitle className="text-2xl font-bold">Apply for {JOB.title}</DialogTitle>
-                             <DialogDescription>
-                                Tell {JOB.companyName} why you're a great fit for this role.
+                       <DialogContent className="sm:max-w-[600px] rounded-[3rem] border-none p-0 overflow-hidden">
+                          <div className="bg-slate-950 p-10 text-white space-y-2">
+                             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-white text-[10px] font-black uppercase tracking-widest mb-2">
+                                Application System
+                             </div>
+                             <DialogTitle className="text-3xl font-black tracking-tighter">Job Application</DialogTitle>
+                             <DialogDescription className="text-slate-400 font-medium italic">
+                                Applying for <span className="text-white font-bold">{job.title}</span> at {job.companyName}
                              </DialogDescription>
-                          </DialogHeader>
-                          <div className="space-y-4 py-4">
-                             <div className="space-y-2">
-                                <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-                                   <MessageSquare className="h-4 w-4" /> Cover Letter (Optional)
-                                </label>
+                          </div>
+                          
+                          <div className="p-10 space-y-8 bg-white">
+                             <div className="space-y-4">
+                                <Label htmlFor="desc" className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">
+                                   Why are you a great fit? (Optional)
+                                </Label>
                                 <Textarea 
-                                   placeholder="I'm excited about this role because..." 
-                                   className="min-h-[150px] rounded-2xl resize-none"
+                                   placeholder="Introduce yourself and highlight your relevant experience..." 
+                                   className="min-h-[200px] rounded-3xl bg-slate-50 border-none focus-visible:ring-primary/20 transition-all p-6 text-lg font-medium resize-none shadow-inner"
                                    value={coverLetter}
                                    onChange={(e) => setCoverLetter(e.target.value)}
                                 />
                              </div>
-                             <div className="rounded-xl bg-slate-50 p-4 border flex items-center gap-3">
-                                <div className="h-10 w-10 rounded-lg bg-white border flex items-center justify-center text-slate-400">
-                                   <FileText className="h-5 w-5" />
+                             
+                             <div className="rounded-3xl bg-slate-50 p-6 flex items-center justify-between group hover:bg-slate-100 transition-colors">
+                                <div className="flex items-center gap-4">
+                                   <div className="h-14 w-14 rounded-2xl bg-white shadow-sm flex items-center justify-center text-primary">
+                                      <FileText className="h-7 w-7" />
+                                   </div>
+                                   <div>
+                                      <p className="font-black text-slate-900">Your Master Resume</p>
+                                      <p className="text-xs font-semibold text-slate-400 tracking-tight">Syncs automatically from your profile</p>
+                                   </div>
                                 </div>
-                                <div className="flex-1 text-xs">
-                                   <p className="font-semibold text-slate-900">Your Current Resume</p>
-                                   <p className="text-slate-500">John_Doe_Resume.pdf</p>
-                                </div>
-                                <Button variant="ghost" size="sm" className="text-primary h-8" asChild>
-                                   <Link href="/profile">Edit</Link>
+                                <Button variant="ghost" size="sm" className="font-bold text-primary hover:bg-white rounded-xl h-10 px-4" asChild>
+                                   <Link href="/profile">Update</Link>
                                 </Button>
                              </div>
+
+                             <DialogFooter className="pt-4">
+                                <Button onClick={handleApply} className="w-full ios-button h-16 text-xl shadow-2xl shadow-primary/20 font-black tracking-tight" disabled={isApplying}>
+                                   {isApplying ? <Loader2 className="mr-2 h-6 w-6 animate-spin" /> : "Confirm My Application"}
+                                </Button>
+                             </DialogFooter>
                           </div>
-                          <DialogFooter>
-                             <Button onClick={handleApply} className="w-full ios-button h-12" disabled={isApplying}>
-                                {isApplying ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Submit Application"}
-                             </Button>
-                          </DialogFooter>
                        </DialogContent>
                     </Dialog>
                  )}
-                 <Button variant="outline" className="w-full ios-button">
-                    <Bookmark className="mr-2 h-4 w-4" /> Save for Later
+                 <Button variant="ghost" className="w-full h-14 text-slate-500 font-bold hover:text-slate-900 transition-colors rounded-2xl">
+                    <Bookmark className="mr-2 h-5 w-5" /> Save Job for Later
                  </Button>
               </CardContent>
            </Card>
 
-           <Card className="ios-card bg-slate-50 border-none">
-              <CardContent className="p-6">
-                 <div className="flex items-center gap-3 mb-4">
-                    <div className="h-10 w-10 rounded-xl bg-white flex items-center justify-center text-primary shadow-sm">
-                       <Lock className="h-5 w-5" />
-                    </div>
-                    <div>
-                       <h4 className="font-bold text-sm">Safe & Secure</h4>
-                       <p className="text-xs text-slate-500">Your data is never shared with 3rd parties.</p>
-                    </div>
+           <Card className="rounded-[2.5rem] border-none bg-slate-100/50 backdrop-blur-sm p-8 space-y-6">
+              <div className="flex items-center gap-4">
+                 <div className="h-12 w-12 rounded-2xl bg-white shadow-sm flex items-center justify-center text-slate-900">
+                    <Lock className="h-6 w-6" />
                  </div>
-                 <p className="text-xs leading-relaxed text-slate-400">
-                    At RightJobs, we strictly monitor all job postings for any signs of fraudulent activity. Every verified employer has passed our identity check.
-                 </p>
-              </CardContent>
+                 <div>
+                    <h4 className="font-black tracking-tight">Privacy Guaranteed</h4>
+                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Secure Link Protocol</p>
+                 </div>
+              </div>
+              <p className="text-sm font-medium leading-relaxed text-slate-500 italic">
+                 "Your personal information and resume are only visible to the verified hiring manager of this specific job posting."
+              </p>
            </Card>
         </aside>
       </div>
