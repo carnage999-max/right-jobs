@@ -64,6 +64,8 @@ export function Navbar() {
     }
   }, [isMenuOpen]);
 
+  if (pathname.startsWith("/admin")) return null;
+
   return (
     <>
       <nav className={cn(
@@ -110,7 +112,7 @@ export function Navbar() {
                   "hidden md:flex font-semibold transition-colors",
                   isMenuOpen ? "text-white hover:bg-white/10" : "text-slate-600"
                 )} asChild>
-                   <Link href="/app">Dashboard</Link>
+                   <Link href={session?.user?.role === "ADMIN" ? "/admin" : "/app"}>Dashboard</Link>
                 </Button>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -132,7 +134,7 @@ export function Navbar() {
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem asChild className="cursor-pointer">
-                      <Link href="/app" className="flex w-full items-center">
+                      <Link href={session?.user?.role === "ADMIN" ? "/admin" : "/app"} className="flex w-full items-center">
                         <LayoutDashboard className="mr-2 h-4 w-4" />
                         Dashboard
                       </Link>
@@ -239,7 +241,7 @@ export function Navbar() {
             >
                 {status === "authenticated" ? (
                   <Button size="lg" className="ios-button h-16 text-xl" asChild>
-                    <Link href="/app">Go to Dashboard</Link>
+                    <Link href={session?.user?.role === "ADMIN" ? "/admin" : "/app"}>Go to Dashboard</Link>
                   </Button>
                 ) : (
                   <>

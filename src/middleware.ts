@@ -39,7 +39,8 @@ export default auth((req) => {
     if (isLoggedIn) {
       // If it's a login or signup page, redirect to app
       if (nextUrl.pathname === "/auth/login" || nextUrl.pathname === "/auth/signup") {
-        return NextResponse.redirect(new URL("/app", nextUrl));
+        const dashboardUrl = req.auth?.user.role === "ADMIN" ? "/admin" : "/app";
+        return NextResponse.redirect(new URL(dashboardUrl, nextUrl));
       }
 
       // If it's MFA route, let them through if they need it
@@ -47,7 +48,8 @@ export default auth((req) => {
         if (req.auth?.user.role === "ADMIN" && !req.auth?.user.mfaComplete) {
           return NextResponse.next();
         }
-        return NextResponse.redirect(new URL("/app", nextUrl));
+        const dashboardUrl = req.auth?.user.role === "ADMIN" ? "/admin" : "/app";
+        return NextResponse.redirect(new URL(dashboardUrl, nextUrl));
       }
 
       // Allow verify-email and reset-password even when logged in? 

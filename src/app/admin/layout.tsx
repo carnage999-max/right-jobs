@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
@@ -24,6 +25,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const pathname = usePathname();
+  const { data: session } = useSession();
 
   const menuItems = [
     { icon: LayoutDashboard, label: "Overview", href: "/admin" },
@@ -76,12 +78,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
            {!isCollapsed && (
               <div className="flex items-center gap-3 px-2 py-2">
                  <Avatar className="h-9 w-9">
-                   <AvatarImage src="" />
-                   <AvatarFallback className="bg-primary/10 text-primary">JD</AvatarFallback>
+                   <AvatarImage src={session?.user?.image || ""} />
+                   <AvatarFallback className="bg-primary/10 text-primary">
+                      {session?.user?.name?.[0] || "A"}
+                   </AvatarFallback>
                  </Avatar>
                  <div className="flex-1 overflow-hidden">
-                    <p className="text-sm font-semibold truncate">Admin User</p>
-                    <p className="text-xs text-slate-500 truncate">admin@rightjobs.com</p>
+                    <p className="text-sm font-semibold truncate">{session?.user?.name || "Admin"}</p>
+                    <p className="text-xs text-slate-500 truncate">{session?.user?.email}</p>
                  </div>
               </div>
            )}
