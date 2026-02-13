@@ -2,6 +2,7 @@ import { Resend } from "resend";
 import {
   verifyEmailTemplate,
   resetPasswordTemplate,
+  forcedPasswordResetTemplate,
   passwordChangedTemplate,
   passwordChangeVerificationTemplate,
   otpTemplate,
@@ -59,6 +60,29 @@ export const sendPasswordResetEmail = async (email: string, token: string) => {
     return data;
   } catch (error) {
     console.error("Send password reset email error:", error);
+    throw error;
+  }
+};
+
+export const sendForcedPasswordResetEmail = async (email: string, token: string) => {
+  const resetLink = `${process.env.NEXT_PUBLIC_APP_URL}/auth/reset-password/${token}`;
+
+  try {
+    const { data, error } = await resend.emails.send({
+      from: FROM,
+      to: email,
+      subject: "Security Alert: Password Reset Required — RightJobs",
+      html: forcedPasswordResetTemplate(resetLink),
+    });
+
+    if (error) {
+      console.error("Resend error (forced password reset):", error);
+      throw new Error(`Failed to send forced password reset email: ${error.message}`);
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Send forced password reset email error:", error);
     throw error;
   }
 };

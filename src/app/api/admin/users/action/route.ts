@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { generateVerificationToken } from "@/lib/tokens";
-import { sendPasswordResetEmail } from "@/lib/mail";
+import { sendPasswordResetEmail, sendForcedPasswordResetEmail } from "@/lib/mail";
 import { logAdminAction } from "@/lib/audit";
 import { z } from "zod";
 
@@ -40,8 +40,18 @@ export async function POST(req: Request) {
     } else if (action === "FORCE_PASSWORD_RESET") {
         const user = await prisma.user.findUnique({ where: { id: targetUserId } });
         if (user) {
+            // 1. Invalidate current password and all active sessions
+            await (prisma.user as any).update({
+                where: { id: targetUserId },
+                data: {
+                    passwordHash: `INVALIDATED_BY_ADMIN_${Math.random().toString(36).substring(2)}`,
+                    sessionVersion: { increment: 1 }
+                }
+            });
+
+            // 2. Generate reset token and send specific security email
             const token = await generateVerificationToken(user.email, "PASSWORD_RESET");
-            await sendPasswordResetEmail(token.email, token.token);
+            await sendForcedPasswordResetEmail(token.email, token.token);
         }
     }
 

@@ -47,6 +47,7 @@ model User {
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
   isSuspended     Boolean   @default(false)
+  sessionVersion  Int       @default(0)
 
   profile         Profile?
   employerProfile EmployerProfile?

@@ -38,12 +38,18 @@ export default function AdminJobsPage() {
   const [jobs, setJobs] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [pagination, setPagination] = useState({ page: 1, limit: 10, totalPages: 1, total: 0 });
+  const [isDeleting, setIsDeleting] = useState<string | null>(null);
 
-  const fetchJobs = async () => {
+  const fetchJobs = async (page = 1) => {
+    setIsLoading(true);
     try {
-      const resp = await fetch("/api/admin/jobs");
+      const resp = await fetch(`/api/admin/jobs?page=${page}&limit=${pagination.limit}`);
       const data = await resp.json();
-      if (data.ok) setJobs(data.data);
+      if (data.ok) {
+        setJobs(data.data);
+        setPagination(data.pagination);
+      }
     } catch (e) {
       toast.error("Failed to fetch jobs");
     } finally {
@@ -52,7 +58,7 @@ export default function AdminJobsPage() {
   };
 
   useEffect(() => {
-    fetchJobs();
+    fetchJobs(1);
   }, []);
 
   const handleAction = async (jobId: string, action: string) => {
@@ -65,12 +71,14 @@ export default function AdminJobsPage() {
       const data = await resp.json();
       if (data.ok) {
         toast.success(data.message);
-        fetchJobs();
+        fetchJobs(pagination.page);
       } else {
         toast.error(data.message);
       }
     } catch (e) {
       toast.error("Action failed");
+    } finally {
+      setIsDeleting(null);
     }
   };
 
@@ -113,6 +121,7 @@ export default function AdminJobsPage() {
             <Loader2 className="h-8 w-8 animate-spin text-primary opacity-20" />
           </div>
         ) : (
+          <>
           <Table>
             <TableHeader>
               <TableRow className="bg-slate-50/50 hover:bg-slate-50/50">
@@ -168,7 +177,7 @@ export default function AdminJobsPage() {
                         </DropdownMenuItem>
                         <DropdownMenuItem 
                           className="text-red-600 cursor-pointer font-bold rounded-lg py-2.5 flex gap-2 items-center"
-                          onClick={() => handleAction(job.id, "DELETE")}
+                          onClick={() => setIsDeleting(job.id)}
                         >
                           <Trash2 className="h-4 w-4" /> Permanent Delete
                         </DropdownMenuItem>
@@ -185,8 +194,58 @@ export default function AdminJobsPage() {
               )}
             </TableBody>
           </Table>
+
+          {/* Pagination Controls */}
+          <div className="flex items-center justify-between px-6 py-4 border-t bg-slate-50/50">
+             <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+                Showing <span className="text-slate-900">{jobs.length}</span> of <span className="text-slate-900">{pagination.total}</span> jobs
+             </p>
+             <div className="flex gap-2">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="ios-button h-8"
+                  disabled={pagination.page === 1}
+                  onClick={() => fetchJobs(pagination.page - 1)}
+                >
+                   Previous
+                </Button>
+                <div className="flex items-center px-4 text-xs font-black">
+                   {pagination.page} / {pagination.totalPages}
+                </div>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="ios-button h-8"
+                  disabled={pagination.page === pagination.totalPages}
+                  onClick={() => fetchJobs(pagination.page + 1)}
+                >
+                   Next
+                </Button>
+             </div>
+          </div>
+          </>
         )}
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {isDeleting && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/50 backdrop-blur-sm animate-in fade-in duration-200">
+           <div className="w-full max-w-sm bg-white rounded-3xl p-8 shadow-2xl animate-in zoom-in-95 duration-200">
+              <div className="mx-auto h-16 w-16 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center mb-6">
+                 <Trash2 className="h-8 w-8" />
+              </div>
+              <h3 className="text-xl font-black text-center text-slate-900 mb-2">Delete job listing?</h3>
+              <p className="text-sm font-medium text-slate-500 text-center mb-8">
+                 This will permanently remove the job posting and all associated candidate applications.
+              </p>
+              <div className="flex gap-3">
+                 <Button variant="outline" className="flex-1 ios-button h-12" onClick={() => setIsDeleting(null)}>Cancel</Button>
+                 <Button variant="destructive" className="flex-1 ios-button h-12" onClick={() => handleAction(isDeleting, "DELETE")}>Confirm Delete</Button>
+              </div>
+           </div>
+        </div>
+      )}
     </div>
   );
 }

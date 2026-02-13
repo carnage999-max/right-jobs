@@ -90,6 +90,26 @@ export function resetPasswordTemplate(resetLink: string): string {
   `);
 }
 
+// ─── Forced Password Reset ───────────────────────────────────────────
+
+export function forcedPasswordResetTemplate(resetLink: string): string {
+  return baseLayout("Security Alert: Password Reset Required", `
+    <div style="text-align: center; margin-bottom: 24px;">
+      <div style="display: inline-block; background: #fffbeb; border-radius: 50%; padding: 16px;">
+        <span style="font-size: 32px;">🛡️</span>
+      </div>
+    </div>
+    <h1 style="font-size: 24px; font-weight: 700; color: #0f172a; margin: 0 0 16px 0; text-align: center;">Security Action Required</h1>
+    <p style="margin-bottom: 24px; font-size: 16px;">An administrator has initiated a <strong>forced password reset</strong> for your account for security reasons. Your current password has been invalidated and all active sessions have been terminated.</p>
+    <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 12px; padding: 16px; margin-bottom: 24px;">
+      <p style="margin: 0; font-size: 14px; color: #92400e;"><strong>Important:</strong> You must set a new, secure password to regain access to your account.</p>
+    </div>
+    ${ctaButton("Set New Password", resetLink)}
+    ${fallbackLink(resetLink)}
+    <p style="margin-bottom: 0; font-size: 14px; color: #64748b;">This secure link will expire in <strong>1 hour</strong>. For your protection, this link can only be used once.</p>
+  `);
+}
+
 // ─── Password Changed Notice ─────────────────────────────────────────
 
 export function passwordChangedTemplate(): string {

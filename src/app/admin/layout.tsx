@@ -18,7 +18,7 @@ import {
   ChevronRight,
   History
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
@@ -26,6 +26,22 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [isCollapsed, setIsCollapsed] = useState(false);
   const pathname = usePathname();
   const { data: session } = useSession();
+  const sidebarRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        sidebarRef.current && 
+        !sidebarRef.current.contains(event.target as Node) && 
+        !isCollapsed && 
+        window.innerWidth < 1280 // Only collapse automatically on smaller screens or specific conditions
+      ) {
+        setIsCollapsed(true);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isCollapsed]);
 
   const menuItems = [
     { icon: LayoutDashboard, label: "Overview", href: "/admin" },
@@ -42,6 +58,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     <div className="flex h-screen bg-slate-50 overflow-hidden">
       {/* Sidebar */}
       <aside
+        ref={sidebarRef}
         className={cn(
           "relative flex flex-col border-r bg-white transition-all duration-300 ease-in-out",
           isCollapsed ? "w-20" : "w-64"

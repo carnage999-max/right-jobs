@@ -10,6 +10,7 @@ declare module "next-auth" {
   interface User {
     role?: UserRole;
     emailVerified?: boolean;
+    sessionVersion?: number;
   }
   interface Session {
     user: {
@@ -17,6 +18,7 @@ declare module "next-auth" {
       role: UserRole;
       mfaComplete?: boolean;
       isEmailVerified?: boolean;
+      sessionVersion?: number;
     } & DefaultSession["user"];
   }
 }
@@ -49,6 +51,7 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
               name: user.name,
               role: user.role,
               emailVerified: user.emailVerifiedAt ? true : false,
+              sessionVersion: (user as any).sessionVersion,
             };
           }
         }
@@ -60,10 +63,11 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
   callbacks: {
     async jwt({ token, user, trigger, session }) {
       if (user) {
-        token.role = user.role;
+        token.role = (user as any).role;
         token.id = user.id;
         token.emailVerified = (user as any).emailVerified ?? false;
-        token.mfaComplete = user.role !== "ADMIN"; 
+        token.mfaComplete = (user as any).role !== "ADMIN"; 
+        token.sessionVersion = (user as any).sessionVersion ?? 0;
       }
       
       if (trigger === "update" && session?.mfaComplete !== undefined) {
@@ -71,6 +75,19 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
       }
       if (trigger === "update" && session?.emailVerified !== undefined) {
         token.emailVerified = session.emailVerified;
+      }
+
+      // Security check: verify session version if not just signed in
+      if (!user && token.id) {
+        const dbUser = await prisma.user.findUnique({
+          where: { id: token.id as string },
+          select: { sessionVersion: true }
+        });
+
+        if (!dbUser || (dbUser as any).sessionVersion !== token.sessionVersion) {
+          // Invalidate the session
+          return null;
+        }
       }
       
       return token;
@@ -84,6 +101,7 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
       }
       session.user.mfaComplete = !!token?.mfaComplete;
       session.user.isEmailVerified = !!token?.emailVerified;
+      session.user.sessionVersion = (token as any).sessionVersion as number;
       
       return session;
     },
