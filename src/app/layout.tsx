@@ -35,7 +35,6 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}
       >
         <Providers>
-          <ButtonClickEffect />
           <Navbar />
           <EmailVerificationBanner />
           <main className="flex-1">{children}</main>

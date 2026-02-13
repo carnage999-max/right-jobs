@@ -33,13 +33,15 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 import Link from "next/link";
+import { cn } from "@/lib/utils";
 
 export default function AdminJobsPage() {
   const [jobs, setJobs] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("ALL");
   const [pagination, setPagination] = useState({ page: 1, limit: 10, totalPages: 1, total: 0 });
-  const [isDeleting, setIsDeleting] = useState<string | null>(null);
+  const [confirmingAction, setConfirmingAction] = useState<{ id: string, action: string, type: "DELETE" | "TOGGLE" } | null>(null);
 
   const fetchJobs = async (page = 1) => {
     setIsLoading(true);
@@ -78,14 +80,16 @@ export default function AdminJobsPage() {
     } catch (e) {
       toast.error("Action failed");
     } finally {
-      setIsDeleting(null);
+      setConfirmingAction(null);
     }
   };
 
-  const filteredJobs = jobs.filter(j => 
-    j.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    j.companyName.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredJobs = jobs.filter(j => {
+    const matchesSearch = j.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                         j.companyName.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = statusFilter === "ALL" || (statusFilter === "ACTIVE" ? j.isActive : !j.isActive);
+    return matchesSearch && matchesStatus;
+  });
 
   return (
     <div className="space-y-6">
@@ -100,9 +104,22 @@ export default function AdminJobsPage() {
           />
         </div>
         <div className="flex items-center gap-2">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="ios-button">
+                <Filter className="mr-2 h-4 w-4" /> {statusFilter === "ALL" ? "Filter" : statusFilter}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48 p-2 rounded-2xl shadow-xl border-none">
+               <DropdownMenuLabel className="px-3 py-2 text-[10px] font-black uppercase tracking-widest text-slate-400">Filter by status</DropdownMenuLabel>
+               <DropdownMenuItem className="cursor-pointer font-bold rounded-lg py-2" onClick={() => setStatusFilter("ALL")}>All Postings</DropdownMenuItem>
+               <DropdownMenuItem className="cursor-pointer font-bold rounded-lg py-2" onClick={() => setStatusFilter("ACTIVE")}>Active Only</DropdownMenuItem>
+               <DropdownMenuItem className="cursor-pointer font-bold rounded-lg py-2" onClick={() => setStatusFilter("INACTIVE")}>Inactive Only</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
           <Button 
             variant="outline" 
-            className="ios-button h-11"
+            className="ios-button h-11 hidden sm:flex"
             onClick={() => window.open("/api/admin/export?type=jobs")}
           >
             <Download className="mr-2 h-4 w-4" /> Export CSV
@@ -115,7 +132,7 @@ export default function AdminJobsPage() {
         </div>
       </div>
 
-      <div className="rounded-2xl border bg-white overflow-hidden shadow-sm">
+      <div className="rounded-2xl border bg-white overflow-hidden shadow-sm overflow-x-auto">
         {isLoading ? (
           <div className="flex h-64 items-center justify-center">
             <Loader2 className="h-8 w-8 animate-spin text-primary opacity-20" />
@@ -125,7 +142,7 @@ export default function AdminJobsPage() {
           <Table>
             <TableHeader>
               <TableRow className="bg-slate-50/50 hover:bg-slate-50/50">
-                <TableHead className="px-6 py-4 w-[300px] font-bold text-slate-900">Job identity / Company</TableHead>
+                <TableHead className="px-6 py-4 min-w-[300px] font-bold text-slate-900">Job identity / Company</TableHead>
                 <TableHead className="font-bold text-slate-900">Visibility</TableHead>
                 <TableHead className="font-bold text-center text-slate-900">Applicants</TableHead>
                 <TableHead className="font-bold text-slate-900">Date Posted</TableHead>
@@ -146,10 +163,10 @@ export default function AdminJobsPage() {
                       {job.isActive ? "ACTIVE" : "INACTIVE"}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-center">
-                    <span className="font-black text-slate-900">{job._count.applications}</span>
+                  <TableCell className="text-center font-black text-slate-900">
+                    {job._count.applications}
                   </TableCell>
-                  <TableCell className="text-slate-500 font-bold text-xs uppercase tracking-tight">
+                  <TableCell className="text-slate-500 font-bold text-xs uppercase tracking-tight whitespace-nowrap">
                     {new Date(job.createdAt).toLocaleDateString()}
                   </TableCell>
                   <TableCell>
@@ -171,13 +188,13 @@ export default function AdminJobsPage() {
                         <DropdownMenuSeparator className="my-2" />
                         <DropdownMenuItem 
                           className="text-orange-600 cursor-pointer font-bold rounded-lg py-2.5 flex gap-2 items-center"
-                          onClick={() => handleAction(job.id, "TOGGLE_ACTIVE")}
+                          onClick={() => setConfirmingAction({ id: job.id, action: "TOGGLE_ACTIVE", type: "TOGGLE" })}
                         >
                           <Power className="h-4 w-4" /> {job.isActive ? "Deactivate Job" : "Activate Job"}
                         </DropdownMenuItem>
                         <DropdownMenuItem 
                           className="text-red-600 cursor-pointer font-bold rounded-lg py-2.5 flex gap-2 items-center"
-                          onClick={() => setIsDeleting(job.id)}
+                          onClick={() => setConfirmingAction({ id: job.id, action: "DELETE", type: "DELETE" })}
                         >
                           <Trash2 className="h-4 w-4" /> Permanent Delete
                         </DropdownMenuItem>
@@ -197,10 +214,10 @@ export default function AdminJobsPage() {
 
           {/* Pagination Controls */}
           <div className="flex items-center justify-between px-6 py-4 border-t bg-slate-50/50">
-             <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+             <p className="text-xs font-bold text-slate-400 uppercase tracking-widest hidden sm:block">
                 Showing <span className="text-slate-900">{jobs.length}</span> of <span className="text-slate-900">{pagination.total}</span> jobs
              </p>
-             <div className="flex gap-2">
+             <div className="flex gap-2 w-full sm:w-auto justify-between sm:justify-end">
                 <Button 
                   variant="outline" 
                   size="sm" 
@@ -228,20 +245,33 @@ export default function AdminJobsPage() {
         )}
       </div>
 
-      {/* Delete Confirmation Modal */}
-      {isDeleting && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/50 backdrop-blur-sm animate-in fade-in duration-200">
+      {/* Action Confirmation Modal */}
+      {confirmingAction && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/50 backdrop-blur-sm animate-in fade-in duration-200 p-4">
            <div className="w-full max-w-sm bg-white rounded-3xl p-8 shadow-2xl animate-in zoom-in-95 duration-200">
-              <div className="mx-auto h-16 w-16 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center mb-6">
-                 <Trash2 className="h-8 w-8" />
+              <div className={cn(
+                "mx-auto h-16 w-16 rounded-2xl flex items-center justify-center mb-6",
+                confirmingAction.type === "DELETE" ? "bg-red-50 text-red-600" : "bg-orange-50 text-orange-600"
+              )}>
+                 {confirmingAction.type === "DELETE" ? <Trash2 className="h-8 w-8" /> : <Power className="h-8 w-8" />}
               </div>
-              <h3 className="text-xl font-black text-center text-slate-900 mb-2">Delete job listing?</h3>
+              <h3 className="text-xl font-black text-center text-slate-900 mb-2">
+                {confirmingAction.type === "DELETE" ? "Delete job listing?" : "Modify job visibility?"}
+              </h3>
               <p className="text-sm font-medium text-slate-500 text-center mb-8">
-                 This will permanently remove the job posting and all associated candidate applications.
+                 {confirmingAction.type === "DELETE" 
+                    ? "This will permanently remove the job posting and all associated candidate applications. This cannot be undone." 
+                    : "This will change the visibility of this job posting on the platform. It can be reversed at any time."}
               </p>
               <div className="flex gap-3">
-                 <Button variant="outline" className="flex-1 ios-button h-12" onClick={() => setIsDeleting(null)}>Cancel</Button>
-                 <Button variant="destructive" className="flex-1 ios-button h-12" onClick={() => handleAction(isDeleting, "DELETE")}>Confirm Delete</Button>
+                 <Button variant="outline" className="flex-1 ios-button h-12" onClick={() => setConfirmingAction(null)}>Cancel</Button>
+                 <Button 
+                   variant={confirmingAction.type === "DELETE" ? "destructive" : "default"} 
+                   className={cn("flex-1 ios-button h-12", confirmingAction.type === "TOGGLE" && "bg-orange-600 hover:bg-orange-700 border-none")}
+                   onClick={() => handleAction(confirmingAction.id, confirmingAction.action)}
+                 >
+                    Confirm {confirmingAction.type === "DELETE" ? "Delete" : "Change"}
+                 </Button>
               </div>
            </div>
         </div>
