@@ -13,7 +13,7 @@ import {
 
 export const resend = new Resend(process.env.RESEND_API_KEY || "re_placeholder");
 
-const FROM = process.env.EMAIL_FROM || "RightJobs <info@se7eninc.com>";
+const FROM = process.env.EMAIL_FROM || "Right Jobs <info@rightjob.net>";
 
 // ─── Email Verification ──────────────────────────────────────────────
 

@@ -87,7 +87,7 @@ export default function ResetPasswordPage({ params }: { params: Promise<{ token:
           <CardDescription className="text-sm">
             {isSuccess 
               ? "Your password has been successfully updated. You can now sign in with your new credentials."
-              : "Set a new password for your RightJobs account."}
+              : "Set a new password for your Right Jobs account."}
           </CardDescription>
         </CardHeader>
         <CardContent className="pt-4">

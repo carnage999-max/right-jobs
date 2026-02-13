@@ -54,7 +54,7 @@ export async function POST(req: Request) {
             </div>
             <hr style="margin: 40px 0; border: none; border-top: 1px solid #eee;" />
             <p style="color: #999; font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;">
-              This is an official administrative broadcast from RightJobs.
+              This is an official administrative broadcast from Right Jobs.
             </p>
           </div>
         `,

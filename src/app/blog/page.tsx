@@ -26,7 +26,7 @@ export default function BlogPage() {
     },
     {
       id: "3",
-      title: "Optimizing Your Profile for the RightJobs Algorithm",
+      title: "Optimizing Your Profile for the Right Jobs Algorithm",
       desc: "Our verification engine values more than just keywords. Here's how to stand out.",
       date: "Jan 15, 2024",
       author: "Engineering",

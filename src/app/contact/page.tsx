@@ -22,7 +22,7 @@ export default function ContactPage() {
 
               <div className="space-y-8">
                 {[
-                  { icon: Mail, title: "Email Us", detail: "info@right-jobs.com", sub: "General inquiries & support" },
+                  { icon: Mail, title: "Email Us", detail: "info@rightjob.net", sub: "General inquiries & support" },
                   { icon: MessageSquare, title: "Direct Chat", detail: "Available in Dashboard", sub: "Fastest response time" },
                   { icon: MapPin, title: "Mailing Address", detail: "PO Box 52, Detroit, ME 04929", sub: "Official Correspondence" },
                   { icon: Phone, title: "Phone", detail: "207-947-1999", sub: "Mon-Fri, 9am - 5pm EST" }

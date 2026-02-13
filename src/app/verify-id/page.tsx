@@ -257,7 +257,7 @@ export default function VerifyIdPage() {
       
       <div className="mt-8 flex items-center justify-center gap-2 text-sm text-slate-400">
          <ShieldCheck className="h-4 w-4" />
-         <span>End-to-end encrypted verification powered by RightJobs Security</span>
+         <span>End-to-end encrypted verification powered by Right Jobs Security</span>
       </div>
     </div>
   );

@@ -14,7 +14,7 @@ export default function TrustSafetyPage() {
             Your Safety, <br /><span className="text-primary italic">Our Priority.</span>
           </h1>
           <p className="mx-auto max-w-2xl text-xl text-slate-400 font-medium leading-relaxed">
-            RightJobs is built from the ground up to eliminate job fraud and protect your personal identification.
+            Right Jobs is built from the ground up to eliminate job fraud and protect your personal identification.
           </p>
         </div>
       </section>
@@ -36,7 +36,7 @@ export default function TrustSafetyPage() {
               {
                 icon: ShieldCheck,
                 title: "Verified Employers",
-                desc: "Every company on RightJobs must undergo a mandatory video or ID verification call."
+                desc: "Every company on Right Jobs must undergo a mandatory video or ID verification call."
               }
             ].map((item, i) => (
               <div key={i} className="bg-white p-10 rounded-[2.5rem] border border-slate-200 shadow-xl shadow-slate-100/50 hover:border-primary/20 transition-all hover:-translate-y-2">
@@ -94,7 +94,7 @@ export default function TrustSafetyPage() {
           <div className="max-w-4xl mx-auto space-y-12">
              <div className="text-center">
                 <h2 className="text-4xl font-black text-slate-900 mb-4 tracking-tight">Report a Concern</h2>
-                <p className="text-xl text-slate-500 font-medium leading-relaxed">Seen something suspicious? Help us keep RightJobs safe.</p>
+                <p className="text-xl text-slate-500 font-medium leading-relaxed">Seen something suspicious? Help us keep Right Jobs safe.</p>
              </div>
              <div className="rounded-[2.5rem] bg-orange-50/50 border border-orange-200 p-10 lg:p-16 flex flex-col md:flex-row items-center gap-10">
                 <div className="h-24 w-24 shrink-0 flex items-center justify-center rounded-[2rem] bg-orange-100 text-orange-600 shadow-xl shadow-orange-200/50">

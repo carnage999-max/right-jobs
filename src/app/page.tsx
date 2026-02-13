@@ -18,7 +18,7 @@ export default function LandingPage() {
             <div className="mb-6 relative h-48 w-full max-w-[600px] transition-transform hover:scale-105">
               <Image 
                 src="/right-jobs-logo-nobg.png" 
-                alt="RightJobs Logo" 
+                alt="Right Jobs Logo" 
                 fill
                 className="object-contain" 
                 priority
@@ -50,7 +50,7 @@ export default function LandingPage() {
       <section className="bg-slate-50 py-24">
         <div className="container mx-auto px-4">
           <div className="mb-12 text-center">
-            <h2 className="text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl">Why RightJobs?</h2>
+            <h2 className="text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl">Why Right Jobs?</h2>
             <p className="mt-4 text-xl text-slate-600 font-medium">We reimagined the job search experience with trust at its core.</p>
           </div>
           <WhySlider />

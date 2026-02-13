@@ -100,7 +100,7 @@ function AuditLogsContent() {
                   <TableCell className="px-6 py-4">
                      <div className="flex flex-col">
                         <span className="font-bold text-slate-900 leading-tight">{log.actorAdmin?.name || "System Process"}</span>
-                        <span className="text-xs font-medium text-slate-400">{log.actorAdmin?.email || "internal@rightjobs.com"}</span>
+                        <span className="text-xs font-medium text-slate-400">{log.actorAdmin?.email || "internal@rightjob.net"}</span>
                      </div>
                   </TableCell>
                   <TableCell>

@@ -95,7 +95,7 @@ export function Navbar() {
               <div className="relative h-44 w-44">
                 <Image 
                   src="/right-jobs-logo-nobg.png" 
-                  alt="RightJobs Logo" 
+                  alt="Right Jobs Logo" 
                   fill
                   className="object-contain"
                   priority

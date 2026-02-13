@@ -4,7 +4,7 @@ export default function TermsPage() {
   const sections = [
     {
       title: "1. Acceptance of Terms",
-      content: "By accessing or using RightJobs, you agree to be bound by these Terms of Service and all applicable laws and regulations. If you do not agree, you are prohibited from using the platform."
+      content: "By accessing or using Right Jobs, you agree to be bound by these Terms of Service and all applicable laws and regulations. If you do not agree, you are prohibited from using the platform."
     },
     {
       title: "2. Identity & Verified Conduct",
@@ -16,11 +16,11 @@ export default function TermsPage() {
     },
     {
       title: "4. Intellectual Property",
-      content: "The content, branding, and proprietary algorithms of RightJobs are protected by copyright and intellectual property laws. Unauthorized reproduction or reverse engineering is strictly prohibited."
+      content: "The content, branding, and proprietary algorithms of Right Jobs are protected by copyright and intellectual property laws. Unauthorized reproduction or reverse engineering is strictly prohibited."
     },
     {
       title: "5. Limitation of Liability",
-      content: "RightJobs is provided 'as is'. While we maintain military-grade security standards, we are not liable for any professional disputes or damages arising from platform use to the fullest extent of the law."
+      content: "Right Jobs is provided 'as is'. While we maintain military-grade security standards, we are not liable for any professional disputes or damages arising from platform use to the fullest extent of the law."
     }
   ];
 

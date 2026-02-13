@@ -335,7 +335,7 @@ export function UnifiedAuth({ initialMode = "login" }: { initialMode?: "login" |
 
               {mode === "signup" && (
                 <p className="text-[11px] text-center text-slate-500 leading-relaxed px-4">
-                  By clicking "Create My Account", you acknowledge and agree to RightJobs' 
+                  By clicking "Create My Account", you acknowledge and agree to Right Jobs' 
                   <Link href="/terms" className="text-primary hover:underline font-bold mx-1">Terms of Service</Link> 
                   and 
                   <Link href="/privacy" className="text-primary hover:underline font-bold mx-1">Privacy Policy</Link>. 
@@ -356,7 +356,7 @@ export function UnifiedAuth({ initialMode = "login" }: { initialMode?: "login" |
                 </>
               ) : (
                 <>
-                  Already a member of RightJobs?{" "}
+                  Already a member of Right Jobs?{" "}
                   <button onClick={() => setMode("login")} className="text-primary hover:underline font-extrabold">
                     Sign in here
                   </button>

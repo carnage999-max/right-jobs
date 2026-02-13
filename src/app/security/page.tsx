@@ -47,7 +47,7 @@ export default function SecurityPage() {
             Security is not an option.<br />It's our <span className="text-primary italic">Foundation.</span>
           </h1>
           <p className="mx-auto max-w-2xl text-xl text-slate-400 font-medium leading-relaxed">
-            We've built RightJobs with a single-minded focus on protecting your professional identity and data.
+            We've built Right Jobs with a single-minded focus on protecting your professional identity and data.
           </p>
         </div>
       </section>
@@ -72,12 +72,12 @@ export default function SecurityPage() {
       <section className="py-24 bg-slate-50">
         <div className="container mx-auto px-4 max-w-4xl text-center">
            <blockquote className="text-3xl font-bold text-slate-900 leading-tight italic">
-             "Our goal is to make RightJobs the most secure professional network on the planet. We don't just follow industry standards—we set them."
+             "Our goal is to make Right Jobs the most secure professional network on the planet. We don't just follow industry standards—we set them."
            </blockquote>
            <div className="mt-8 flex flex-col items-center">
               <div className="h-16 w-16 rounded-full bg-slate-200 mb-4" />
               <p className="font-black text-slate-900">Adam Sterling</p>
-              <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">Head of Security, RightJobs</p>
+              <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">Head of Security, Right Jobs</p>
            </div>
         </div>
       </section>

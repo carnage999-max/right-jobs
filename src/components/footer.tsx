@@ -51,7 +51,7 @@ export function Footer() {
               <div className="relative h-20 w-80">
                 <Image 
                   src="/right-jobs-logo-nobg.png" 
-                  alt="RightJobs Logo" 
+                  alt="Right Jobs Logo" 
                   fill
                   className="object-contain object-left"
                 />
@@ -105,7 +105,7 @@ export function Footer() {
               <ul className="space-y-4">
                 <li className="flex items-center gap-3 text-slate-600 font-semibold">
                   <Mail className="h-4 w-4 text-primary" />
-                  <span className="truncate">info@right-jobs.com</span>
+                  <span className="truncate">info@rightjob.net</span>
                 </li>
                 <li className="flex items-start gap-3 text-slate-600 font-semibold">
                   <MapPin className="h-4 w-4 text-primary shrink-0 mt-1" />
@@ -119,7 +119,7 @@ export function Footer() {
         <div className="mt-16 border-t pt-8">
           <div className="flex flex-col items-center justify-between gap-6 md:flex-row">
             <p className="text-sm font-medium text-slate-400">
-              © {currentYear} RightJobs Inc. All rights reserved.
+              © {currentYear} Right Jobs Inc. All rights reserved.
             </p>
             <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
               {footerLinks.legal.map((link) => (

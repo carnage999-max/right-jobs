@@ -21,7 +21,7 @@ export default function AboutPage() {
             Hiring built on <span className="text-primary italic">Trust.</span>
           </h1>
           <p className="mx-auto max-w-3xl text-xl text-slate-600 font-medium sm:text-2xl leading-relaxed">
-            We started RightJobs with a simple mission: to eliminate the noise, 
+            We started Right Jobs with a simple mission: to eliminate the noise, 
             the scams, and the lack of transparency in the modern job market.
           </p>
         </div>
@@ -38,7 +38,7 @@ export default function AboutPage() {
                 sophisticated phishing scams, we saw talent losing hope and employers losing time.
               </p>
               <p className="text-lg text-slate-600 leading-relaxed">
-                RightJobs was built as a "Trust-First" platform. By mandating ID verification 
+                Right Jobs was built as a "Trust-First" platform. By mandating ID verification 
                 for every job poster and using advanced encryption for all communication, 
                 we've created a safe haven for professional growth.
               </p>

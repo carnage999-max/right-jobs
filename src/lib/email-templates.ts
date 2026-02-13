@@ -1,7 +1,7 @@
 const BRAND_COLOR = "#ea580c";
 const DARK_BG = "#0f172a";
 const YEAR = new Date().getFullYear();
-const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://right-jobs.com";
+const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://rightjob.net";
 
 function baseLayout(title: string, body: string): string {
   return `
@@ -32,7 +32,7 @@ function baseLayout(title: string, body: string): string {
           <!-- Footer -->
           <tr>
             <td style="background: #f1f5f9; padding: 24px; text-align: center; font-size: 12px; color: #64748b;">
-              &copy; ${YEAR} RightJobs Inc. All rights reserved.<br>
+              &copy; ${YEAR} Right Jobs Inc. All rights reserved.<br>
               PO Box 52, Detroit, ME 04929<br><br>
               <a href="${SITE_URL}" style="color: ${BRAND_COLOR}; text-decoration: none;">${SITE_URL.replace('https://', '')}</a>
             </td>
@@ -71,10 +71,10 @@ function fallbackLink(href: string): string {
 export function verifyEmailTemplate(confirmLink: string): string {
   return baseLayout("Verify Your Email", `
     <h1 style="font-size: 24px; font-weight: 700; color: #0f172a; margin: 0 0 16px 0;">Verify Your Email Address</h1>
-    <p style="margin-bottom: 24px; font-size: 16px;">Thanks for signing up for RightJobs! Please confirm your email address by clicking the button below. This helps us keep your account secure.</p>
+    <p style="margin-bottom: 24px; font-size: 16px;">Thanks for signing up for Right Jobs! Please confirm your email address by clicking the button below. This helps us keep your account secure.</p>
     ${ctaButton("Verify My Email", confirmLink)}
     ${fallbackLink(confirmLink)}
-    <p style="margin-bottom: 0; font-size: 14px; color: #64748b;">This link will expire in <strong>1 hour</strong>. If you didn't create a RightJobs account, you can safely ignore this email.</p>
+    <p style="margin-bottom: 0; font-size: 14px; color: #64748b;">This link will expire in <strong>1 hour</strong>. If you didn't create a Right Jobs account, you can safely ignore this email.</p>
   `);
 }
 
@@ -83,7 +83,7 @@ export function verifyEmailTemplate(confirmLink: string): string {
 export function resetPasswordTemplate(resetLink: string): string {
   return baseLayout("Reset Your Password", `
     <h1 style="font-size: 24px; font-weight: 700; color: #0f172a; margin: 0 0 16px 0;">Reset Your Password</h1>
-    <p style="margin-bottom: 24px; font-size: 16px;">We received a request to reset the password for your RightJobs account. If you didn't make this request, you can safely ignore this email.</p>
+    <p style="margin-bottom: 24px; font-size: 16px;">We received a request to reset the password for your Right Jobs account. If you didn't make this request, you can safely ignore this email.</p>
     ${ctaButton("Reset Password", resetLink)}
     ${fallbackLink(resetLink)}
     <p style="margin-bottom: 0; font-size: 14px; color: #64748b;">This link will expire in <strong>1 hour</strong>. For security, this link can only be used once.</p>
@@ -113,7 +113,7 @@ export function forcedPasswordResetTemplate(resetLink: string): string {
 // ─── Password Changed Notice ─────────────────────────────────────────
 
 export function passwordChangedTemplate(): string {
-  const supportEmail = process.env.SUPPORT_EMAIL || "info@right-jobs.com";
+  const supportEmail = process.env.SUPPORT_EMAIL || "info@rightjob.net";
   return baseLayout("Password Changed", `
     <div style="text-align: center; margin-bottom: 24px;">
       <div style="display: inline-block; background: #fef2f2; border-radius: 50%; padding: 16px;">
@@ -121,7 +121,7 @@ export function passwordChangedTemplate(): string {
       </div>
     </div>
     <h1 style="font-size: 24px; font-weight: 700; color: #0f172a; margin: 0 0 16px 0; text-align: center;">Your Password Was Changed</h1>
-    <p style="margin-bottom: 24px; font-size: 16px;">Your RightJobs account password was successfully updated. If you made this change, no further action is required.</p>
+    <p style="margin-bottom: 24px; font-size: 16px;">Your Right Jobs account password was successfully updated. If you made this change, no further action is required.</p>
     <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 12px; padding: 16px; margin-bottom: 24px;">
       <p style="margin: 0; font-size: 14px; color: #991b1b;"><strong>Didn't make this change?</strong> Your account may be compromised. Please reset your password immediately and contact our support team at <a href="mailto:${supportEmail}" style="color: ${BRAND_COLOR}; text-decoration: none;">${supportEmail}</a>.</p>
     </div>
@@ -133,7 +133,7 @@ export function passwordChangedTemplate(): string {
 export function passwordChangeVerificationTemplate(confirmLink: string): string {
   return baseLayout("Confirm Password Change", `
     <h1 style="font-size: 24px; font-weight: 700; color: #0f172a; margin: 0 0 16px 0;">Confirm Your Password Change</h1>
-    <p style="margin-bottom: 24px; font-size: 16px;">We received a request to change your RightJobs account password. Click the button below to confirm this action.</p>
+    <p style="margin-bottom: 24px; font-size: 16px;">We received a request to change your Right Jobs account password. Click the button below to confirm this action.</p>
     ${ctaButton("Confirm Password Change", confirmLink)}
     ${fallbackLink(confirmLink)}
     <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 12px; padding: 16px; margin-bottom: 24px;">
@@ -186,7 +186,7 @@ export function verificationStatusTemplate(status: "VERIFIED" | "REJECTED", note
   const textColor = isVerified ? "#166534" : "#991b1b";
   const heading = isVerified ? "Identity Verified!" : "Verification Update";
   const message = isVerified
-    ? "Congratulations! Your identity has been successfully verified. You now have full access to apply for all jobs on RightJobs."
+    ? "Congratulations! Your identity has been successfully verified. You now have full access to apply for all jobs on Right Jobs."
     : `Unfortunately, your identity verification was not successful. ${notes ? `<br><br><strong>Reason:</strong> ${notes}` : "Please try again with clearer documents."}`;
 
   return baseLayout(heading, `

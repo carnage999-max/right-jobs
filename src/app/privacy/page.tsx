@@ -49,7 +49,7 @@ export default function PrivacyPage() {
           
           <div className="mt-16 p-8 rounded-3xl bg-primary/5 border border-primary/10 text-center">
              <p className="text-primary font-bold">Have questions about your data?</p>
-             <p className="text-slate-600 font-medium">Reach out to our Data Protection Officer at privacy@rightjobs.com</p>
+             <p className="text-slate-600 font-medium">Reach out to our Data Protection Officer at privacy@rightjob.net</p>
           </div>
         </div>
       </section>

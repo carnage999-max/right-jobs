@@ -21,30 +21,30 @@ import { EmailVerificationBanner } from "@/components/email-verification-banner"
 
 export const metadata: Metadata = {
   title: {
-    default: "RightJobs | Secure Production-Grade Job Platform",
-    template: "%s | RightJobs"
+    default: "Right Jobs | Secure Production-Grade Job Platform",
+    template: "%s | Right Jobs"
   },
   description: "A high-performance job ecosystem featuring mandatory identity verification, secure MFA administration, and an iOS-inspired focus on trust and transparency.",
   keywords: ["job board", "employment", "verified hiring", "secure careers", "production nextjs"],
-  authors: [{ name: "RightJobs Engineering" }],
-  creator: "RightJobs Team",
+  authors: [{ name: "Right Jobs Engineering" }],
+  creator: "Right Jobs Team",
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://rightjobs.com",
-    title: "RightJobs | Find Your Next Opportunity Safely",
+    url: "https://rightjob.net",
+    title: "Right Jobs | Find Your Next Opportunity Safely",
     description: "The next generation of employment platforms with a 100% verified user base and administrative transparency.",
-    siteName: "RightJobs",
+    siteName: "Right Jobs",
     images: [{
       url: "/right-jobs-logo.png",
       width: 1200,
       height: 630,
-      alt: "RightJobs Platform Preview"
+      alt: "Right Jobs Platform Preview"
     }]
   },
   twitter: {
     card: "summary_large_image",
-    title: "RightJobs | Secure Career Marketplace",
+    title: "Right Jobs | Secure Career Marketplace",
     description: "The most trusted way to find jobs and hire talent.",
     images: ["/right-jobs-logo.png"],
   },
