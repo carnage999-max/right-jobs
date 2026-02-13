@@ -202,3 +202,24 @@ export function verificationStatusTemplate(status: "VERIFIED" | "REJECTED", note
     ${isVerified ? ctaButton("Browse Jobs Now", `${SITE_URL}/jobs`) : ctaButton("Try Again", `${SITE_URL}/verify-id`)}
   `);
 }
+
+// ─── User Profile Updated by Admin ───────────────────────────────────
+
+export function userProfileUpdatedTemplate(name: string, role: string): string {
+  return baseLayout("Account Updated", `
+    <div style="text-align: center; margin-bottom: 24px;">
+      <div style="display: inline-block; background: #f8fafc; border-radius: 50%; padding: 16px;">
+        <span style="font-size: 32px;">📝</span>
+      </div>
+    </div>
+    <h1 style="font-size: 24px; font-weight: 700; color: #0f172a; margin: 0 0 16px 0; text-align: center;">Account Details Updated</h1>
+    <p style="margin-bottom: 24px; font-size: 16px;">Hello,</p>
+    <p style="margin-bottom: 24px; font-size: 16px;">An administrator has recently updated your account profile information. Here is the current summary of your official details:</p>
+    <div style="background: #f8fafc; border-radius: 12px; padding: 20px; margin-bottom: 24px;">
+      <p style="margin: 0 0 12px 0; font-size: 14px; color: #64748b;"><strong>Display Name:</strong> <span style="color: #0f172a;">${name}</span></p>
+      <p style="margin: 0; font-size: 14px; color: #64748b;"><strong>Access Role:</strong> <span style="color: #0f172a;">${role}</span></p>
+    </div>
+    <p style="margin-bottom: 24px; font-size: 14px; color: #64748b; font-style: italic;">If you did not request these changes or believe this is an error, please contact our security team immediately.</p>
+    ${ctaButton("Review My Account", `${SITE_URL}/profile`)}
+  `);
+}

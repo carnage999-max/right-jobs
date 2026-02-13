@@ -8,6 +8,7 @@ import {
   otpTemplate,
   applicationConfirmationTemplate,
   verificationStatusTemplate,
+  userProfileUpdatedTemplate,
 } from "@/lib/email-templates";
 
 export const resend = new Resend(process.env.RESEND_API_KEY || "re_placeholder");
@@ -202,6 +203,29 @@ export const sendPasswordChangedNoticeEmail = async (email: string) => {
     return data;
   } catch (error) {
     console.error("Send password changed notice email error:", error);
+    throw error;
+  }
+};
+
+// ─── User Profile Updated by Admin ───────────────────────────────────
+
+export const sendUserProfileUpdatedEmail = async (email: string, name: string, role: string) => {
+  try {
+    const { data, error } = await resend.emails.send({
+      from: FROM,
+      to: email,
+      subject: "Important: Your account profile has been updated — RightJobs",
+      html: userProfileUpdatedTemplate(name, role),
+    });
+
+    if (error) {
+      console.error("Resend error (user profile updated):", error);
+      throw new Error(`Failed to send user profile updated email: ${error.message}`);
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Send user profile updated email error:", error);
     throw error;
   }
 };

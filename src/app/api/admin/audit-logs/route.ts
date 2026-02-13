@@ -17,10 +17,20 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "20");
+    const userId = searchParams.get("userId");
     const skip = (page - 1) * limit;
+
+    const where: any = {};
+    if (userId) {
+      where.OR = [
+        { actorAdminId: userId },
+        { entityId: userId }
+      ];
+    }
 
     const [logs, total] = await Promise.all([
       prisma.auditLog.findMany({
+        where,
         take: limit,
         skip,
         orderBy: { createdAt: "desc" },

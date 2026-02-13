@@ -56,79 +56,78 @@ export default function AdminNotificationsPage() {
   ];
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8">
-      <div className="flex items-center justify-between">
+    <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6">
+      <div className="flex items-center justify-between gap-4">
          <div>
-            <h1 className="text-3xl font-black tracking-tight text-slate-900">System Broadcast</h1>
-            <p className="text-slate-500 font-medium">Compose and dispatch critical platform announcements.</p>
+            <h1 className="text-xl sm:text-2xl font-black tracking-tight text-slate-900">System Broadcast</h1>
+            <p className="text-slate-500 font-medium text-xs sm:text-sm">Dispatch critical platform announcements.</p>
          </div>
-         <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-            <Bell className="h-6 w-6" />
+         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary shrink-0">
+            <Bell className="h-5 w-5" />
          </div>
       </div>
 
-      <div className="grid gap-8 lg:grid-cols-3">
-         <div className="space-y-4">
-            <Label className="text-xs font-black uppercase tracking-widest text-slate-400">Target Segment</Label>
-            <div className="flex flex-col gap-3">
+      <div className="grid gap-6 lg:grid-cols-3">
+         <div className="space-y-3">
+            <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Target Segment</Label>
+            <div className="grid grid-cols-1 sm:grid-cols-3 lg:flex lg:flex-col gap-2">
                {targetOptions.map((opt) => (
                  <button
                    key={opt.id}
                    onClick={() => setTarget(opt.id as any)}
                    className={cn(
-                     "flex items-center gap-4 p-4 rounded-2xl border-2 transition-all text-left",
+                     "flex items-center gap-3 p-3 rounded-xl border-2 transition-all text-left",
                      target === opt.id 
-                       ? "bg-white border-primary shadow-lg scale-[1.02]" 
+                       ? "bg-white border-primary shadow-md" 
                        : "bg-slate-50 border-transparent text-slate-500 hover:bg-slate-100"
                    )}
                  >
-                   <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center", opt.color)}>
-                      <opt.icon className="h-5 w-5" />
+                   <div className={cn("h-8 w-8 rounded-lg flex items-center justify-center shrink-0", opt.color)}>
+                      <opt.icon className="h-4 w-4" />
                    </div>
-                   <div className="flex-1">
-                      <p className="font-bold text-slate-900">{opt.label}</p>
-                      <p className="text-[10px] font-black uppercase tracking-wider opacity-60">Recipient Group</p>
+                   <div className="flex-1 min-w-0">
+                      <p className="font-bold text-slate-900 truncate text-xs sm:text-sm">{opt.label}</p>
                    </div>
-                   {target === opt.id && <CheckCircle2 className="h-5 w-5 text-primary" />}
+                   {target === opt.id && <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />}
                  </button>
                ))}
             </div>
          </div>
 
          <div className="lg:col-span-2">
-            <Card className="ios-card shadow-xl shadow-slate-200/50">
-               <CardHeader className="px-8 pt-8">
-                  <CardTitle className="text-xl font-black">Message Composer</CardTitle>
+            <Card className="ios-card shadow-lg shadow-slate-200/40 border-none sm:border overflow-hidden">
+               <CardHeader className="px-5 py-5 text-slate-900 bg-slate-50/30 border-b">
+                  <CardTitle className="text-lg font-black">Message Composer</CardTitle>
                </CardHeader>
-               <CardContent className="px-8 pb-8 space-y-6">
-                  <div className="space-y-3">
-                     <Label className="text-xs font-black uppercase tracking-widest text-slate-400">Email Subject</Label>
+               <CardContent className="px-5 py-5 space-y-5">
+                  <div className="space-y-2">
+                     <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 pl-1">Email Subject</Label>
                      <Input 
                         placeholder="Urgent Maintenance / Update..."
-                        className="rounded-2xl h-12 font-bold border-2 focus-visible:ring-primary shadow-sm"
+                        className="rounded-xl h-11 font-bold border-2 focus-visible:ring-primary shadow-sm"
                         value={subject}
                         onChange={(e) => setSubject(e.target.value)}
                      />
                   </div>
-                  <div className="space-y-3">
-                     <Label className="text-xs font-black uppercase tracking-widest text-slate-400">Content (HTML Supported)</Label>
+                  <div className="space-y-2">
+                     <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 pl-1">Content (HTML Supported)</Label>
                      <Textarea 
                         placeholder="Write your announcement here..."
-                        className="min-h-[200px] rounded-[1.5rem] resize-none font-medium p-5 border-2 focus-visible:ring-primary shadow-sm leading-relaxed"
+                        className="min-h-[120px] sm:min-h-[150px] rounded-xl resize-none font-medium p-4 border-2 focus-visible:ring-primary shadow-sm leading-relaxed"
                         value={content}
                         onChange={(e) => setContent(e.target.value)}
                      />
                   </div>
-                  <div className="pt-4 border-t flex justify-between items-center">
-                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                        Dispatching to approximately <span className="text-primary">1.2k</span> active sessions
+                  <div className="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                     <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
+                        Reaching <span className="text-primary italic">~1,200</span> active sessions
                      </p>
                      <Button 
                         onClick={handleSend} 
                         disabled={isSending}
-                        className="ios-button h-14 px-10 min-w-[200px] text-lg font-black shadow-xl shadow-primary/20"
+                        className="ios-button h-12 px-8 w-full sm:w-auto text-sm font-black shadow-lg shadow-primary/10"
                      >
-                        {isSending ? <Loader2 className="mr-3 h-5 w-5 animate-spin" /> : <Send className="mr-3 h-5 w-5" />}
+                        {isSending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
                         Execute Broadcast
                      </Button>
                   </div>

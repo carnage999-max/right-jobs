@@ -33,6 +33,8 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { Label } from "@/components/ui/label";
+import Link from "next/link";
 
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<any[]>([]);
@@ -41,6 +43,10 @@ export default function AdminUsersPage() {
   const [roleFilter, setRoleFilter] = useState("ALL");
   const [pagination, setPagination] = useState({ page: 1, limit: 10, totalPages: 1, total: 0 });
   const [confirmingAction, setConfirmingAction] = useState<{ id: string, action: string, type: "DELETE" | "SUSPEND" | "ACTIVATE" } | null>(null);
+  
+  // Edit State
+  const [editingUser, setEditingUser] = useState<any | null>(null);
+  const [isUpdating, setIsUpdating] = useState(false);
 
   const fetchUsers = async (page = 1) => {
     setIsLoading(true);
@@ -80,6 +86,32 @@ export default function AdminUsersPage() {
       toast.error("Action failed");
     } finally {
       setConfirmingAction(null);
+    }
+  };
+
+  const handleUpdateProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingUser) return;
+    
+    setIsUpdating(true);
+    try {
+      const resp = await fetch(`/api/admin/users/${editingUser.id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ name: editingUser.name, role: editingUser.role }),
+        headers: { "Content-Type": "application/json" },
+      });
+      const data = await resp.json();
+      if (data.ok) {
+        toast.success("Profile updated and email notification sent.");
+        setEditingUser(null);
+        fetchUsers(pagination.page);
+      } else {
+        toast.error(data.message);
+      }
+    } catch (e) {
+      toast.error("Failed to update profile");
+    } finally {
+      setIsUpdating(false);
     }
   };
 
@@ -193,8 +225,10 @@ export default function AdminUsersPage() {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" className="w-56 p-2 rounded-2xl shadow-2xl border-none">
                         <DropdownMenuLabel className="px-3 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Account Management</DropdownMenuLabel>
-                        <DropdownMenuItem className="cursor-pointer font-bold rounded-lg py-2.5">Edit Profile</DropdownMenuItem>
-                        <DropdownMenuItem className="cursor-pointer font-bold rounded-lg py-2.5">Security Audit</DropdownMenuItem>
+                        <DropdownMenuItem className="cursor-pointer font-bold rounded-lg py-2.5" onClick={() => setEditingUser(user)}>Edit Profile</DropdownMenuItem>
+                        <DropdownMenuItem className="cursor-pointer font-bold rounded-lg py-2.5" asChild>
+                           <Link href={`/admin/audit-logs?userId=${user.id}`}>Security Audit</Link>
+                        </DropdownMenuItem>
                         <DropdownMenuItem 
                           className="cursor-pointer font-bold rounded-lg py-2.5 text-primary"
                           onClick={() => handleAction(user.id, "FORCE_PASSWORD_RESET")}
@@ -290,6 +324,89 @@ export default function AdminUsersPage() {
                  >
                     Confirm {confirmingAction.type === "DELETE" ? "Delete" : confirmingAction.type === "SUSPEND" ? "Suspend" : "Activate"}
                  </Button>
+              </div>
+           </div>
+        </div>
+      )}
+
+      {/* Edit User Profile Modal */}
+      {editingUser && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/50 backdrop-blur-sm animate-in fade-in duration-200 p-4">
+           <div className="w-full max-w-md bg-white rounded-[2rem] p-8 shadow-2xl animate-in zoom-in-95 duration-200 overflow-hidden relative">
+              <button 
+                onClick={() => setEditingUser(null)}
+                className="absolute top-6 right-6 h-10 w-10 text-slate-300 hover:text-slate-600 transition-colors"
+                aria-label="Close"
+              >
+                <XCircle className="h-8 w-8" />
+              </button>
+              
+              <div className="flex flex-col items-center mb-8">
+                 <div className="h-20 w-20 rounded-3xl bg-slate-100 flex items-center justify-center mb-4 overflow-hidden border-4 border-white shadow-lg">
+                    {editingUser.avatarUrl ? (
+                      <img src={editingUser.avatarUrl} alt="" className="h-full w-full object-cover" />
+                    ) : (
+                      <span className="text-2xl font-black text-slate-400 uppercase">{editingUser.email[0]}</span>
+                    )}
+                 </div>
+                 <h3 className="text-2xl font-black text-slate-900">Edit Official Profile</h3>
+                 <p className="text-sm font-medium text-slate-400">{editingUser.email}</p>
+              </div>
+
+              <form onSubmit={handleUpdateProfile} className="space-y-6">
+                 <div className="space-y-2">
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 pl-1">Full Identity Name</Label>
+                    <Input 
+                      value={editingUser.name || ""} 
+                      onChange={(e) => setEditingUser({...editingUser, name: e.target.value})}
+                      placeholder="e.g. John Doe"
+                      className="ios-button h-14 bg-slate-50 border-transparent focus:bg-white focus:border-primary px-5 rounded-2xl font-bold"
+                    />
+                 </div>
+
+                 <div className="space-y-2">
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 pl-1">System Access Role</Label>
+                    <div className="grid grid-cols-3 gap-2">
+                       {["USER", "EMPLOYER", "ADMIN"].map((r) => (
+                         <button
+                           key={r}
+                           type="button"
+                           onClick={() => setEditingUser({...editingUser, role: r})}
+                           className={cn(
+                             "py-3 rounded-xl text-[10px] font-black tracking-widest uppercase border-2 transition-all",
+                             editingUser.role === r 
+                               ? "bg-primary/5 border-primary text-primary" 
+                               : "bg-slate-50 border-transparent text-slate-400 hover:bg-slate-100"
+                           )}
+                         >
+                           {r}
+                         </button>
+                       ))}
+                    </div>
+                 </div>
+
+                 <div className="pt-4 flex gap-3">
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      className="flex-1 ios-button h-14" 
+                      onClick={() => setEditingUser(null)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button 
+                      disabled={isUpdating}
+                      className="flex-1 ios-button h-14 font-black shadow-xl shadow-primary/20"
+                    >
+                       {isUpdating ? <Loader2 className="h-5 w-5 animate-spin" /> : "Save Changes"}
+                    </Button>
+                 </div>
+              </form>
+              
+              <div className="mt-8 pt-6 border-t border-slate-50">
+                 <p className="text-[9px] text-center font-bold text-slate-300 uppercase tracking-widest leading-relaxed">
+                    Updating this profile will trigger a security notification email <br /> to the user regarding the administrative changes.
+                 </p>
               </div>
            </div>
         </div>

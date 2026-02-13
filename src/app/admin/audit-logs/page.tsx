@@ -1,3 +1,5 @@
+"use client";
+
 import { 
   Table, 
   TableBody, 
@@ -8,12 +10,17 @@ import {
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Search, History, Terminal, Loader2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Search, History, Terminal, Loader2, User } from "lucide-react";
+
+import { useEffect, useState, Suspense } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { useSearchParams } from "next/navigation";
 
-export default function AdminAuditLogsPage() {
+function AuditLogsContent() {
+  const searchParams = useSearchParams();
+  const userIdFilter = searchParams.get("userId");
+  
   const [logs, setLogs] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -22,7 +29,14 @@ export default function AdminAuditLogsPage() {
   const fetchLogs = async (page = 1) => {
     setIsLoading(true);
     try {
-      const resp = await fetch(`/api/admin/audit-logs?page=${page}&limit=${pagination.limit}`);
+      const url = new URL("/api/admin/audit-logs", window.location.origin);
+      url.searchParams.set("page", page.toString());
+      url.searchParams.set("limit", pagination.limit.toString());
+      if (userIdFilter) {
+        url.searchParams.set("userId", userIdFilter);
+      }
+      
+      const resp = await fetch(url.toString());
       const data = await resp.json();
       if (data.ok) {
         setLogs(data.data);
@@ -37,7 +51,7 @@ export default function AdminAuditLogsPage() {
 
   useEffect(() => {
     fetchLogs(1);
-  }, []);
+  }, [userIdFilter]);
 
   const filteredLogs = logs.filter(log => 
     log.action.toLowerCase().includes(searchTerm.toLowerCase()) || 
@@ -146,5 +160,17 @@ export default function AdminAuditLogsPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function AdminAuditLogsPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex h-64 items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary opacity-20" />
+      </div>
+    }>
+      <AuditLogsContent />
+    </Suspense>
   );
 }

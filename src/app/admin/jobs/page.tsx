@@ -183,8 +183,16 @@ export default function AdminJobsPage() {
                               <Eye className="h-4 w-4" /> View listing
                            </Link>
                         </DropdownMenuItem>
-                        <DropdownMenuItem className="cursor-pointer font-bold rounded-lg py-2.5">Edit posting</DropdownMenuItem>
-                        <DropdownMenuItem className="cursor-pointer font-bold rounded-lg py-2.5">Candidate queue</DropdownMenuItem>
+                        <DropdownMenuItem className="cursor-pointer font-bold rounded-lg py-2.5 flex gap-2 items-center" asChild>
+                           <Link href={`/admin/jobs/${job.id}/edit`}>
+                              <Plus className="h-4 w-4 rotate-45" /> Edit posting
+                           </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem className="cursor-pointer font-bold rounded-lg py-2.5 flex gap-2 items-center" asChild>
+                           <Link href={`/admin/jobs/${job.id}/candidates`}>
+                              <Search className="h-4 w-4" /> Candidate queue
+                           </Link>
+                        </DropdownMenuItem>
                         <DropdownMenuSeparator className="my-2" />
                         <DropdownMenuItem 
                           className="text-orange-600 cursor-pointer font-bold rounded-lg py-2.5 flex gap-2 items-center"
