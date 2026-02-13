@@ -24,7 +24,7 @@ export const sendVerificationEmail = async (email: string, token: string) => {
     const { data, error } = await resend.emails.send({
       from: FROM,
       to: email,
-      subject: "Verify your email — RightJobs",
+      subject: "Verify your email — Right Jobs",
       html: verifyEmailTemplate(confirmLink),
     });
 
@@ -49,7 +49,7 @@ export const sendPasswordResetEmail = async (email: string, token: string) => {
     const { data, error } = await resend.emails.send({
       from: FROM,
       to: email,
-      subject: "Reset your password — RightJobs",
+      subject: "Reset your password — Right Jobs",
       html: resetPasswordTemplate(resetLink),
     });
 
@@ -72,7 +72,7 @@ export const sendForcedPasswordResetEmail = async (email: string, token: string)
     const { data, error } = await resend.emails.send({
       from: FROM,
       to: email,
-      subject: "Security Alert: Password Reset Required — RightJobs",
+      subject: "Security Alert: Password Reset Required — Right Jobs",
       html: forcedPasswordResetTemplate(resetLink),
     });
 
@@ -95,7 +95,7 @@ export const sendOTPEmail = async (email: string, otp: string) => {
     const { data, error } = await resend.emails.send({
       from: FROM,
       to: email,
-      subject: "Your security code — RightJobs",
+      subject: "Your security code — Right Jobs",
       html: otpTemplate(otp),
     });
 
@@ -118,7 +118,7 @@ export const sendApplicationConfirmationEmail = async (email: string, jobTitle: 
     const { data, error } = await resend.emails.send({
       from: FROM,
       to: email,
-      subject: `Application Received: ${jobTitle} — RightJobs`,
+      subject: `Application Received: ${jobTitle} — Right Jobs`,
       html: applicationConfirmationTemplate(jobTitle),
     });
 
@@ -143,7 +143,7 @@ export const sendVerificationStatusEmail = async (email: string, status: "VERIFI
     const { data, error } = await resend.emails.send({
       from: FROM,
       to: email,
-      subject: `${subject} — RightJobs`,
+      subject: `${subject} — Right Jobs`,
       html: verificationStatusTemplate(status, notes),
     });
 
@@ -168,7 +168,7 @@ export const sendPasswordChangeVerificationEmail = async (email: string, token: 
     const { data, error } = await resend.emails.send({
       from: FROM,
       to: email,
-      subject: "Confirm password change — RightJobs",
+      subject: "Confirm password change — Right Jobs",
       html: passwordChangeVerificationTemplate(confirmLink),
     });
 
@@ -191,7 +191,7 @@ export const sendPasswordChangedNoticeEmail = async (email: string) => {
     const { data, error } = await resend.emails.send({
       from: FROM,
       to: email,
-      subject: "Security Alert: Password Changed — RightJobs",
+      subject: "Security Alert: Password Changed — Right Jobs",
       html: passwordChangedTemplate(),
     });
 
@@ -214,7 +214,7 @@ export const sendUserProfileUpdatedEmail = async (email: string, name: string, r
     const { data, error } = await resend.emails.send({
       from: FROM,
       to: email,
-      subject: "Important: Your account profile has been updated — RightJobs",
+      subject: "Important: Your account profile has been updated — Right Jobs",
       html: userProfileUpdatedTemplate(name, role),
     });
 
