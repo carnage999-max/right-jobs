@@ -58,7 +58,8 @@ function VerifyEmailContent() {
     if (status !== "success") return;
 
     if (countdown <= 0) {
-      const target = authStatus === "authenticated" ? "/app" : "/auth/login?verified=true";
+      const dashboardUrl = session?.user?.role === "ADMIN" ? "/admin" : "/app";
+      const target = authStatus === "authenticated" ? dashboardUrl : "/auth/login?verified=true";
       router.push(target);
       return;
     }

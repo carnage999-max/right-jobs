@@ -81,8 +81,10 @@ export default auth((req) => {
         }
      }
 
-     // Redirect admin away from standard app to admin if they are verified? 
-     // Or just let them be? Usually admins can use the app too.
+     // Redirect admin away from standard app to admin portal
+     if (isAppRoute && role === "ADMIN") {
+        return NextResponse.redirect(new URL("/admin", nextUrl));
+     }
   }
 
   return NextResponse.next();

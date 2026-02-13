@@ -23,6 +23,13 @@ export default function AdminMFAPage() {
     }
   }, [session, router]);
 
+  // Trigger code send on initial load
+  useEffect(() => {
+    if (session?.user?.role === "ADMIN" && !session?.user?.mfaComplete) {
+      handleResend();
+    }
+  }, []); // Only once on mount
+
   const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
