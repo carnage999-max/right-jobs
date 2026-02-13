@@ -235,9 +235,22 @@ export default function ProfilePage() {
     );
   }
 
-  const isVerified = profileData?.verificationStatus === "VERIFIED";
+   const isVerified = profileData?.verificationStatus === "VERIFIED";
 
-  return (
+   const calculateTrustScore = () => {
+      let score = 10; // Base score
+      if (name) score += 20;
+      if (bio) score += 20;
+      if (location) score += 10;
+      if (skills.length > 0) score += 10;
+      if (resumeUrl) score += 10;
+      if (isVerified) score += 20;
+      return Math.min(score, 100);
+   };
+
+   const trustScore = calculateTrustScore();
+
+   return (
     <div className="container mx-auto px-4 py-6 sm:py-10 max-w-5xl animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="mb-6 sm:mb-10 flex flex-col gap-3 sm:gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
@@ -297,18 +310,18 @@ export default function ProfilePage() {
               </CardHeader>
               <CardContent className="space-y-4 sm:space-y-6 px-5 sm:px-6 pb-5 sm:pb-6">
                  <div className="flex items-end gap-2">
-                    <span className="text-4xl sm:text-5xl font-black tracking-tighter text-white">{isVerified ? "98%" : "45%"}</span>
+                    <span className="text-4xl sm:text-5xl font-black tracking-tighter text-white">{trustScore}%</span>
                     <span className="mb-1 sm:mb-2 text-[10px] sm:text-xs font-bold text-slate-500 uppercase">Trusted</span>
                  </div>
                  <div className="h-2 w-full overflow-hidden rounded-full bg-slate-800">
-                    <div className={cn("h-full transition-all duration-1000", isVerified ? "w-[98%] bg-primary" : "w-[45%] bg-amber-500")}></div>
+                    <div className={cn("h-full transition-all duration-1000", trustScore > 70 ? "bg-primary" : "bg-amber-500")} style={{ width: `${trustScore}%` }}></div>
                  </div>
                  <div className="flex gap-2 items-start bg-slate-800/50 p-3 sm:p-4 rounded-xl">
-                    <AlertCircle className="h-3 w-3 sm:h-4 sm:w-4 text-primary shrink-0 mt-0.5" />
+                    <AlertCircle className="h-3 w-3 sm:h-4 w-4 text-primary shrink-0 mt-0.5" />
                     <p className="text-[9px] sm:text-[10px] font-bold text-slate-400 leading-relaxed uppercase tracking-wider">
-                        {isVerified 
+                        {trustScore >= 90 
                           ? "You are appearing in the top segment of candidate searches."
-                          : "Complete ID verification to reach 100% visibility."}
+                          : "Complete your dossier and ID verification to reach 100% visibility."}
                     </p>
                  </div>
               </CardContent>
