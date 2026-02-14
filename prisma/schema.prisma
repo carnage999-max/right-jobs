@@ -103,20 +103,21 @@ model EmployerProfile {
 }
 
 model Job {
-  id           String        @id @default(uuid())
-  title        String
-  companyName  String
-  location     String
-  type         JobType
-  category     String
-  description  String        @db.Text
-  salaryRange  String?
-  isActive     Boolean       @default(true)
-  createdById  String?
-  createdBy    User?         @relation("JobCreator", fields: [createdById], references: [id])
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  applications Application[]
+  id              String        @id @default(uuid())
+  title           String
+  companyName     String
+  companyLogoUrl  String?
+  location        String
+  type            JobType
+  category        String
+  description     String        @db.Text
+  salaryRange     String?
+  isActive        Boolean       @default(true)
+  createdById     String?
+  createdBy       User?         @relation("JobCreator", fields: [createdById], references: [id])
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  applications    Application[]
 }
 
 model Application {

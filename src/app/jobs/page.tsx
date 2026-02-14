@@ -152,16 +152,26 @@ export default function JobsPage() {
                 <Card key={job.id} className="ios-card bg-white/70 backdrop-blur-sm group hover:scale-[1.01] transition-all duration-500 border-none shadow-xl hover:shadow-2xl">
                   <CardContent className="p-8">
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-                      <div className="flex-1 space-y-4">
-                        <div className="space-y-1">
-                          <Link href={`/jobs/${job.id}`} className="inline-block group-hover:text-primary transition-colors">
-                            <h3 className="text-2xl font-black tracking-tight text-slate-900 group-hover:underline decoration-4 underline-offset-4">{job.title}</h3>
-                          </Link>
-                          <div className="flex items-center gap-2">
-                            <Briefcase className="h-4 w-4 text-primary" />
-                            <p className="text-lg font-bold text-slate-900">{job.companyName}</p>
-                          </div>
+                      <div className="flex-1 flex flex-col md:flex-row gap-6">
+                        <div className="h-16 w-16 rounded-2xl bg-white shadow-lg shadow-slate-200/50 flex items-center justify-center overflow-hidden border border-slate-100 shrink-0">
+                           {job.companyLogoUrl ? (
+                              <img src={job.companyLogoUrl} alt={job.companyName} className="h-full w-full object-cover" />
+                           ) : (
+                              <div className="h-full w-full bg-primary/5 flex items-center justify-center text-primary font-black text-2xl">
+                                 {job.companyName[0]}
+                              </div>
+                           )}
                         </div>
+                        <div className="space-y-4">
+                          <div className="space-y-1">
+                            <Link href={`/jobs/${job.id}`} className="inline-block group-hover:text-primary transition-colors">
+                              <h3 className="text-2xl font-black tracking-tight text-slate-900 group-hover:underline decoration-4 underline-offset-4">{job.title}</h3>
+                            </Link>
+                            <div className="flex items-center gap-2">
+                              <Briefcase className="h-4 w-4 text-primary" />
+                              <p className="text-lg font-bold text-slate-900">{job.companyName}</p>
+                            </div>
+                          </div>
 
                         <div className="flex flex-wrap gap-4 text-sm font-bold text-slate-400">
                           <div className="flex items-center gap-1.5"><MapPin className="h-4 w-4" /> {job.location}</div>
@@ -169,6 +179,7 @@ export default function JobsPage() {
                           <div className="flex items-center gap-1.5"><DollarSign className="h-4 w-4" /> {job.salaryRange || 'Competitive'}</div>
                           <div className="flex items-center gap-1.5"><Clock className="h-4 w-4" /> {formatDate(job.createdAt)}</div>
                         </div>
+                      </div>
                       </div>
 
                       <div className="flex flex-col md:items-end gap-4 min-w-[140px]">

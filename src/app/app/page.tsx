@@ -140,9 +140,13 @@ export default function AppDashboard() {
                 <CardContent className="p-5">
                    <div className="flex items-start justify-between">
                       <div className="flex gap-4">
-                         <div className="h-12 w-12 rounded-lg bg-primary/5 flex items-center justify-center font-black text-primary text-xl uppercase">
-                            {app.job.companyName[0]}
-                         </div>
+                          <div className="h-12 w-12 rounded-lg bg-primary/5 flex items-center justify-center font-black text-primary text-xl uppercase overflow-hidden">
+                             {app.job.companyLogoUrl ? (
+                                <img src={app.job.companyLogoUrl} alt={app.job.companyName} className="h-full w-full object-cover" />
+                             ) : (
+                                app.job.companyName[0]
+                             )}
+                          </div>
                          <div>
                             <h4 className="font-bold text-slate-900 tracking-tight">{app.job.title}</h4>
                             <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">{app.job.companyName}</p>
@@ -185,9 +189,13 @@ export default function AppDashboard() {
                 <CardContent className="p-5">
                    <div className="flex items-start justify-between">
                       <div className="flex gap-4">
-                         <div className="h-12 w-12 rounded-lg bg-white/10 flex items-center justify-center font-black text-white text-xl uppercase">
-                            {job.companyName[0]}
-                         </div>
+                          <div className="h-12 w-12 rounded-lg bg-white/10 flex items-center justify-center font-black text-white text-xl uppercase overflow-hidden">
+                             {job.companyLogoUrl ? (
+                                <img src={job.companyLogoUrl} alt={job.companyName} className="h-full w-full object-cover" />
+                             ) : (
+                                job.companyName[0]
+                             )}
+                          </div>
                          <div>
                             <h4 className="font-bold text-white tracking-tight leading-tight">{job.title}</h4>
                             <p className="text-sm font-semibold text-slate-300">{job.companyName}</p>

@@ -6,6 +6,7 @@ import { z } from "zod";
 const jobSchema = z.object({
   title: z.string().min(3, "Title must be at least 3 characters"),
   companyName: z.string().min(2, "Company name must be at least 2 characters"),
+  companyLogoUrl: z.string().optional(),
   location: z.string().min(2, "Location must be at least 2 characters"),
   type: z.enum(["FULL_TIME", "PART_TIME", "CONTRACT", "INTERNSHIP", "REMOTE"]),
   category: z.string().min(2, "Category must be at least 2 characters"),

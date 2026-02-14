@@ -29,7 +29,11 @@ export default function VerifyIdPage() {
     // 1. Get presigned URL
     const presignResp = await fetch("/api/upload/presign", {
       method: "POST",
-      body: JSON.stringify({ filename: file.name, contentType: file.type }),
+      body: JSON.stringify({ 
+        filename: file.name, 
+        contentType: file.type,
+        folder: "identity-docs"
+      }),
       headers: { "Content-Type": "application/json" },
     });
     

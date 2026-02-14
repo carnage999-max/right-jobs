@@ -17,7 +17,9 @@ import {
   ArrowLeft,
   Loader2,
   LayoutGrid,
-  Zap
+  Zap,
+  Camera,
+  X
 } from "lucide-react";
 import { 
   Select, 
@@ -44,8 +46,11 @@ export default function UserPostJobPage() {
     type: "FULL_TIME",
     category: "Engineering",
     salaryRange: "",
-    description: ""
+    description: "",
+    companyLogoUrl: ""
   });
+
+  const [isUploadingLogo, setIsUploadingLogo] = useState(false);
 
   const handleNext = () => {
     // Basic validation
@@ -156,7 +161,7 @@ export default function UserPostJobPage() {
                           onChange={(e) => setFormData({...formData, title: e.target.value})}
                         />
                      </div>
-                     <div className="space-y-3">
+                      <div className="space-y-3">
                         <Label htmlFor="company" className="text-sm font-bold ml-1">Company Name</Label>
                         <Input 
                           id="company" 
@@ -164,6 +169,85 @@ export default function UserPostJobPage() {
                           className="h-14 rounded-2xl bg-white border-slate-100 focus:ring-primary/20 transition-all font-medium text-lg px-6"
                           value={formData.companyName}
                           onChange={(e) => setFormData({...formData, companyName: e.target.value})}
+                        />
+                     </div>
+                  </div>
+
+                  <div className="space-y-4">
+                     <Label className="text-sm font-bold ml-1 text-slate-900 flex items-center gap-2">
+                        Company Logo <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest">(Recommended)</span>
+                     </Label>
+                     <div className="flex items-center gap-6 p-6 rounded-[2rem] bg-slate-50 border-2 border-dashed border-slate-200 transition-all hover:bg-white hover:border-primary/30 group">
+                        <div className="relative h-20 w-20 shrink-0">
+                           <div className="h-full w-full rounded-2xl bg-white shadow-sm flex items-center justify-center overflow-hidden border border-slate-100">
+                              {formData.companyLogoUrl ? (
+                                 <img src={formData.companyLogoUrl} alt="Logo" className="h-full w-full object-cover" />
+                              ) : (
+                                 <Building2 className="h-8 w-8 text-slate-200" />
+                              )}
+                           </div>
+                           {isUploadingLogo && (
+                              <div className="absolute inset-0 bg-white/80 flex items-center justify-center rounded-2xl">
+                                 <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                              </div>
+                           )}
+                        </div>
+                        <div className="space-y-2">
+                           <div className="flex flex-wrap gap-2">
+                              <Button 
+                                 variant="outline" 
+                                 size="sm" 
+                                 className="rounded-xl font-bold text-xs h-9 bg-white"
+                                 onClick={() => document.getElementById('logo-upload')?.click()}
+                                 disabled={isUploadingLogo}
+                                 type="button"
+                              >
+                                 <Camera className="h-3.5 w-3.5 mr-2" />
+                                 {formData.companyLogoUrl ? "Change Logo" : "Upload Logo"}
+                              </Button>
+                              {formData.companyLogoUrl && (
+                                 <Button 
+                                    variant="ghost" 
+                                    size="sm" 
+                                    className="rounded-xl font-bold text-xs h-9 text-red-500 hover:text-red-600 hover:bg-red-50"
+                                    onClick={() => setFormData({...formData, companyLogoUrl: ""})}
+                                    type="button"
+                                 >
+                                    <X className="h-3.5 w-3.5 mr-2" />
+                                    Remove
+                                 </Button>
+                              )}
+                           </div>
+                           <p className="text-[10px] font-medium text-slate-400">PNG, JPG or SVG. Max 2MB.</p>
+                        </div>
+                        <input 
+                           id="logo-upload"
+                           type="file" 
+                           accept="image/*"
+                           className="hidden"
+                           onChange={async (e) => {
+                              const file = e.target.files?.[0];
+                              if (!file) return;
+                              if (file.size > 2 * 1024 * 1024) return toast.error("Logo must be under 2MB");
+                              
+                              setIsUploadingLogo(true);
+                              try {
+                                 const presignResp = await fetch("/api/upload/presign", {
+                                    method: "POST",
+                                    headers: { "Content-Type": "application/json" },
+                                    body: JSON.stringify({ filename: file.name, contentType: file.type, folder: "avatars" })
+                                 });
+                                 const { url, publicUrl } = await presignResp.json();
+                                 
+                                 await fetch(url, { method: "PUT", body: file, headers: { "Content-Type": file.type } });
+                                 setFormData({...formData, companyLogoUrl: publicUrl});
+                                 toast.success("Logo uploaded!");
+                              } catch (e) {
+                                 toast.error("Failed to upload logo");
+                              } finally {
+                                 setIsUploadingLogo(false);
+                              }
+                           }}
                         />
                      </div>
                   </div>
@@ -277,13 +361,22 @@ export default function UserPostJobPage() {
                      <div className="absolute top-0 right-0 w-64 h-64 bg-primary/20 rounded-full blur-[100px] -mr-32 -mt-32 transition-transform duration-1000 group-hover:scale-110" />
                      
                      <div className="relative flex flex-col md:flex-row items-start justify-between gap-6">
-                        <div className="space-y-2">
-                           <h3 className="text-3xl font-black text-white tracking-tight">{formData.title || "Job Title"}</h3>
-                           <div className="flex items-center gap-2">
-                              <Building2 className="h-4 w-4 text-primary" />
-                              <p className="text-primary font-bold text-xl">{formData.companyName || "Company Name"}</p>
-                           </div>
-                        </div>
+                            <div className="flex items-center gap-4">
+                               <div className="h-14 w-14 rounded-2xl bg-white/10 flex items-center justify-center overflow-hidden border border-white/10 shrink-0">
+                                  {formData.companyLogoUrl ? (
+                                     <img src={formData.companyLogoUrl} alt="Logo" className="h-full w-full object-cover" />
+                                  ) : (
+                                     <Building2 className="h-6 w-6 text-white/20" />
+                                  )}
+                               </div>
+                               <div className="space-y-1">
+                                  <div className="flex items-center gap-2">
+                                     <Building2 className="h-4 w-4 text-primary" />
+                                     <p className="text-primary font-bold text-xl">{formData.companyName || "Company Name"}</p>
+                                  </div>
+                                  <h3 className="text-3xl font-black text-white tracking-tight">{formData.title || "Job Title"}</h3>
+                               </div>
+                            </div>
                         <Badge className="rounded-2xl bg-white/10 text-white border-none py-1.5 px-6 text-sm font-bold backdrop-blur-md">
                            {formData.type.replace('_', ' ')}
                         </Badge>

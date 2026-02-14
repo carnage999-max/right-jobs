@@ -114,6 +114,7 @@ export default function ProfilePage() {
         body: JSON.stringify({
           filename: file.name,
           contentType: file.type,
+          folder: "resumes"
         }),
       });
 
@@ -173,6 +174,7 @@ export default function ProfilePage() {
         body: JSON.stringify({
           filename: file.name,
           contentType: file.type,
+          folder: "avatars"
         }),
       });
 

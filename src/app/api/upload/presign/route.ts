@@ -10,14 +10,18 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: false, message: "Unauthorized" }, { status: 401 });
     }
 
-    const { filename, contentType } = await req.json();
+    const { filename, contentType, folder = "uploads" } = await req.json();
 
     if (!filename || !contentType) {
       return NextResponse.json({ ok: false, message: "Missing filename or contentType" }, { status: 400 });
     }
 
+    // Validate folder to prevent path traversal or unstructured uploads
+    const allowedFolders = ["avatars", "resumes", "identity-docs", "uploads"];
+    const targetFolder = allowedFolders.includes(folder) ? folder : "uploads";
+
     const fileExtension = filename.split(".").pop();
-    const key = `uploads/${session.user.id}/${uuidv4()}.${fileExtension}`;
+    const key = `${targetFolder}/${session.user.id}/${uuidv4()}.${fileExtension}`;
 
     const presignedUrl = await getPresignedPostUrl(key, contentType);
     

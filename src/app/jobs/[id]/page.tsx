@@ -123,11 +123,22 @@ export default function JobDetailsPage({ params }: { params: Promise<{ id: strin
                    </Badge>
                  )}
               </div>
-              <div className="space-y-2">
-                 <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-slate-900 leading-tight">{job.title}</h1>
-                 <div className="flex items-center gap-3 text-primary">
-                    <Building2 className="h-6 w-6" />
-                    <span className="text-2xl font-black italic tracking-tight">{job.companyName}</span>
+              <div className="flex flex-col md:flex-row items-start gap-6">
+                 <div className="h-24 w-24 rounded-[2rem] bg-white shadow-xl shadow-slate-200/50 flex items-center justify-center overflow-hidden border border-slate-100 shrink-0">
+                    {job.companyLogoUrl ? (
+                       <img src={job.companyLogoUrl} alt={job.companyName} className="h-full w-full object-cover" />
+                    ) : (
+                       <div className="h-full w-full bg-primary/5 flex items-center justify-center text-primary font-black text-4xl">
+                          {job.companyName[0]}
+                       </div>
+                    )}
+                 </div>
+                 <div className="space-y-2">
+                    <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-slate-900 leading-tight">{job.title}</h1>
+                    <div className="flex items-center gap-3 text-primary">
+                       <Building2 className="h-6 w-6" />
+                       <span className="text-2xl font-black italic tracking-tight">{job.companyName}</span>
+                    </div>
                  </div>
               </div>
               
