@@ -7,28 +7,46 @@ import { Badge } from "@/components/ui/badge";
 export default function PricingPage() {
   const plans = [
     {
-      name: "Standard",
+      name: "Free",
       price: "Free",
-      desc: "Perfect for small teams and startups testing the platform.",
-      features: ["3 active job posts", "Standard visibility", "Basic applicant filtering", "Email support"],
-      cta: "Get Started",
+      desc: "Perfect for testing the platform's core features.",
+      features: ["1 active job post", "Standard visibility", "Basic applicant filtering", "Email support"],
+      cta: "Start Free",
       href: "/auth/signup"
+    },
+    {
+      name: "Basic",
+      price: "$49",
+      period: "/month",
+      desc: "Essentials for small businesses and growing teams.",
+      features: ["5 active job posts", "Improved visibility", "Priority support", "Standard filtering"],
+      cta: "Go Basic",
+      href: "/auth/signup"
+    },
+    {
+      name: "Standard",
+      price: "$99",
+      period: "/month",
+      desc: "The standard for professional hiring at scale.",
+      features: ["10 active job posts", "Boosted placement", "Advanced AI filtering", "24/7 Support"],
+      cta: "Get Standard",
+      href: "/auth/signup",
+      featured: true
     },
     {
       name: "Premium",
       price: "$199",
       period: "/month",
-      desc: "For growing companies that need professional hiring tools.",
-      features: ["Unlimited job posts", "Priority placement", "Advanced AI filtering", "Direct recruiter chat", "24/7 Priority support", "Verified Talent Badge"],
+      desc: "Elite tools for high-volume recruitment needs.",
+      features: ["20 active job posts", "Maximum visibility", "Full Recruiter Suite", "Account Manager"],
       cta: "Go Premium",
-      href: "/auth/signup",
-      featured: true
+      href: "/auth/signup"
     },
     {
-      name: "Enterprise",
-      price: "Custom",
-      desc: "Tailored solutions for large organizations and agencies.",
-      features: ["Custom recruitment API", "Dedicated account manager", "White-label options", "Bulk ID verification", "SSO & SAML"],
+      name: "Elite",
+      price: "Contact Us",
+      desc: "Tailored solutions for large-scale organizations.",
+      features: ["Unlimited job posts", "Full API Access", "Dedicated Success Manager", "Custom Contracts"],
       cta: "Contact Sales",
       href: "/contact"
     }
@@ -43,15 +61,21 @@ export default function PricingPage() {
           <h1 className="text-5xl font-black tracking-tight sm:text-7xl mb-8 leading-tight">
             Simple, <span className="text-primary italic">Transparent</span> Pricing.
           </h1>
-          <p className="mx-auto max-w-2xl text-xl text-slate-400 font-medium leading-relaxed">
+          <p className="mx-auto max-w-2xl text-xl text-slate-400 font-medium leading-relaxed mb-10">
             Choose the plan that's right for your business. No hidden fees, no complexity.
           </p>
+          
+          <div className="mx-auto max-w-lg rounded-2xl bg-primary/10 border border-primary/20 p-4 backdrop-blur-md animate-in zoom-in-95 duration-700">
+             <p className="text-sm font-bold text-primary italic">
+                🚀 Early Access Promotion: All platform features are currently FREE for all users as we scale our community!
+             </p>
+          </div>
         </div>
       </section>
 
       <section className="py-24 bg-white -mt-20">
         <div className="container mx-auto max-w-6xl px-4 relative z-20">
-          <div className="grid gap-8 lg:grid-cols-3 items-stretch">
+          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 items-stretch">
             {plans.map((plan) => (
               <div 
                 key={plan.name} 

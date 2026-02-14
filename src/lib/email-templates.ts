@@ -223,3 +223,27 @@ export function userProfileUpdatedTemplate(name: string, role: string): string {
     ${ctaButton("Review My Account", `${SITE_URL}/profile`)}
   `);
 }
+
+// ─── Issue Report ────────────────────────────────────────────────────
+
+export function issueReportTemplate(userEmail: string, description: string): string {
+  return baseLayout("New Issue Report", `
+    <div style="text-align: center; margin-bottom: 24px;">
+      <div style="display: inline-block; background: #fef2f2; border-radius: 50%; padding: 16px;">
+        <span style="font-size: 32px;">🚨</span>
+      </div>
+    </div>
+    <h1 style="font-size: 24px; font-weight: 700; color: #0f172a; margin: 0 0 16px 0; text-align: center;">New Issue Reported</h1>
+    <p style="margin-bottom: 24px; font-size: 16px;">A user has reported an issue through the platform.</p>
+    <div style="background: #f8fafc; border-radius: 12px; padding: 24px; margin-bottom: 24px; border: 1px solid #e2e8f0;">
+      <p style="margin: 0 0 12px 0; font-size: 14px; color: #64748b;"><strong>User Email:</strong> <span style="color: #0f172a; font-weight: 600;">${userEmail}</span></p>
+      <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid #e2e8f0;">
+        <p style="margin: 0 0 8px 0; font-size: 14px; color: #64748b;"><strong>Issue Description:</strong></p>
+        <p style="margin: 0; font-size: 15px; color: #334155; white-space: pre-wrap;">${description}</p>
+      </div>
+    </div>
+    <p style="margin-bottom: 0; font-size: 12px; color: #94a3b8; text-align: center;">
+      This report was generated automatically by the Right Jobs System Monitor.
+    </p>
+  `);
+}

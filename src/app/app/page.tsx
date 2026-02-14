@@ -190,10 +190,10 @@ export default function AppDashboard() {
                          </div>
                          <div>
                             <h4 className="font-bold text-white tracking-tight leading-tight">{job.title}</h4>
-                            <p className="text-sm font-medium text-slate-400">{job.companyName}</p>
-                            <div className="mt-2 flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-slate-500">
+                            <p className="text-sm font-semibold text-slate-300">{job.companyName}</p>
+                            <div className="mt-2 flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-slate-200">
                                <span className="flex items-center gap-1"><MapPin className="h-3.5 w-3.5" /> {job.location}</span>
-                               <span className="text-primary">{job.salaryRange || 'Competitive'}</span>
+                               <span className="text-primary font-black">{job.salaryRange || 'Competitive'}</span>
                             </div>
                          </div>
                       </div>

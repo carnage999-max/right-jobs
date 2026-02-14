@@ -18,6 +18,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { Providers } from "@/components/providers";
 import { ButtonClickEffect } from "@/components/button-click-effect";
 import { EmailVerificationBanner } from "@/components/email-verification-banner";
+import { ReportIssue } from "@/components/report-issue";
 
 export const metadata: Metadata = {
   title: {
@@ -69,6 +70,7 @@ export default function RootLayout({
           <EmailVerificationBanner />
           <main className="flex-1">{children}</main>
           <Footer />
+          <ReportIssue />
           <Toaster />
         </Providers>
       </body>

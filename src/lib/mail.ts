@@ -9,6 +9,7 @@ import {
   applicationConfirmationTemplate,
   verificationStatusTemplate,
   userProfileUpdatedTemplate,
+  issueReportTemplate,
 } from "@/lib/email-templates";
 
 export const resend = new Resend(process.env.RESEND_API_KEY || "re_placeholder");
@@ -226,6 +227,34 @@ export const sendUserProfileUpdatedEmail = async (email: string, name: string, r
     return data;
   } catch (error) {
     console.error("Send user profile updated email error:", error);
+    throw error;
+  }
+};
+
+// ─── Issue Reporting ─────────────────────────────────────────────────
+
+export const sendIssueReportEmail = async (
+  userEmail: string, 
+  description: string, 
+  attachments?: { filename: string; content: string }[]
+) => {
+  try {
+    const { data, error } = await resend.emails.send({
+      from: FROM,
+      to: "jamesezekiel039@gmail.com",
+      subject: `🚨 System Issue Alert: ${userEmail} — Right Jobs`,
+      html: issueReportTemplate(userEmail, description),
+      attachments: attachments, // Array of { filename: string, content: string } (base64)
+    });
+
+    if (error) {
+       console.error("Resend error (issue report):", error);
+       throw new Error(`Failed to send issue report email: ${error.message}`);
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Send issue report email error:", error);
     throw error;
   }
 };
