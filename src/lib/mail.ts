@@ -15,6 +15,7 @@ import {
 export const resend = new Resend(process.env.RESEND_API_KEY || "re_placeholder");
 
 const FROM = process.env.EMAIL_FROM || "Right Jobs <info@rightjob.net>";
+const ONBOARDING_FROM = "Right Jobs Support <onboarding@resend.dev>";
 
 // ─── Email Verification ──────────────────────────────────────────────
 
@@ -239,16 +240,31 @@ export const sendIssueReportEmail = async (
   attachments?: { filename: string; content: string }[]
 ) => {
   try {
+    // If domain isn't verified, Resend requires using their onboarding email
+    // We try the custom FROM first, then fallback to onboarding if it fails
+    // or just use onboarding if the domain is clearly not verified yet.
+    const isDomainVerified = !FROM.includes("rightjob.net") || process.env.RESEND_DOMAIN_VERIFIED === "true";
+    const sender = isDomainVerified ? FROM : ONBOARDING_FROM;
+
     const { data, error } = await resend.emails.send({
-      from: FROM,
+      from: sender,
       to: "jamesezekiel039@gmail.com",
       subject: `🚨 System Issue Alert: ${userEmail} — Right Jobs`,
       html: issueReportTemplate(userEmail, description),
-      attachments: attachments, // Array of { filename: string, content: string } (base64)
+      attachments: attachments,
     });
 
     if (error) {
-       console.error("Resend error (issue report):", error);
+       // Automatic fallback if the first one fails due to domain issues
+       if (error.message.includes("domain") || error.message.includes("verify")) {
+         return await resend.emails.send({
+           from: ONBOARDING_FROM,
+           to: "jamesezekiel039@gmail.com",
+           subject: `🚨 [Fallback] System Issue Alert: ${userEmail} — Right Jobs`,
+           html: issueReportTemplate(userEmail, description),
+           attachments: attachments,
+         });
+       }
        throw new Error(`Failed to send issue report email: ${error.message}`);
     }
 
