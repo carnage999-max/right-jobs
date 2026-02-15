@@ -69,13 +69,14 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
         token.emailVerified = (user as any).emailVerified ?? false;
         token.mfaComplete = (user as any).role !== "ADMIN"; 
         token.sessionVersion = (user as any).sessionVersion ?? 0;
+        token.picture = user.image;
       }
       
-      if (trigger === "update" && session?.mfaComplete !== undefined) {
-        token.mfaComplete = session.mfaComplete;
-      }
-      if (trigger === "update" && session?.emailVerified !== undefined) {
-        token.emailVerified = session.emailVerified;
+      if (trigger === "update") {
+        if (session?.mfaComplete !== undefined) token.mfaComplete = session.mfaComplete;
+        if (session?.emailVerified !== undefined) token.emailVerified = session.emailVerified;
+        if (session?.image !== undefined) token.picture = session.image;
+        if (session?.name !== undefined) token.name = session.name;
       }
 
       /* Security check: verify session version if not just signed in

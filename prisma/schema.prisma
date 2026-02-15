@@ -93,6 +93,7 @@ model Profile {
   location           String?
   skills             String[]
   resumeUrl          String?
+  resumeFilename     String?
   verificationStatus VerificationStatus @default(PENDING)
   updatedAt          DateTime           @updatedAt
 }

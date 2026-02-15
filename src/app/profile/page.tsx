@@ -15,7 +15,8 @@ import {
   ShieldCheck,
   Plus,
   X,
-  AlertCircle
+  AlertCircle,
+  Edit2
 } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
@@ -23,7 +24,7 @@ import { useSession } from "next-auth/react";
 import { cn } from "@/lib/utils";
 
 export default function ProfilePage() {
-  const { data: session } = useSession();
+  const { data: session, update } = useSession();
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
@@ -37,7 +38,10 @@ export default function ProfilePage() {
   const [newSkill, setNewSkill] = useState("");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [resumeUrl, setResumeUrl] = useState<string | null>(null);
+  const [resumeFilename, setResumeFilename] = useState<string | null>(null);
   const [isUploadingResume, setIsUploadingResume] = useState(false);
+  const [isRenamingResume, setIsRenamingResume] = useState(false);
+  const [newResumeName, setNewResumeName] = useState("");
   const resumeInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -53,6 +57,7 @@ export default function ProfilePage() {
           setSkills(data.data.skills || []);
           setAvatarUrl(data.data.user.avatarUrl || null);
           setResumeUrl(data.data.resumeUrl || null);
+          setResumeFilename(data.data.resumeFilename || null);
         }
       } catch (e) {
         toast.error("Failed to load profile");
@@ -73,6 +78,7 @@ export default function ProfilePage() {
       });
       const data = await resp.json();
       if (data.ok) {
+        await update({ name });
         toast.success("Profile updated successfully!");
       } else {
         toast.error(data.message);
@@ -132,12 +138,16 @@ export default function ProfilePage() {
       const updateResp = await fetch("/api/profile", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ resumeUrl: presignData.publicUrl }),
+        body: JSON.stringify({ 
+          resumeUrl: presignData.publicUrl,
+          resumeFilename: file.name
+        }),
       });
 
       const updateData = await updateResp.json();
       if (updateData.ok) {
         setResumeUrl(presignData.publicUrl);
+        setResumeFilename(file.name);
         toast.success("Resume updated!");
       } else {
         throw new Error("Failed to save resume");
@@ -206,6 +216,7 @@ export default function ProfilePage() {
       const updateData = await updateResp.json();
       if (updateData.ok) {
         setAvatarUrl(updateData.avatarUrl);
+        await update({ image: updateData.avatarUrl });
         toast.success("Profile picture updated!");
       } else {
         throw new Error("Failed to save avatar");
@@ -215,6 +226,48 @@ export default function ProfilePage() {
       toast.error("Failed to update profile picture");
     } finally {
       setIsUploadingAvatar(false);
+    }
+  };
+
+  const handleRenameResume = async () => {
+    if (!newResumeName.trim()) return;
+    
+    // Add .pdf extension if missing
+    let finalName = newResumeName.trim();
+    if (!finalName.toLowerCase().endsWith(".pdf")) {
+      finalName += ".pdf";
+    }
+
+    try {
+      const resp = await fetch("/api/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ resumeFilename: finalName }),
+      });
+      const data = await resp.json();
+      if (data.ok) {
+        setResumeFilename(finalName);
+        setIsRenamingResume(false);
+        toast.success("Resume renamed!");
+      } else {
+        toast.error("Failed to rename resume");
+      }
+    } catch (e) {
+      toast.error("Error renaming resume");
+    }
+  };
+
+  const handlePreviewResume = async () => {
+    try {
+      const resp = await fetch("/api/profile/resume-download");
+      const data = await resp.json();
+      if (data.ok && data.url) {
+        window.open(data.url, "_blank");
+      } else {
+        toast.error("Failed to get preview link");
+      }
+    } catch (e) {
+      toast.error("Error opening resume");
     }
   };
 
@@ -417,36 +470,82 @@ export default function ProfilePage() {
                  <CardDescription className="font-bold text-xs text-primary/70">Secure document cloud storage enabled</CardDescription>
               </CardHeader>
               <CardContent className="px-5 sm:px-8 pb-6 sm:pb-8">
-                 <div className="flex items-center justify-between p-4 sm:p-5 bg-white rounded-xl sm:rounded-2xl border-2 border-primary/10 shadow-sm transition-all group-hover:shadow-md">
-                    <div className="flex items-center gap-3 sm:gap-4 min-w-0">
-                       <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-lg sm:rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
-                          <CheckCircle2 className="h-5 w-5 sm:h-6 sm:w-6" />
+                 <div className="flex flex-col gap-4">
+                    <div className="flex items-center justify-between p-4 sm:p-5 bg-white rounded-xl sm:rounded-2xl border-2 border-primary/10 shadow-sm transition-all group-hover:shadow-md">
+                       <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+                          <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-lg sm:rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0 transition-transform group-hover:scale-110">
+                             <CheckCircle2 className="h-5 w-5 sm:h-6 sm:w-6" />
+                          </div>
+                          <div className="min-w-0">
+                             {isRenamingResume ? (
+                                <div className="flex items-center gap-2">
+                                   <Input 
+                                      value={newResumeName}
+                                      onChange={(e) => setNewResumeName(e.target.value)}
+                                      onKeyDown={(e) => e.key === 'Enter' && handleRenameResume()}
+                                      className="h-8 max-w-[200px] font-bold text-xs"
+                                      autoFocus
+                                   />
+                                   <Button size="icon" variant="ghost" className="h-8 w-8 text-green-600" onClick={handleRenameResume}>
+                                      <CheckCircle2 className="h-4 w-4" />
+                                   </Button>
+                                   <Button size="icon" variant="ghost" className="h-8 w-8 text-red-500" onClick={() => setIsRenamingResume(false)}>
+                                      <X className="h-4 w-4" />
+                                   </Button>
+                                </div>
+                             ) : (
+                                <>
+                                   <p className="text-xs sm:text-sm font-black text-slate-900 truncate flex items-center gap-2">
+                                     {resumeFilename || (resumeUrl ? "Master_Resume.pdf" : "No resume uploaded")}
+                                     {resumeUrl && (
+                                       <button 
+                                         onClick={() => {
+                                           setIsRenamingResume(true);
+                                           setNewResumeName(resumeFilename || "Master_Resume.pdf");
+                                         }}
+                                         className="text-slate-400 hover:text-primary"
+                                       >
+                                         <Edit2 className="h-3 w-3" />
+                                       </button>
+                                     )}
+                                   </p>
+                                   <p className="text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
+                                     {resumeUrl ? "Verified System Sync" : "Sync required for top roles"}
+                                   </p>
+                                </>
+                             )}
+                          </div>
                        </div>
-                       <div className="min-w-0">
-                          <p className="text-xs sm:text-sm font-black text-slate-900 truncate">
-                            {resumeUrl ? "Master_Resume_Verified.pdf" : "No resume uploaded"}
-                          </p>
-                          <p className="text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
-                            {resumeUrl ? "Verified System Sync" : "Sync required for top roles"}
-                          </p>
+                       <input 
+                         ref={resumeInputRef}
+                         type="file"
+                         accept=".pdf"
+                         onChange={handleResumeChange}
+                         className="hidden"
+                       />
+                       <div className="flex items-center gap-2">
+                          {resumeUrl && (
+                             <Button 
+                                variant="ghost" 
+                                size="sm"
+                                onClick={handlePreviewResume}
+                                className="font-black text-slate-500 text-[10px] sm:text-xs tracking-widest uppercase hover:bg-slate-50"
+                             >
+                                Preview
+                             </Button>
+                          )}
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={handleResumeClick}
+                            disabled={isUploadingResume}
+                            className="font-black text-primary text-[10px] sm:text-xs tracking-widest uppercase hover:bg-primary/5"
+                          >
+                            {isUploadingResume ? <Loader2 className="h-3 w-3 animate-spin mr-2" /> : null}
+                            {resumeUrl ? "Replace" : "Upload"}
+                          </Button>
                        </div>
                     </div>
-                    <input 
-                      ref={resumeInputRef}
-                      type="file"
-                      accept=".pdf"
-                      onChange={handleResumeChange}
-                      className="hidden"
-                    />
-                    <Button 
-                      variant="ghost" 
-                      onClick={handleResumeClick}
-                      disabled={isUploadingResume}
-                      className="font-black text-primary text-[10px] sm:text-xs tracking-widest uppercase hover:bg-primary/5 shrink-0"
-                    >
-                      {isUploadingResume ? <Loader2 className="h-3 w-3 animate-spin mr-2" /> : null}
-                      {resumeUrl ? "Replace" : "Upload"}
-                    </Button>
                  </div>
               </CardContent>
            </Card>
