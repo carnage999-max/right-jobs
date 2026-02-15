@@ -8,8 +8,8 @@ const profileSchema = z.object({
   bio: z.string().optional(),
   location: z.string().optional(),
   skills: z.array(z.string()).optional(),
-  resumeUrl: z.string().url().optional(),
-  resumeFilename: z.string().optional(),
+  resumeUrl: z.string().url().nullish(),
+  resumeFilename: z.string().nullish(),
 });
 
 export async function GET() {

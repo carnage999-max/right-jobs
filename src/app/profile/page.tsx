@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   MapPin, 
   Camera, 
@@ -306,251 +307,195 @@ export default function ProfilePage() {
    const trustScore = calculateTrustScore();
 
    return (
-    <div className="container mx-auto px-4 py-6 sm:py-10 max-w-5xl animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="mb-6 sm:mb-10 flex flex-col gap-3 sm:gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <div className="container mx-auto px-4 py-4 sm:py-8 max-w-4xl animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900">Your Identity</h1>
-          <p className="text-sm sm:text-base text-slate-500 font-medium mt-1">Your professional profile is how you stand out from the crowd.</p>
+          <p className="text-sm text-slate-500 font-medium">Manage your professional presence.</p>
         </div>
         <div className={cn(
-            "flex items-center gap-2 px-3 sm:px-4 py-2 rounded-full border text-xs sm:text-sm font-bold shadow-sm transition-all w-fit",
+            "flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-bold shadow-sm w-fit transition-colors",
             isVerified 
               ? "bg-green-50 border-green-100 text-green-700" 
               : "bg-amber-50 border-amber-100 text-amber-700"
         )}>
-           {isVerified ? <ShieldCheck className="h-4 w-4" /> : <Loader2 className="h-4 w-4 animate-spin" />}
-           {isVerified ? "Trusted & Verified" : "Verification Pending"}
+           {isVerified ? <ShieldCheck className="h-3.5 w-3.5" /> : <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+           {isVerified ? "Verified" : "Pending"}
         </div>
       </div>
 
-      <div className="grid gap-6 sm:gap-8 lg:grid-cols-3">
-        {/* Left: Avatar & Quick Info */}
-        <div className="space-y-4 sm:space-y-6">
-           <Card className="ios-card overflow-hidden shadow-xl shadow-slate-200/50">
-              <CardContent className="p-6 sm:p-8 text-center bg-gradient-to-b from-primary/5 to-transparent">
-                 <div className="relative mx-auto mb-4 sm:mb-6 h-28 w-28 sm:h-32 sm:w-32">
-                    <Avatar className="h-full w-full border-4 border-white shadow-2xl">
-                       <AvatarImage src={avatarUrl || undefined} />
-                       <AvatarFallback className="bg-primary/10 text-primary text-2xl sm:text-3xl font-black">
-                          {name?.[0] || session?.user?.email?.[0]?.toUpperCase()}
-                       </AvatarFallback>
-                    </Avatar>
-                    <button 
-                      onClick={handleAvatarClick}
-                      disabled={isUploadingAvatar}
-                      className="absolute bottom-0 right-0 sm:bottom-1 sm:right-1 flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-xl sm:rounded-2xl bg-primary text-primary-foreground shadow-lg transition-transform hover:scale-110 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                       {isUploadingAvatar ? (
-                         <Loader2 className="h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
-                       ) : (
-                         <Camera className="h-4 w-4 sm:h-5 sm:w-5" />
-                       )}
-                    </button>
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      accept="image/*"
-                      onChange={handleAvatarChange}
-                      className="hidden"
-                    />
-                 </div>
-                 <h3 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight">{name || "Unnamed"}</h3>
-                 <p className="text-xs sm:text-sm text-slate-400 font-bold mt-1 truncate px-2">{session?.user?.email}</p>
-              </CardContent>
-           </Card>
+      <Tabs defaultValue="profile" className="w-full space-y-6">
+        <TabsList className="grid w-full grid-cols-2 p-1 bg-slate-100/80 rounded-2xl h-12 sm:h-14">
+           <TabsTrigger value="profile" className="rounded-xl font-bold text-xs sm:text-sm h-full data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all">
+              Edit Profile
+           </TabsTrigger>
+           <TabsTrigger value="visibility" className="rounded-xl font-bold text-xs sm:text-sm h-full data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all">
+              Visibility & Stats
+           </TabsTrigger>
+        </TabsList>
 
-           <Card className="ios-card bg-slate-900 text-white border-none shadow-2xl shadow-slate-900/20">
-              <CardHeader className="pb-2 px-5 sm:px-6 pt-5 sm:pt-6">
-                 <CardTitle className="text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Platform Visibility</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4 sm:space-y-6 px-5 sm:px-6 pb-5 sm:pb-6">
-                 <div className="flex items-end gap-2">
-                    <span className="text-4xl sm:text-5xl font-black tracking-tighter text-white">{trustScore}%</span>
-                    <span className="mb-1 sm:mb-2 text-[10px] sm:text-xs font-bold text-slate-500 uppercase">Trusted</span>
-                 </div>
-                 <div className="h-2 w-full overflow-hidden rounded-full bg-slate-800">
-                    <div className={cn("h-full transition-all duration-1000", trustScore > 70 ? "bg-primary" : "bg-amber-500")} style={{ width: `${trustScore}%` }}></div>
-                 </div>
-                 <div className="flex gap-2 items-start bg-slate-800/50 p-3 sm:p-4 rounded-xl">
-                    <AlertCircle className="h-3 w-3 sm:h-4 w-4 text-primary shrink-0 mt-0.5" />
-                    <p className="text-[9px] sm:text-[10px] font-bold text-slate-400 leading-relaxed uppercase tracking-wider">
-                        {trustScore >= 90 
-                          ? "You are appearing in the top segment of candidate searches."
-                          : "Complete your dossier and ID verification to reach 100% visibility."}
-                    </p>
-                 </div>
-              </CardContent>
-           </Card>
-        </div>
-
-        {/* Right: Detailed Info */}
-        <div className="lg:col-span-2 space-y-6 sm:space-y-8">
+        {/* PROFILE TAB */}
+        <TabsContent value="profile" className="space-y-6 outline-none">
+           {/* Avatar & Basic Info Card */}
            <Card className="ios-card shadow-lg border-slate-100">
-              <CardHeader className="px-5 sm:px-8 pt-6 sm:pt-8">
-                 <CardTitle className="text-xl sm:text-2xl font-black tracking-tight text-slate-900">Professional Dossier</CardTitle>
-                 <CardDescription className="text-slate-400 font-bold uppercase text-[9px] sm:text-[10px] tracking-widest mt-1">Updates are visible immediately to recruiters</CardDescription>
+               <CardContent className="p-5 sm:p-8 pt-6 sm:pt-8 space-y-6">
+                  {/* Avatar Section */}
+                  <div className="flex flex-col items-center sm:flex-row sm:items-start gap-6">
+                      <div className="relative group">
+                        <div className="h-24 w-24 sm:h-28 sm:w-28 rounded-full ring-4 ring-white shadow-xl overflow-hidden bg-slate-100">
+                           <Avatar className="h-full w-full">
+                              <AvatarImage src={avatarUrl || undefined} className="object-cover" />
+                              <AvatarFallback className="bg-primary/10 text-primary text-3xl font-black">
+                                 {name?.[0] || session?.user?.email?.[0]?.toUpperCase()}
+                              </AvatarFallback>
+                           </Avatar>
+                        </div>
+                        <button 
+                          onClick={handleAvatarClick}
+                          disabled={isUploadingAvatar}
+                          className="absolute bottom-0 right-0 h-8 w-8 bg-primary text-white rounded-full flex items-center justify-center shadow-lg hover:bg-primary/90 transition-transform active:scale-95"
+                        >
+                           {isUploadingAvatar ? <Loader2 className="h-4 w-4 animate-spin" /> : <Camera className="h-4 w-4" />}
+                        </button>
+                        <input ref={fileInputRef} type="file" accept="image/*" onChange={handleAvatarChange} className="hidden" />
+                      </div>
+                      
+                      <div className="flex-1 w-full space-y-4 text-center sm:text-left">
+                         <div className="grid gap-4 sm:grid-cols-2">
+                            <div className="space-y-2">
+                               <Label htmlFor="name" className="text-xs font-black uppercase text-slate-400">Display Name</Label>
+                               <Input id="name" value={name} onChange={(e) => setName(e.target.value)} className="font-bold border-slate-200 focus:border-primary" />
+                            </div>
+                            <div className="space-y-2">
+                               <Label htmlFor="location" className="text-xs font-black uppercase text-slate-400">Location</Label>
+                               <div className="relative">
+                                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                                  <Input id="location" value={location} onChange={(e) => setLocation(e.target.value)} className="pl-9 font-bold border-slate-200 focus:border-primary" placeholder="City, Country" />
+                               </div>
+                            </div>
+                         </div>
+                      </div>
+                  </div>
+
+                  <div className="space-y-2">
+                     <Label htmlFor="bio" className="text-xs font-black uppercase text-slate-400">About Me</Label>
+                     <Textarea 
+                        id="bio" 
+                        value={bio} 
+                        onChange={(e) => setBio(e.target.value)} 
+                        className="min-h-[100px] resize-none font-medium border-slate-200 focus:border-primary" 
+                        placeholder="Share your professional story..."
+                     />
+                  </div>
+               </CardContent>
+           </Card>
+
+           {/* Skills Card */}
+           <Card className="ios-card shadow-sm">
+              <CardHeader className="pb-3">
+                 <CardTitle className="text-base font-black">Skills</CardTitle>
               </CardHeader>
-              <CardContent className="px-5 sm:px-8 pb-6 sm:pb-8 space-y-6 sm:space-y-8">
-                 <div className="grid gap-5 sm:gap-6 sm:grid-cols-2 mt-4">
-                    <div className="space-y-3">
-                       <Label htmlFor="name" className="text-xs font-black uppercase tracking-widest text-slate-400">Display Name</Label>
-                       <Input 
-                          id="name" 
-                          value={name} 
-                          onChange={(e) => setName(e.target.value)}
-                          className="rounded-xl sm:rounded-2xl h-11 sm:h-12 font-bold border-2 focus-visible:ring-primary shadow-sm" 
-                       />
-                    </div>
-                    <div className="space-y-3">
-                       <Label htmlFor="location" className="text-xs font-black uppercase tracking-widest text-slate-400">Base Location</Label>
-                       <div className="relative">
-                          <MapPin className="absolute left-3 sm:left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                          <Input 
-                            id="location" 
-                            value={location} 
-                            onChange={(e) => setLocation(e.target.value)}
-                            className="pl-10 sm:pl-11 rounded-xl sm:rounded-2xl h-11 sm:h-12 font-bold border-2 focus-visible:ring-primary shadow-sm" 
-                            placeholder="City, Country"
-                          />
-                       </div>
-                    </div>
+              <CardContent className="space-y-4">
+                 <div className="flex flex-wrap gap-2">
+                    {skills.map((skill) => (
+                      <Badge key={skill} variant="secondary" className="px-3 py-1.5 rounded-lg text-sm bg-slate-100 text-slate-700 group hover:bg-slate-200">
+                        {skill}
+                        <button onClick={() => removeSkill(skill)} className="ml-2 text-slate-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <X className="h-3 w-3" />
+                        </button>
+                      </Badge>
+                    ))}
+                    {skills.length === 0 && <span className="text-sm text-slate-400 italic">No skills added.</span>}
                  </div>
-
-                 <div className="space-y-3">
-                    <Label htmlFor="bio" className="text-xs font-black uppercase tracking-widest text-slate-400">Professional Summary</Label>
-                    <Textarea 
-                       id="bio" 
-                       placeholder="A brief overview of your expertise and aspirations..." 
-                       className="min-h-[120px] sm:min-h-[140px] rounded-xl sm:rounded-[1.5rem] resize-none font-medium p-4 sm:p-5 border-2 focus-visible:ring-primary shadow-sm leading-relaxed text-sm sm:text-base"
-                       value={bio}
-                       onChange={(e) => setBio(e.target.value)}
+                 <div className="flex gap-2">
+                    <Input 
+                       value={newSkill} 
+                       onChange={(e) => setNewSkill(e.target.value)} 
+                       onKeyDown={(e) => e.key === 'Enter' && addSkill()}
+                       placeholder="Add a skill" 
+                       className="h-10"
                     />
-                 </div>
-
-                 <div className="space-y-4 sm:space-y-5">
-                    <Label className="text-xs font-black uppercase tracking-widest text-slate-400">Core Expertise & Skills</Label>
-                    <div className="flex flex-wrap gap-2 sm:gap-2.5">
-                       {skills.map((skill) => (
-                         <Badge key={skill} variant="secondary" className="pl-3 sm:pl-4 pr-2 py-1.5 sm:py-2 flex items-center gap-2 rounded-lg sm:rounded-xl text-xs sm:text-sm font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors border-none group">
-                           {skill}
-                           <button onClick={() => removeSkill(skill)} className="text-slate-300 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100">
-                             <X className="h-3 w-3 sm:h-4 sm:w-4" />
-                           </button>
-                         </Badge>
-                       ))}
-                       {skills.length === 0 && (
-                           <p className="text-xs font-bold text-slate-400 italic">No skills added yet.</p>
-                       )}
-                    </div>
-                    <div className="flex gap-2 sm:gap-3">
-                       <Input 
-                          placeholder="Type skill & press Enter" 
-                          className="flex-1 rounded-xl sm:rounded-2xl h-11 sm:h-12 font-bold border-2 border-dashed text-sm sm:text-base"
-                          value={newSkill}
-                          onChange={(e) => setNewSkill(e.target.value)}
-                          onKeyDown={(e) => e.key === 'Enter' && addSkill()}
-                       />
-                       <Button variant="outline" className="ios-button h-11 w-11 sm:h-12 sm:w-12 rounded-xl sm:rounded-2xl border-2 shrink-0" onClick={addSkill}>
-                          <Plus className="h-4 w-4 sm:h-5 sm:w-5" />
-                       </Button>
-                    </div>
-                 </div>
-
-                 <div className="pt-4 sm:pt-6 border-t flex justify-end">
-                    <Button onClick={handleSave} disabled={isSaving} className="ios-button h-12 sm:h-14 px-8 sm:px-10 min-w-[140px] sm:min-w-[160px] text-base sm:text-lg font-black shadow-xl shadow-primary/20">
-                       {isSaving ? <Loader2 className="mr-2 sm:mr-3 h-4 w-4 sm:h-5 sm:w-5 animate-spin" /> : "Commit Changes"}
+                    <Button onClick={addSkill} size="icon" variant="outline" className="h-10 w-10 border-dashed">
+                       <Plus className="h-4 w-4" />
                     </Button>
                  </div>
               </CardContent>
            </Card>
 
-           <Card className="ios-card bg-primary/5 border-primary/10 overflow-hidden group">
-              <CardHeader className="px-5 sm:px-8 pt-5 sm:pt-6">
-                 <CardTitle className="text-base sm:text-lg font-black tracking-tight text-slate-900">Career Credentials</CardTitle>
-                 <CardDescription className="font-bold text-xs text-primary/70">Secure document cloud storage enabled</CardDescription>
-              </CardHeader>
-              <CardContent className="px-5 sm:px-8 pb-6 sm:pb-8">
-                 <div className="flex flex-col gap-4">
-                    <div className="flex items-center justify-between p-4 sm:p-5 bg-white rounded-xl sm:rounded-2xl border-2 border-primary/10 shadow-sm transition-all group-hover:shadow-md">
-                       <div className="flex items-center gap-3 sm:gap-4 min-w-0">
-                          <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-lg sm:rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0 transition-transform group-hover:scale-110">
-                             <CheckCircle2 className="h-5 w-5 sm:h-6 sm:w-6" />
-                          </div>
-                          <div className="min-w-0">
-                             {isRenamingResume ? (
-                                <div className="flex items-center gap-2">
-                                   <Input 
-                                      value={newResumeName}
-                                      onChange={(e) => setNewResumeName(e.target.value)}
-                                      onKeyDown={(e) => e.key === 'Enter' && handleRenameResume()}
-                                      className="h-8 max-w-[200px] font-bold text-xs"
-                                      autoFocus
-                                   />
-                                   <Button size="icon" variant="ghost" className="h-8 w-8 text-green-600" onClick={handleRenameResume}>
-                                      <CheckCircle2 className="h-4 w-4" />
-                                   </Button>
-                                   <Button size="icon" variant="ghost" className="h-8 w-8 text-red-500" onClick={() => setIsRenamingResume(false)}>
-                                      <X className="h-4 w-4" />
-                                   </Button>
-                                </div>
-                             ) : (
-                                <>
-                                   <p className="text-xs sm:text-sm font-black text-slate-900 truncate flex items-center gap-2">
-                                     {resumeFilename || (resumeUrl ? "Master_Resume.pdf" : "No resume uploaded")}
-                                     {resumeUrl && (
-                                       <button 
-                                         onClick={() => {
-                                           setIsRenamingResume(true);
-                                           setNewResumeName(resumeFilename || "Master_Resume.pdf");
-                                         }}
-                                         className="text-slate-400 hover:text-primary"
-                                       >
-                                         <Edit2 className="h-3 w-3" />
-                                       </button>
-                                     )}
-                                   </p>
-                                   <p className="text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
-                                     {resumeUrl ? "Verified System Sync" : "Sync required for top roles"}
-                                   </p>
-                                </>
-                             )}
-                          </div>
-                       </div>
-                       <input 
-                         ref={resumeInputRef}
-                         type="file"
-                         accept=".pdf"
-                         onChange={handleResumeChange}
-                         className="hidden"
-                       />
-                       <div className="flex items-center gap-2">
-                          {resumeUrl && (
-                             <Button 
-                                variant="ghost" 
-                                size="sm"
-                                onClick={handlePreviewResume}
-                                className="font-black text-slate-500 text-[10px] sm:text-xs tracking-widest uppercase hover:bg-slate-50"
-                             >
-                                Preview
-                             </Button>
-                          )}
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            onClick={handleResumeClick}
-                            disabled={isUploadingResume}
-                            className="font-black text-primary text-[10px] sm:text-xs tracking-widest uppercase hover:bg-primary/5"
-                          >
-                            {isUploadingResume ? <Loader2 className="h-3 w-3 animate-spin mr-2" /> : null}
-                            {resumeUrl ? "Replace" : "Upload"}
-                          </Button>
-                       </div>
+           {/* Resume Card */}
+           <Card className="ios-card bg-primary/5 border-primary/10">
+              <CardContent className="p-5 flex items-center justify-between gap-4">
+                 <div className="flex items-center gap-4 overflow-hidden">
+                    <div className="h-12 w-12 rounded-xl bg-white flex items-center justify-center text-primary shadow-sm shrink-0">
+                       <CheckCircle2 className="h-6 w-6" />
                     </div>
+                    <div className="overflow-hidden">
+                       <p className="font-bold text-sm text-slate-900 truncate">
+                          {resumeFilename || (resumeUrl ? "Resume.pdf" : "No Resume")}
+                       </p>
+                       <p className="text-[10px] uppercase font-bold text-primary/70">
+                          {resumeUrl ? "Synced" : "Upload Expected"}
+                       </p>
+                    </div>
+                 </div>
+                 <div className="flex gap-2">
+                     <input ref={resumeInputRef} type="file" accept=".pdf" onChange={handleResumeChange} className="hidden" />
+                     {resumeUrl && (
+                        <Button variant="ghost" size="sm" onClick={handlePreviewResume} className="text-xs font-bold">View</Button>
+                     )}
+                     <Button size="sm" onClick={handleResumeClick} disabled={isUploadingResume} className="text-xs font-bold">
+                        {isUploadingResume ? <Loader2 className="h-3 w-3 animate-spin" /> : (resumeUrl ? "Update" : "Upload")}
+                     </Button>
                  </div>
               </CardContent>
            </Card>
-        </div>
-      </div>
+
+           <div className="pt-4 flex justify-end">
+              <Button onClick={handleSave} disabled={isSaving} className="w-full sm:w-auto ios-button h-12 px-8 shadow-xl shadow-primary/20 text-lg font-black">
+                 {isSaving ? <Loader2 className="h-5 w-5 animate-spin mr-2" /> : "Save Changes"}
+              </Button>
+           </div>
+        </TabsContent>
+
+        {/* VISIBILITY TAB */}
+        <TabsContent value="visibility" className="space-y-6 outline-none">
+            <Card className="ios-card bg-slate-900 text-white border-none shadow-2xl">
+               <CardHeader className="pb-2">
+                  <CardTitle className="text-xs font-black uppercase tracking-[0.2em] text-slate-400">Visibility Score</CardTitle>
+               </CardHeader>
+               <CardContent className="space-y-6">
+                  <div className="flex items-end gap-2">
+                     <span className="text-5xl font-black tracking-tighter text-white">{trustScore}%</span>
+                     <span className="mb-2 text-xs font-bold text-slate-500 uppercase">Profile Strength</span>
+                  </div>
+                  <div className="h-3 w-full overflow-hidden rounded-full bg-slate-800">
+                     <div className={cn("h-full transition-all duration-1000", trustScore > 70 ? "bg-primary" : "bg-amber-500")} style={{ width: `${trustScore}%` }}></div>
+                  </div>
+                  <p className="text-sm text-slate-400 leading-relaxed">
+                      {trustScore >= 90 
+                        ? "You are appearing in the top segment of candidate searches."
+                        : "Complete all profile sections and verify your ID to reach 100% visibility."}
+                  </p>
+               </CardContent>
+            </Card>
+
+            <Card className="ios-card">
+               <CardHeader>
+                  <CardTitle className="text-lg font-bold">Why it matters?</CardTitle>
+               </CardHeader>
+               <CardContent className="space-y-4">
+                  <div className="flex gap-3">
+                     <div className="h-8 w-8 rounded-full bg-green-100 text-green-600 flex items-center justify-center shrink-0"><CheckCircle2 className="h-4 w-4" /></div>
+                     <p className="text-sm text-slate-600">Higher scores rank you higher in recruiter searches.</p>
+                  </div>
+                  <div className="flex gap-3">
+                     <div className="h-8 w-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center shrink-0"><ShieldCheck className="h-4 w-4" /></div>
+                     <p className="text-sm text-slate-600">Verified profiles get 2x more interview requests.</p>
+                  </div>
+               </CardContent>
+            </Card>
+        </TabsContent>
+      </Tabs>
     </div>
-  );
+   );
 }
