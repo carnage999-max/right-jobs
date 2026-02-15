@@ -101,8 +101,8 @@ export function ReportIssue() {
            </span>
         </button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[480px] rounded-[2.5rem] border-none shadow-2xl p-0 overflow-hidden bg-white/95 backdrop-blur-xl">
-        <div className="absolute top-0 left-0 w-full h-2 bg-primary" />
+      <DialogContent className="sm:max-w-[480px] w-full max-h-[90vh] overflow-y-auto rounded-[2.5rem] border-none shadow-2xl p-0 bg-white/95 backdrop-blur-xl">
+        <div className="absolute top-0 left-0 w-full h-2 bg-primary z-10" />
         
         {isSuccess ? (
           <div className="py-20 flex flex-col items-center justify-center text-center px-8 animate-in fade-in zoom-in duration-500">
