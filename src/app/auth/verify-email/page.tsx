@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useState, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -17,6 +17,7 @@ function VerifyEmailContent() {
   const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
   const [message, setMessage] = useState("");
   const [countdown, setCountdown] = useState(5);
+  const verifyRef = useRef(false);
 
   useEffect(() => {
     const token = searchParams.get("token");
@@ -27,6 +28,9 @@ function VerifyEmailContent() {
       return;
     }
 
+    if (verifyRef.current) return;
+    verifyRef.current = true;
+
     async function verifyEmail() {
       try {
         const response = await fetch(`/api/auth/verify-email?token=${token}`);
@@ -36,7 +40,6 @@ function VerifyEmailContent() {
           setStatus("success");
           setMessage("Your email has been verified successfully!");
           
-          // Force a session update so the verification banner disappears
           if (authStatus === "authenticated") {
             await update({ emailVerified: true });
           }

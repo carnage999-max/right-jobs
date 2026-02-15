@@ -10,10 +10,12 @@ const jobSchema = z.object({
   officeImageUrl: z.string().optional(),
   phoneNumber: z.string().optional(),
   location: z.string().min(2, "Location must be at least 2 characters"),
-  type: z.enum(["FULL_TIME", "PART_TIME", "CONTRACT", "INTERNSHIP", "REMOTE"]),
+  workMode: z.enum(["ONSITE", "HYBRID", "REMOTE"]).default("ONSITE"),
+  type: z.enum(["FULL_TIME", "PART_TIME", "CONTRACT", "INTERNSHIP"]),
+  contractDuration: z.string().optional(),
   category: z.string().min(2, "Category must be at least 2 characters"),
   salaryRange: z.string().optional(),
-  salaryType: z.enum(["YEARLY", "MONTHLY", "HOURLY"]).default("YEARLY"),
+  salaryType: z.enum(["YEARLY", "MONTHLY", "WEEKLY", "HOURLY"]).default("YEARLY"),
   description: z.string().min(50, "Description must be at least 50 characters"),
 });
 

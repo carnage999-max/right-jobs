@@ -23,6 +23,11 @@ enum JobType {
   PART_TIME
   CONTRACT
   INTERNSHIP
+}
+
+enum WorkMode {
+  ONSITE
+  HYBRID
   REMOTE
 }
 
@@ -38,6 +43,7 @@ enum ApplicationStatus {
 enum SalaryType {
   YEARLY
   MONTHLY
+  WEEKLY
   HOURLY
 }
 
@@ -115,11 +121,13 @@ model Job {
   companyName     String
   companyLogoUrl  String?
   location        String
+  workMode        WorkMode      @default(ONSITE)
   type            JobType
   category        String
   description     String        @db.Text
   salaryRange     String?
   salaryType      SalaryType    @default(YEARLY)
+  contractDuration String?
   phoneNumber     String?
   officeImageUrl  String?
   isActive        Boolean       @default(true)

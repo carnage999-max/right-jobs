@@ -71,22 +71,6 @@ export default function SecuritySettingsPage() {
                     </div>
                  </div>
 
-                 <div className="p-6">
-                    <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
-                       <div className="space-y-1">
-                          <div className="flex items-center gap-2">
-                             <p className="font-bold text-slate-900">Two-Factor Authentication (2FA)</p>
-                             <span className="bg-slate-100 text-slate-500 text-[10px] uppercase font-bold px-2 py-0.5 rounded-md self-center">Coming Soon</span>
-                          </div>
-                          <p className="text-sm text-slate-500">
-                             Add an extra layer of security to your account with email OTP or an authenticator app.
-                          </p>
-                       </div>
-                       <Button disabled variant="outline" className="ios-button min-w-[180px]">
-                          Setup 2FA
-                       </Button>
-                    </div>
-                 </div>
               </CardContent>
            </Card>
         </section>
@@ -129,38 +113,6 @@ export default function SecuritySettingsPage() {
         </section>
 
         {/* Session Management */}
-        <section className="space-y-4">
-           <div className="flex items-center justify-between">
-              <h2 className="text-lg font-bold flex items-center gap-2 text-slate-900"><History className="h-5 w-5 text-amber-500" /> Active Sessions</h2>
-              <Button variant="ghost" className="text-red-600 hover:text-red-700 text-xs font-bold uppercase tracking-wider">Sign out all devices</Button>
-           </div>
-           <Card className="ios-card">
-              <CardContent className="p-0 divide-y">
-                 {[
-                   { device: "MacBook Pro • NYC, USA", browser: "Chrome", current: true, time: "Active now" },
-                   { device: "iPhone 15 Pro • NYC, USA", browser: "Mobile Safari", current: false, time: "Last active 2 hrs ago" },
-                 ].map((session, i) => (
-                   <div key={i} className="p-6 flex items-center justify-between group">
-                      <div className="flex items-center gap-4">
-                         <div className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-primary/5 transition-colors">
-                            {session.device.includes("iPhone") ? <Smartphone className="h-5 w-5" /> : <Lock className="h-5 w-5" />}
-                         </div>
-                         <div>
-                            <div className="flex items-center gap-2">
-                               <p className="font-bold text-slate-900">{session.device}</p>
-                               {session.current && <span className="bg-primary/10 text-primary text-[10px] uppercase font-bold px-2 py-0.5 rounded-full">Current Session</span>}
-                            </div>
-                            <p className="text-xs text-slate-400 font-medium">{session.browser} • {session.time}</p>
-                         </div>
-                      </div>
-                      <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity">
-                         <ChevronRight className="h-4 w-4" />
-                      </Button>
-                   </div>
-                 ))}
-              </CardContent>
-           </Card>
-        </section>
 
         {/* Help/Inquiry Footer */}
         <div className="flex flex-col sm:flex-row items-center justify-between p-8 rounded-2xl bg-slate-100 border border-slate-200 gap-6">

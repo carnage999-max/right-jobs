@@ -44,13 +44,15 @@ export default function UserPostJobPage() {
     companyName: "",
     location: "",
     type: "FULL_TIME",
+    workMode: "ONSITE",
     category: "Engineering",
     salaryRange: "",
     salaryType: "YEARLY",
     description: "",
     companyLogoUrl: "",
     officeImageUrl: "",
-    phoneNumber: ""
+    phoneNumber: "",
+    contractDuration: ""
   });
 
   const [zipCode, setZipCode] = useState("");
@@ -283,32 +285,32 @@ export default function UserPostJobPage() {
 
                   <div className="grid gap-6 md:grid-cols-2">
                      <div className="space-y-3">
-                        <Label htmlFor="zip" className="text-sm font-bold ml-1 text-slate-900 flex items-center justify-between">
-                           ZIP Code
-                           {isZipping && <Loader2 className="h-3 w-3 animate-spin text-primary" />}
+                        <Label htmlFor="location" className="text-sm font-bold ml-1 text-slate-900">
+                           Location <span className="text-slate-400 font-normal">(Primary Office)</span>
                         </Label>
-                        <Input 
-                          id="zip" 
-                          placeholder="e.g. 90210" 
-                          maxLength={5}
-                          className="h-14 rounded-2xl bg-white border-slate-100 focus:ring-primary/20 transition-all font-medium text-lg px-6"
-                          value={zipCode}
-                          onChange={(e) => {
-                             const val = e.target.value.replace(/\D/g, '').slice(0, 5);
-                             setZipCode(val);
-                             if (val.length === 5) fetchLocationFromZip(val);
-                          }}
-                        />
+                        <div className="relative">
+                           <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
+                           <Input 
+                             id="location" 
+                             placeholder="e.g. San Francisco, CA" 
+                             className="h-14 rounded-2xl bg-white border-slate-100 focus:ring-primary/20 transition-all font-medium text-lg pl-12 pr-6"
+                             value={formData.location}
+                             onChange={(e) => setFormData({...formData, location: e.target.value})}
+                           />
+                        </div>
                      </div>
                      <div className="space-y-3">
-                        <Label htmlFor="phone" className="text-sm font-bold ml-1 text-slate-900">Phone Number (Optional)</Label>
-                        <Input 
-                          id="phone" 
-                          placeholder="e.g. +1 (555) 000-0000" 
-                          className="h-14 rounded-2xl bg-white border-slate-100 focus:ring-primary/20 transition-all font-medium text-lg px-6"
-                          value={formData.phoneNumber}
-                          onChange={(e) => setFormData({...formData, phoneNumber: e.target.value})}
-                        />
+                        <Label className="text-sm font-bold ml-1 text-slate-900">Work Mode</Label>
+                        <Select value={formData.workMode} onValueChange={(val) => setFormData({...formData, workMode: val as any})}>
+                          <SelectTrigger className="h-14 rounded-2xl bg-white border-slate-100 focus:ring-primary/20 transition-all font-medium text-lg px-6">
+                            <SelectValue placeholder="Select mode" />
+                          </SelectTrigger>
+                          <SelectContent className="rounded-2xl border-none shadow-2xl">
+                             <SelectItem value="ONSITE">On-site (Office)</SelectItem>
+                             <SelectItem value="HYBRID">Hybrid (Office & Remote)</SelectItem>
+                             <SelectItem value="REMOTE">Fully Remote</SelectItem>
+                          </SelectContent>
+                        </Select>
                      </div>
                   </div>
 
@@ -390,7 +392,7 @@ export default function UserPostJobPage() {
                      </div>
                   </div>
 
-                   <div className="grid gap-6 md:grid-cols-[1fr_1.5fr_1fr]">
+                   <div className="grid gap-6 md:grid-cols-2">
                       <div className="space-y-3">
                          <Label className="text-sm font-bold ml-1">Salary Type</Label>
                          <Select value={formData.salaryType} onValueChange={(val) => setFormData({...formData, salaryType: val as any})}>
@@ -399,6 +401,7 @@ export default function UserPostJobPage() {
                            </SelectTrigger>
                            <SelectContent className="rounded-2xl border-none shadow-2xl">
                              <SelectItem value="HOURLY">Per Hour</SelectItem>
+                             <SelectItem value="WEEKLY">Weekly</SelectItem>
                              <SelectItem value="MONTHLY">Monthly</SelectItem>
                              <SelectItem value="YEARLY">Yearly</SelectItem>
                            </SelectContent>
@@ -414,19 +417,6 @@ export default function UserPostJobPage() {
                               className="h-14 rounded-2xl bg-white border-slate-100 focus:ring-primary/20 transition-all font-medium text-lg pl-12 pr-6"
                               value={formData.salaryRange}
                               onChange={(e) => setFormData({...formData, salaryRange: e.target.value})}
-                            />
-                         </div>
-                      </div>
-                      <div className="space-y-3">
-                         <Label htmlFor="location" className="text-sm font-bold ml-1">Location</Label>
-                         <div className="relative">
-                            <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
-                            <Input 
-                              id="location" 
-                              placeholder="e.g. Remote" 
-                              className="h-14 rounded-2xl bg-white border-slate-100 focus:ring-primary/20 transition-all font-medium text-lg pl-12 pr-6"
-                              value={formData.location}
-                              onChange={(e) => setFormData({...formData, location: e.target.value})}
                             />
                          </div>
                       </div>
@@ -547,17 +537,20 @@ export default function UserPostJobPage() {
                      </div>
 
                       <div className="relative flex flex-wrap gap-6 text-sm text-slate-400 font-bold uppercase tracking-widest">
-                        <div className="flex items-center gap-2 bg-white/5 py-2 px-4 rounded-xl"><MapPin className="h-4 w-4 text-white" /> {formData.location || "Location"}</div>
+                        <div className="flex items-center gap-2 bg-white/5 py-2 px-4 rounded-xl"><MapPin className="h-4 w-4 text-white" /> 
+                          {formData.workMode === 'REMOTE' ? 'Remote' : formData.location || "Location"}
+                          {formData.workMode === 'HYBRID' && ' (Hybrid)'}
+                        </div>
                         <div className="flex items-center gap-2 bg-white/5 py-2 px-4 rounded-xl"><LayoutGrid className="h-4 w-4 text-white" /> {formData.category}</div>
                         <div className="flex items-center gap-2 bg-white/5 py-2 px-4 rounded-xl">
                            <DollarSign className="h-4 w-4 text-white" /> 
                            {formData.salaryRange || "Not specified"}
                            {formData.salaryRange && ` / ${formData.salaryType.replace('LY', '').toLowerCase()}`}
                         </div>
-                        {formData.phoneNumber && (
+                        {formData.contractDuration && formData.type === 'CONTRACT' && (
                            <div className="flex items-center gap-2 bg-white/5 py-2 px-4 rounded-xl">
-                              <Building2 className="h-4 w-4 text-white" /> 
-                              {formData.phoneNumber}
+                              <Briefcase className="h-4 w-4 text-white" /> 
+                              {formData.contractDuration}
                            </div>
                         )}
                      </div>
