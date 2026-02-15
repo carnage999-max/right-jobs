@@ -16,11 +16,22 @@ import {
   LogOut,
   ChevronLeft,
   ChevronRight,
-  History
+  History,
+  Home,
+  User
 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuLabel, 
+  DropdownMenuSeparator, 
+  DropdownMenuTrigger 
+} from "@/components/ui/dropdown-menu";
+import { signOut } from "next-auth/react";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -99,19 +110,23 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <div className="border-t p-4 space-y-4">
            {(!isCollapsed || (typeof window !== 'undefined' && window.innerWidth < 1024)) && (
               <div className="flex items-center gap-3 px-2 py-2">
-                 <Avatar className="h-9 w-9">
-                   <AvatarImage src={session?.user?.image || ""} />
-                   <AvatarFallback className="bg-primary/10 text-primary">
+                 <Avatar className="h-9 w-9 ring-2 ring-primary/10">
+                   <AvatarImage src={session?.user?.image || ""} alt={session?.user?.name || ""} />
+                   <AvatarFallback className="bg-primary/10 text-primary font-bold text-xs">
                       {session?.user?.name?.[0] || "A"}
                    </AvatarFallback>
                  </Avatar>
                  <div className="flex-1 overflow-hidden">
-                    <p className="text-sm font-semibold truncate">{session?.user?.name || "Admin"}</p>
-                    <p className="text-xs text-slate-500 truncate">{session?.user?.email}</p>
+                    <p className="text-sm font-bold truncate text-slate-900">{session?.user?.name || "Admin"}</p>
+                    <p className="text-[10px] text-slate-500 truncate uppercase font-bold tracking-widest">{session?.user?.role || "SYSTEM"}</p>
                  </div>
               </div>
            )}
-           <Button variant="ghost" className={cn("w-full justify-start gap-3 rounded-xl", isCollapsed && "lg:px-3")}>
+           <Button 
+            variant="ghost" 
+            className={cn("w-full justify-start gap-3 rounded-xl text-red-600 hover:bg-red-50 hover:text-red-700 font-bold", isCollapsed && "lg:px-3")}
+            onClick={() => signOut()}
+           >
               <LogOut className="h-5 w-5 min-w-[20px]" />
               <span className={cn(isCollapsed && "lg:hidden")}>Logout</span>
            </Button>
@@ -150,6 +165,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               </h2>
            </div>
            <div className="flex items-center gap-2 lg:gap-4">
+              <Button variant="ghost" size="icon" className="rounded-full h-9 w-9 lg:h-10 lg:w-10" asChild title="Return Home">
+                 <Link href="/">
+                    <Home className="h-5 w-5 text-slate-500" />
+                 </Link>
+              </Button>
               <Button variant="ghost" size="icon" className="rounded-full h-9 w-9 lg:h-10 lg:w-10" asChild>
                  <Link href="/admin/notifications">
                     <Bell className="h-5 w-5 text-slate-500" />
@@ -160,6 +180,54 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     <Settings className="h-5 w-5 text-slate-500" />
                  </Link>
               </Button>
+
+              <div className="hidden sm:block h-8 w-px bg-slate-200 mx-2" />
+
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="relative h-9 w-9 lg:h-10 lg:w-10 rounded-full ring-offset-background transition-colors hover:bg-slate-100 p-0">
+                    <Avatar className="h-8 w-8 lg:h-9 lg:w-9 border border-primary/20 shadow-sm">
+                      <AvatarImage src={session?.user?.image || ""} alt={session?.user?.name || ""} />
+                      <AvatarFallback className="bg-primary/10 text-primary font-bold text-xs">
+                        {session?.user?.name?.[0] || "A"}
+                      </AvatarFallback>
+                    </Avatar>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56 rounded-2xl z-[80] shadow-2xl border-slate-100" align="end" sideOffset={12} forceMount>
+                  <DropdownMenuLabel className="font-normal p-4 pb-3">
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-sm font-black tracking-tight text-slate-900">{session?.user?.name}</p>
+                      <p className="text-[10px] uppercase font-black tracking-widest text-slate-400">{session?.user?.email}</p>
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator className="bg-slate-50" />
+                  <div className="p-2 space-y-1">
+                    <DropdownMenuItem asChild className="cursor-pointer rounded-xl font-bold text-slate-600 focus:bg-slate-50 focus:text-primary transition-colors">
+                      <Link href="/" className="flex w-full items-center">
+                        <Home className="mr-3 h-4 w-4" />
+                        Main Platform
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild className="cursor-pointer rounded-xl font-bold text-slate-600 focus:bg-slate-50 focus:text-primary transition-colors">
+                      <Link href="/profile" className="flex w-full items-center">
+                        <User className="mr-3 h-4 w-4" />
+                        Personal Dossier
+                      </Link>
+                    </DropdownMenuItem>
+                  </div>
+                  <DropdownMenuSeparator className="bg-slate-50" />
+                  <div className="p-2">
+                    <DropdownMenuItem
+                      className="cursor-pointer rounded-xl text-red-500 focus:bg-red-50 focus:text-red-600 font-bold transition-colors"
+                      onSelect={() => signOut()}
+                    >
+                      <LogOut className="mr-3 h-4 w-4" />
+                      Commit Logout
+                    </DropdownMenuItem>
+                  </div>
+                </DropdownMenuContent>
+              </DropdownMenu>
            </div>
         </header>
         <div className="flex-1 overflow-y-auto p-4 lg:p-8">

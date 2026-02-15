@@ -107,6 +107,12 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
       if (token?.id) {
         session.user.id = token.id as string;
       }
+      if (token?.picture) {
+        session.user.image = token.picture as string;
+      }
+      if (token?.name) {
+        session.user.name = token.name as string;
+      }
       session.user.mfaComplete = !!token?.mfaComplete;
       session.user.isEmailVerified = !!token?.emailVerified;
       session.user.sessionVersion = (token as any).sessionVersion as number;
