@@ -28,6 +28,8 @@ import {
   SelectTrigger, 
   SelectValue 
 } from "@/components/ui/select";
+import { SearchableSelect } from "@/components/ui/searchable-select";
+import { countries, getCities } from "@/lib/locations";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -42,7 +44,9 @@ export default function UserPostJobPage() {
   const [formData, setFormData] = useState({
     title: "",
     companyName: "",
-    location: "",
+    country: "",
+    city: "",
+    location: "", // Keep for backend compatibility
     type: "FULL_TIME",
     workMode: "ONSITE",
     category: "Engineering",
@@ -285,22 +289,44 @@ export default function UserPostJobPage() {
 
                   <div className="grid gap-6 md:grid-cols-2">
                      <div className="space-y-3">
-                        <Label htmlFor="location" className="text-sm font-bold ml-1 text-slate-900">
-                           Location <span className="text-slate-400 font-normal">(Primary Office)</span>
+                        <Label className="text-sm font-bold ml-1 text-slate-900">
+                           Country <span className="text-slate-400 font-normal">(Job Location)</span>
                         </Label>
-                        <div className="relative">
-                           <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
-                           <Input 
-                             id="location" 
-                             placeholder="e.g. San Francisco, CA" 
-                             className="h-14 rounded-2xl bg-white border-slate-100 focus:ring-primary/20 transition-all font-medium text-lg pl-12 pr-6"
-                             value={formData.location}
-                             onChange={(e) => setFormData({...formData, location: e.target.value})}
-                           />
-                        </div>
+                        <SearchableSelect 
+                           options={countries.map(c => c.name)}
+                           value={formData.country}
+                           onChange={(val) => {
+                             setFormData(curr => ({
+                               ...curr, 
+                               country: val, 
+                               city: "", // Reset city when country changes
+                               location: val // Default location to just country until city is picked
+                             }));
+                           }}
+                           placeholder="Select Country"
+                        />
                      </div>
                      <div className="space-y-3">
-                        <Label className="text-sm font-bold ml-1 text-slate-900">Work Mode</Label>
+                        <Label className="text-sm font-bold ml-1 text-slate-900">
+                           City <span className="text-slate-400 font-normal">(Primary Office)</span>
+                        </Label>
+                        <SearchableSelect 
+                           options={getCities(formData.country)}
+                           value={formData.city}
+                           onChange={(val) => {
+                             setFormData(curr => ({
+                               ...curr, 
+                               city: val,
+                               location: `${val}, ${curr.country}` // Combine for backend
+                             }));
+                           }}
+                           placeholder={formData.country ? `Select City in ${formData.country}` : "Select Country First"}
+                        />
+                     </div>
+                  </div>
+                  
+                  <div className="space-y-3">
+                     <Label className="text-sm font-bold ml-1 text-slate-900">Work Mode</Label>
                         <Select value={formData.workMode} onValueChange={(val) => setFormData({...formData, workMode: val as any})}>
                           <SelectTrigger className="h-14 rounded-2xl bg-white border-slate-100 focus:ring-primary/20 transition-all font-medium text-lg px-6">
                             <SelectValue placeholder="Select mode" />
@@ -312,7 +338,6 @@ export default function UserPostJobPage() {
                           </SelectContent>
                         </Select>
                      </div>
-                  </div>
 
                   <div className="space-y-4">
                      <Label className="text-sm font-bold ml-1 text-slate-900 flex items-center gap-2">
