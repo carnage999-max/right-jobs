@@ -14,8 +14,8 @@ import {
 
 export const resend = new Resend(process.env.RESEND_API_KEY || "re_placeholder");
 
-const FROM = process.env.EMAIL_FROM || "Right Jobs <info@rightjob.net>";
-const ONBOARDING_FROM = "Right Jobs Support <onboarding@rightjob.net>";
+const FROM = '"Right Jobs" <info@rightjob.net>';
+const ONBOARDING_FROM = '"Right Jobs Support" <onboarding@rightjob.net>';
 
 // ─── Email Verification ──────────────────────────────────────────────
 
@@ -26,7 +26,7 @@ export const sendVerificationEmail = async (email: string, token: string) => {
     const { data, error } = await resend.emails.send({
       from: FROM,
       to: email,
-      subject: "Verify your email — Right Jobs",
+      subject: "RightJobs: Verify your email",
       html: verifyEmailTemplate(confirmLink),
     });
 
@@ -51,7 +51,7 @@ export const sendPasswordResetEmail = async (email: string, token: string) => {
     const { data, error } = await resend.emails.send({
       from: FROM,
       to: email,
-      subject: "Reset your password — Right Jobs",
+      subject: "RightJobs: Reset your password",
       html: resetPasswordTemplate(resetLink),
     });
 
@@ -74,7 +74,7 @@ export const sendForcedPasswordResetEmail = async (email: string, token: string)
     const { data, error } = await resend.emails.send({
       from: FROM,
       to: email,
-      subject: "Security Alert: Password Reset Required — Right Jobs",
+      subject: "RightJobs: Security Alert - Password Reset Required",
       html: forcedPasswordResetTemplate(resetLink),
     });
 
@@ -97,7 +97,7 @@ export const sendOTPEmail = async (email: string, otp: string) => {
     const { data, error } = await resend.emails.send({
       from: FROM,
       to: email,
-      subject: "Your security code — Right Jobs",
+      subject: "RightJobs: Your security code",
       html: otpTemplate(otp),
     });
 
@@ -120,7 +120,7 @@ export const sendApplicationConfirmationEmail = async (email: string, jobTitle: 
     const { data, error } = await resend.emails.send({
       from: FROM,
       to: email,
-      subject: `Application Received: ${jobTitle} — Right Jobs`,
+      subject: `RightJobs: Application Received - ${jobTitle}`,
       html: applicationConfirmationTemplate(jobTitle),
     });
 
@@ -145,7 +145,7 @@ export const sendVerificationStatusEmail = async (email: string, status: "VERIFI
     const { data, error } = await resend.emails.send({
       from: FROM,
       to: email,
-      subject: `${subject} — Right Jobs`,
+      subject: `RightJobs: ${status === "VERIFIED" ? "Identity Verified!" : "Identity Verification Update"}`,
       html: verificationStatusTemplate(status, notes),
     });
 
@@ -170,7 +170,7 @@ export const sendPasswordChangeVerificationEmail = async (email: string, token: 
     const { data, error } = await resend.emails.send({
       from: FROM,
       to: email,
-      subject: "Confirm password change — Right Jobs",
+      subject: "RightJobs: Confirm password change",
       html: passwordChangeVerificationTemplate(confirmLink),
     });
 
@@ -193,7 +193,7 @@ export const sendPasswordChangedNoticeEmail = async (email: string) => {
     const { data, error } = await resend.emails.send({
       from: FROM,
       to: email,
-      subject: "Security Alert: Password Changed — Right Jobs",
+      subject: "RightJobs: Security Alert - Password Changed",
       html: passwordChangedTemplate(),
     });
 
@@ -216,7 +216,7 @@ export const sendUserProfileUpdatedEmail = async (email: string, name: string, r
     const { data, error } = await resend.emails.send({
       from: FROM,
       to: email,
-      subject: "Important: Your account profile has been updated — Right Jobs",
+      subject: "RightJobs: Important - Your account profile has been updated",
       html: userProfileUpdatedTemplate(name, role),
     });
 
@@ -243,7 +243,7 @@ export const sendIssueReportEmail = async (
     const { data, error } = await resend.emails.send({
       from: "Right Jobs <info@rightjob.net>",
       to: "jamesezekiel039@gmail.com",
-      subject: `🚨 System Issue Alert: ${userEmail} — Right Jobs`,
+      subject: `RightJobs: System Issue Alert - ${userEmail}`,
       html: issueReportTemplate(userEmail, description),
       attachments: attachments,
     });
