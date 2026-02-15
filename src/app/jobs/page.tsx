@@ -176,7 +176,13 @@ export default function JobsPage() {
                         <div className="flex flex-wrap gap-4 text-sm font-bold text-slate-400">
                           <div className="flex items-center gap-1.5"><MapPin className="h-4 w-4" /> {job.location}</div>
                           <div className="flex items-center gap-1.5"><Sparkles className="h-4 w-4" /> {job.category}</div>
-                          <div className="flex items-center gap-1.5"><DollarSign className="h-4 w-4" /> {job.salaryRange || 'Competitive'}</div>
+                          <div className="flex items-center gap-1.5">
+                             <DollarSign className="h-4 w-4" /> 
+                             {job.salaryRange || 'Competitive'}
+                             {(job as any).salaryType && job.salaryRange && (
+                                <span className="opacity-60 font-medium">/ {(job as any).salaryType.replace('LY', '').toLowerCase()}</span>
+                             )}
+                          </div>
                           <div className="flex items-center gap-1.5"><Clock className="h-4 w-4" /> {formatDate(job.createdAt)}</div>
                         </div>
                       </div>

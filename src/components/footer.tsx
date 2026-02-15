@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
-import { Mail, MapPin, Facebook, Instagram } from "lucide-react";
+import { Mail, MapPin, Facebook, Instagram, Youtube } from "lucide-react";
 
 // Custom X (Twitter) Icon
 const XIcon = (props: React.SVGProps<SVGSVGElement>) => (
@@ -69,6 +69,12 @@ export function Footer() {
               </a>
               <a href="#" aria-label="Instagram" className="flex h-10 w-10 items-center justify-center rounded-full bg-white border shadow-sm transition-all hover:border-pink-600 hover:text-pink-600 active:scale-90">
                 <Instagram className="h-5 w-5" />
+              </a>
+              <a href="#" aria-label="YouTube" className="flex h-10 w-10 items-center justify-center rounded-full bg-white border shadow-sm transition-all hover:border-red-600 hover:text-red-600 active:scale-90">
+                <Youtube className="h-5 w-5" />
+              </a>
+              <a href="#" aria-label="Liberty Social" className="flex h-10 w-10 items-center justify-center rounded-full bg-white border shadow-sm transition-all hover:border-primary active:scale-90 overflow-hidden p-2">
+                <img src="/icon/liberty-social.png" alt="Liberty Social" className="h-full w-full object-contain" />
               </a>
             </div>
           </div>

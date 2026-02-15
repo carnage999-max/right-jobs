@@ -49,6 +49,7 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
               id: user.id,
               email: user.email,
               name: user.name,
+              image: user.avatarUrl,
               role: user.role,
               emailVerified: user.emailVerifiedAt ? true : false,
               sessionVersion: (user as any).sessionVersion,

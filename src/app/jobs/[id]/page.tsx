@@ -6,19 +6,23 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { 
+  Building2, 
   MapPin, 
   Briefcase, 
-  DollarSign, 
   Clock, 
   ArrowLeft, 
+  Sparkles, 
+  CheckCircle2, 
   Loader2,
-  CheckCircle2,
-  Lock,
-  MessageSquare,
+  DollarSign,
   FileText,
+  Calendar,
+  Share2,
   Bookmark,
-  Building2,
-  Sparkles
+  ChevronRight,
+  ShieldCheck,
+  Camera,
+  Lock
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -151,16 +155,37 @@ export default function JobDetailsPage({ params }: { params: Promise<{ id: strin
                     <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Category</p>
                     <div className="flex items-center gap-2 font-bold text-slate-900"><Sparkles className="h-4 w-4 text-primary" /> {job.category}</div>
                  </div>
-                 <div className="space-y-1">
-                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Salary Range</p>
-                    <div className="flex items-center gap-2 font-bold text-slate-900"><DollarSign className="h-4 w-4 text-primary" /> {job.salaryRange || 'Competitive'}</div>
-                 </div>
+                  <div className="space-y-1">
+                     <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Salary</p>
+                     <div className="flex items-center gap-2 font-bold text-slate-900">
+                        <DollarSign className="h-4 w-4 text-primary" /> 
+                        {job.salaryRange || 'Competitive'}
+                        {(job as any).salaryType && job.salaryRange && (
+                           <span className="text-slate-400 font-medium ml-1">/ {(job as any).salaryType.replace('LY', '').toLowerCase()}</span>
+                        )}
+                     </div>
+                  </div>
                  <div className="space-y-1">
                     <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Posted On</p>
                     <div className="flex items-center gap-2 font-bold text-slate-900"><Clock className="h-4 w-4 text-primary" /> {formatDate(job.createdAt)}</div>
                  </div>
               </div>
            </div>
+
+           {(job as any).officeImageUrl && (
+              <div className="relative group overflow-hidden rounded-[3rem] shadow-2xl border border-slate-100 mb-8">
+                 <img 
+                   src={(job as any).officeImageUrl} 
+                   alt="Workplace" 
+                   className="w-full h-auto max-h-[500px] object-cover transition-transform duration-700 group-hover:scale-105"
+                 />
+                 <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 via-transparent to-transparent pointer-events-none" />
+                 <div className="absolute bottom-6 left-8 flex items-center gap-3 bg-white/10 backdrop-blur-md px-6 py-3 rounded-2xl border border-white/20">
+                    <Camera className="h-5 w-5 text-white" />
+                    <span className="text-white font-black text-xs uppercase tracking-[0.2em]">Workplace Preview</span>
+                 </div>
+              </div>
+           )}
 
            <div className="space-y-8">
               <h3 className="text-2xl font-black tracking-tight flex items-center gap-3">

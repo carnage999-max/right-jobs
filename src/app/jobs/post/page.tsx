@@ -46,11 +46,17 @@ export default function UserPostJobPage() {
     type: "FULL_TIME",
     category: "Engineering",
     salaryRange: "",
+    salaryType: "YEARLY",
     description: "",
-    companyLogoUrl: ""
+    companyLogoUrl: "",
+    officeImageUrl: "",
+    phoneNumber: ""
   });
 
+  const [zipCode, setZipCode] = useState("");
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
+  const [isUploadingOffice, setIsUploadingOffice] = useState(false);
+  const [isZipping, setIsZipping] = useState(false);
 
   const handleNext = () => {
     // Basic validation
@@ -67,6 +73,25 @@ export default function UserPostJobPage() {
         return;
       }
       setStep("REVIEW");
+    }
+  };
+
+  const fetchLocationFromZip = async (zip: string) => {
+    if (zip.length === 5) {
+      setIsZipping(true);
+      try {
+        const resp = await fetch(`https://api.zippopotam.us/us/${zip}`);
+        if (resp.ok) {
+          const data = await resp.json();
+          const place = data.places[0];
+          setFormData(prev => ({ ...prev, location: `${place['place name']}, ${place['state abbreviation']}` }));
+          toast.success(`Location set to ${place['place name']}`);
+        }
+      } catch (e) {
+        console.error("Zip lookup failed");
+      } finally {
+        setIsZipping(false);
+      }
     }
   };
 
@@ -116,8 +141,12 @@ export default function UserPostJobPage() {
              Post a New <span className="text-primary italic">Opportunity</span>
            </h1>
            <p className="text-slate-500 text-lg font-medium max-w-xl mx-auto animate-in fade-in slide-in-from-bottom-6 duration-700 delay-200">
-             Find the perfect candidate from our curated community of top talent.
+             Discover curated roles from innovative companies around the world.
            </p>
+        </div>
+
+        <div className="hidden">
+           {/* Utility functions */}
         </div>
 
         {/* Stepper */}
@@ -254,32 +283,154 @@ export default function UserPostJobPage() {
 
                   <div className="grid gap-6 md:grid-cols-2">
                      <div className="space-y-3">
-                        <Label htmlFor="location" className="text-sm font-bold ml-1">Location</Label>
-                        <div className="relative">
-                           <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
-                           <Input 
-                             id="location" 
-                             placeholder="e.g. Remote or San Francisco" 
-                             className="h-14 rounded-2xl bg-white border-slate-100 focus:ring-primary/20 transition-all font-medium text-lg pl-12 pr-6"
-                             value={formData.location}
-                             onChange={(e) => setFormData({...formData, location: e.target.value})}
-                           />
-                        </div>
+                        <Label htmlFor="zip" className="text-sm font-bold ml-1 text-slate-900 flex items-center justify-between">
+                           ZIP Code
+                           {isZipping && <Loader2 className="h-3 w-3 animate-spin text-primary" />}
+                        </Label>
+                        <Input 
+                          id="zip" 
+                          placeholder="e.g. 90210" 
+                          maxLength={5}
+                          className="h-14 rounded-2xl bg-white border-slate-100 focus:ring-primary/20 transition-all font-medium text-lg px-6"
+                          value={zipCode}
+                          onChange={(e) => {
+                             const val = e.target.value.replace(/\D/g, '').slice(0, 5);
+                             setZipCode(val);
+                             if (val.length === 5) fetchLocationFromZip(val);
+                          }}
+                        />
                      </div>
                      <div className="space-y-3">
-                        <Label htmlFor="salary" className="text-sm font-bold ml-1">Salary Range (Optional)</Label>
-                        <div className="relative">
-                           <DollarSign className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
-                           <Input 
-                             id="salary" 
-                             placeholder="e.g. $140k - $180k" 
-                             className="h-14 rounded-2xl bg-white border-slate-100 focus:ring-primary/20 transition-all font-medium text-lg pl-12 pr-6"
-                             value={formData.salaryRange}
-                             onChange={(e) => setFormData({...formData, salaryRange: e.target.value})}
-                           />
-                        </div>
+                        <Label htmlFor="phone" className="text-sm font-bold ml-1 text-slate-900">Phone Number (Optional)</Label>
+                        <Input 
+                          id="phone" 
+                          placeholder="e.g. +1 (555) 000-0000" 
+                          className="h-14 rounded-2xl bg-white border-slate-100 focus:ring-primary/20 transition-all font-medium text-lg px-6"
+                          value={formData.phoneNumber}
+                          onChange={(e) => setFormData({...formData, phoneNumber: e.target.value})}
+                        />
                      </div>
                   </div>
+
+                  <div className="space-y-4">
+                     <Label className="text-sm font-bold ml-1 text-slate-900 flex items-center gap-2">
+                        Office/Building Photo <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest">(Optional)</span>
+                     </Label>
+                     <div className="flex items-center gap-6 p-6 rounded-[2rem] bg-slate-50 border-2 border-dashed border-slate-200 transition-all hover:bg-white hover:border-primary/30 group">
+                        <div className="relative h-20 w-32 shrink-0">
+                           <div className="h-full w-full rounded-2xl bg-white shadow-sm flex items-center justify-center overflow-hidden border border-slate-100">
+                              {formData.officeImageUrl ? (
+                                 <img src={formData.officeImageUrl} alt="Office" className="h-full w-full object-cover" />
+                              ) : (
+                                 <div className="h-full w-full bg-slate-100 flex items-center justify-center text-slate-300">
+                                    <Camera className="h-8 w-8" />
+                                 </div>
+                              )}
+                           </div>
+                           {isUploadingOffice && (
+                              <div className="absolute inset-0 bg-white/80 flex items-center justify-center rounded-2xl">
+                                 <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                              </div>
+                           )}
+                        </div>
+                        <div className="space-y-2">
+                           <div className="flex flex-wrap gap-2">
+                              <Button 
+                                 variant="outline" 
+                                 size="sm" 
+                                 className="rounded-xl font-bold text-xs h-9 bg-white"
+                                 onClick={() => document.getElementById('office-upload')?.click()}
+                                 disabled={isUploadingOffice}
+                                 type="button"
+                              >
+                                 <Camera className="h-3.5 w-3.5 mr-2" />
+                                 {formData.officeImageUrl ? "Change Photo" : "Upload Photo"}
+                              </Button>
+                              {formData.officeImageUrl && (
+                                 <Button 
+                                    variant="ghost" 
+                                    size="sm" 
+                                    className="rounded-xl font-bold text-xs h-9 text-red-500 hover:text-red-600 hover:bg-red-50"
+                                    onClick={() => setFormData({...formData, officeImageUrl: ""})}
+                                    type="button"
+                                 >
+                                    <X className="h-3.5 w-3.5 mr-2" />
+                                    Remove
+                                 </Button>
+                              )}
+                           </div>
+                           <p className="text-[10px] font-medium text-slate-400">Workspace photo, building, or team shot.</p>
+                        </div>
+                        <input 
+                           id="office-upload"
+                           type="file" 
+                           accept="image/*"
+                           className="hidden"
+                           onChange={async (e) => {
+                              const file = e.target.files?.[0];
+                              if (!file) return;
+                              setIsUploadingOffice(true);
+                              try {
+                                 const presignResp = await fetch("/api/upload/presign", {
+                                    method: "POST",
+                                    headers: { "Content-Type": "application/json" },
+                                    body: JSON.stringify({ filename: file.name, contentType: file.type, folder: "avatars" })
+                                 });
+                                 const { url, publicUrl } = await presignResp.json();
+                                 await fetch(url, { method: "PUT", body: file, headers: { "Content-Type": file.type } });
+                                 setFormData({...formData, officeImageUrl: publicUrl});
+                                 toast.success("Office photo uploaded!");
+                              } catch (e) {
+                                 toast.error("Failed to upload photo");
+                              } finally {
+                                 setIsUploadingOffice(false);
+                              }
+                           }}
+                        />
+                     </div>
+                  </div>
+
+                   <div className="grid gap-6 md:grid-cols-[1fr_1.5fr_1fr]">
+                      <div className="space-y-3">
+                         <Label className="text-sm font-bold ml-1">Salary Type</Label>
+                         <Select value={formData.salaryType} onValueChange={(val) => setFormData({...formData, salaryType: val as any})}>
+                           <SelectTrigger className="h-14 rounded-2xl bg-white border-slate-100 focus:ring-primary/20 transition-all font-medium text-lg px-6">
+                             <SelectValue placeholder="Period" />
+                           </SelectTrigger>
+                           <SelectContent className="rounded-2xl border-none shadow-2xl">
+                             <SelectItem value="HOURLY">Per Hour</SelectItem>
+                             <SelectItem value="MONTHLY">Monthly</SelectItem>
+                             <SelectItem value="YEARLY">Yearly</SelectItem>
+                           </SelectContent>
+                         </Select>
+                      </div>
+                      <div className="space-y-3">
+                         <Label htmlFor="salary" className="text-sm font-bold ml-1">Salary Amount / Range</Label>
+                         <div className="relative">
+                            <DollarSign className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
+                            <Input 
+                              id="salary" 
+                              placeholder={formData.salaryType === "HOURLY" ? "e.g. 45 - 65" : "e.g. 140k - 180k"} 
+                              className="h-14 rounded-2xl bg-white border-slate-100 focus:ring-primary/20 transition-all font-medium text-lg pl-12 pr-6"
+                              value={formData.salaryRange}
+                              onChange={(e) => setFormData({...formData, salaryRange: e.target.value})}
+                            />
+                         </div>
+                      </div>
+                      <div className="space-y-3">
+                         <Label htmlFor="location" className="text-sm font-bold ml-1">Location</Label>
+                         <div className="relative">
+                            <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
+                            <Input 
+                              id="location" 
+                              placeholder="e.g. Remote" 
+                              className="h-14 rounded-2xl bg-white border-slate-100 focus:ring-primary/20 transition-all font-medium text-lg pl-12 pr-6"
+                              value={formData.location}
+                              onChange={(e) => setFormData({...formData, location: e.target.value})}
+                            />
+                         </div>
+                      </div>
+                   </div>
 
                   <div className="grid gap-6 md:grid-cols-2">
                      <div className="space-y-3">
@@ -304,12 +455,25 @@ export default function UserPostJobPage() {
                             <SelectValue placeholder="Select category" />
                           </SelectTrigger>
                           <SelectContent className="rounded-2xl border-none shadow-2xl">
-                            <SelectItem value="Engineering">Engineering</SelectItem>
-                            <SelectItem value="Design">Design</SelectItem>
-                            <SelectItem value="Product">Product</SelectItem>
-                            <SelectItem value="Marketing">Marketing</SelectItem>
-                            <SelectItem value="Management">Management</SelectItem>
-                            <SelectItem value="Customer Support">Customer Support</SelectItem>
+                             <SelectItem value="Engineering">Engineering & Tech</SelectItem>
+                             <SelectItem value="Design">Design & Creative</SelectItem>
+                             <SelectItem value="Product">Product Management</SelectItem>
+                             <SelectItem value="Marketing">Marketing & Comms</SelectItem>
+                             <SelectItem value="Management">Business Management</SelectItem>
+                             <SelectItem value="Customer Support">Customer Support</SelectItem>
+                             <SelectItem value="Sales">Sales & Business Dev</SelectItem>
+                             <SelectItem value="Finance">Finance & Accounting</SelectItem>
+                             <SelectItem value="Human Resources">Human Resources</SelectItem>
+                             <SelectItem value="Operations">Operations</SelectItem>
+                             <SelectItem value="Legal">Legal & Compliance</SelectItem>
+                             <SelectItem value="Healthcare">Healthcare & Medical</SelectItem>
+                             <SelectItem value="Education">Education & Training</SelectItem>
+                             <SelectItem value="Hospitality">Hospitality & Tourism</SelectItem>
+                             <SelectItem value="Construction">Construction & Trades</SelectItem>
+                             <SelectItem value="Logistics">Logistics & Transport</SelectItem>
+                             <SelectItem value="Arts">Arts & Entertainment</SelectItem>
+                             <SelectItem value="Real Estate">Real Estate</SelectItem>
+                             <SelectItem value="Science">Data & Life Science</SelectItem>
                           </SelectContent>
                         </Select>
                      </div>
@@ -382,11 +546,29 @@ export default function UserPostJobPage() {
                         </Badge>
                      </div>
 
-                     <div className="relative flex flex-wrap gap-6 text-sm text-slate-400 font-bold uppercase tracking-widest">
+                      <div className="relative flex flex-wrap gap-6 text-sm text-slate-400 font-bold uppercase tracking-widest">
                         <div className="flex items-center gap-2 bg-white/5 py-2 px-4 rounded-xl"><MapPin className="h-4 w-4 text-white" /> {formData.location || "Location"}</div>
                         <div className="flex items-center gap-2 bg-white/5 py-2 px-4 rounded-xl"><LayoutGrid className="h-4 w-4 text-white" /> {formData.category}</div>
-                        <div className="flex items-center gap-2 bg-white/5 py-2 px-4 rounded-xl"><DollarSign className="h-4 w-4 text-white" /> {formData.salaryRange || "Not specified"}</div>
+                        <div className="flex items-center gap-2 bg-white/5 py-2 px-4 rounded-xl">
+                           <DollarSign className="h-4 w-4 text-white" /> 
+                           {formData.salaryRange || "Not specified"}
+                           {formData.salaryRange && ` / ${formData.salaryType.replace('LY', '').toLowerCase()}`}
+                        </div>
+                        {formData.phoneNumber && (
+                           <div className="flex items-center gap-2 bg-white/5 py-2 px-4 rounded-xl">
+                              <Building2 className="h-4 w-4 text-white" /> 
+                              {formData.phoneNumber}
+                           </div>
+                        )}
                      </div>
+
+                     {formData.officeImageUrl && (
+                        <div className="relative h-48 w-full rounded-[2rem] overflow-hidden border border-white/10 group/office">
+                           <img src={formData.officeImageUrl} alt="Office" className="h-full w-full object-cover transition-transform duration-500 group-hover/office:scale-110" />
+                           <div className="absolute inset-0 bg-gradient-to-t from-slate-950/60 to-transparent" />
+                           <div className="absolute bottom-4 left-6 text-white text-[10px] font-black uppercase tracking-[0.2em]">Office / Workspace</div>
+                        </div>
+                     )}
 
                      <div className="h-px bg-white/10" />
                      

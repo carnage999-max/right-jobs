@@ -35,6 +35,12 @@ enum ApplicationStatus {
   WITHDRAWN
 }
 
+enum SalaryType {
+  YEARLY
+  MONTHLY
+  HOURLY
+}
+
 model User {
   id              String    @id @default(uuid())
   email           String    @unique
@@ -112,6 +118,9 @@ model Job {
   category        String
   description     String        @db.Text
   salaryRange     String?
+  salaryType      SalaryType    @default(YEARLY)
+  phoneNumber     String?
+  officeImageUrl  String?
   isActive        Boolean       @default(true)
   createdById     String?
   createdBy       User?         @relation("JobCreator", fields: [createdById], references: [id])

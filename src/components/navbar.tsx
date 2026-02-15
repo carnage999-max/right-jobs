@@ -209,16 +209,8 @@ export function Navbar() {
 
       {/* Mobile Menu Backdrop */}
       {isMenuOpen && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950 px-4 pt-24 pb-12 animate-in slide-in-from-top-10 fade-in duration-300">
-          <div className="relative z-10 flex flex-col items-center gap-6 text-center">
-              <div className="mb-4 relative h-32 w-32 shrink-0">
-                  <Image 
-                    src="/right-jobs-logo-nobg.png" 
-                    alt="Logo" 
-                    fill
-                    className="object-contain"
-                  />
-              </div>
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950 px-4 pt-32 pb-12 animate-in slide-in-from-top-10 fade-in duration-300">
+          <div className="relative z-10 flex flex-col items-center gap-10 text-center">
             <div className="flex flex-col gap-4">
               {dynamicRoutes.map((route, i) => (
                 <div

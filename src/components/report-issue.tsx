@@ -93,10 +93,10 @@ export function ReportIssue() {
     }}>
       <DialogTrigger asChild>
         <button 
-          className="fixed bottom-6 right-6 z-[100] group flex items-center gap-2 px-4 py-3 bg-slate-900 text-white rounded-full shadow-2xl transition-all hover:scale-105 active:scale-95 hover:bg-slate-800"
+          className="fixed bottom-6 right-6 z-[100] group flex items-center gap-2 px-4 py-3 bg-slate-900 text-white rounded-full shadow-2xl transition-all hover:scale-105 active:scale-95 hover:bg-slate-800 border border-white/10"
         >
-           <MessageSquareWarning className="h-5 w-5 text-primary animate-pulse" />
-           <span className="max-w-0 overflow-hidden whitespace-nowrap font-bold text-sm tracking-tight transition-all group-hover:max-w-xs group-hover:ml-1">
+           <MessageSquareWarning className="h-5 w-5 text-white animate-pulse" />
+           <span className="max-w-0 overflow-hidden whitespace-nowrap font-bold text-sm tracking-tight transition-all group-hover:max-w-xs group-hover:ml-1 text-white">
               Report Issue
            </span>
         </button>
