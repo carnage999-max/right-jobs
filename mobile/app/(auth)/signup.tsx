@@ -1,2 +1,2 @@
-import { SignUpScreen } from '../../src/screens/auth/SignUpScreen';
-export default SignUpScreen;
+import { LoginScreen } from '../../src/screens/auth/LoginScreen';
+export default LoginScreen;

@@ -10,6 +10,9 @@ import { AuthProvider } from '../src/context/AuthContext';
 import { useColorScheme } from '@/components/useColorScheme';
 import 'react-native-reanimated';
 
+import { AnimatedSplashScreen } from '../src/components/AnimatedSplashScreen';
+import { useState } from 'react';
+
 // Create a client
 const queryClient = new QueryClient();
 
@@ -27,6 +30,9 @@ export const unstable_settings = {
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
+  const [appReady, setAppReady] = useState(false);
+  const [animationFinished, setAnimationFinished] = useState(false);
+
   const [loaded, error] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
     ...FontAwesome.font,
@@ -39,7 +45,9 @@ export default function RootLayout() {
 
   useEffect(() => {
     if (loaded) {
+      // Hide native splash, custom one will be visible
       SplashScreen.hideAsync();
+      setAppReady(true);
     }
   }, [loaded]);
 
@@ -47,7 +55,14 @@ export default function RootLayout() {
     return null;
   }
 
-  return <RootLayoutNav />;
+  return (
+    <>
+      <RootLayoutNav />
+      {!animationFinished && (
+        <AnimatedSplashScreen onAnimationFinish={() => setAnimationFinished(true)} />
+      )}
+    </>
+  );
 }
 
 import { useAuth } from '../src/context/AuthContext';

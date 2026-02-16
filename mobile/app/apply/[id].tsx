@@ -8,6 +8,8 @@ import { Button } from '../../src/components/ui/Button';
 import { useToast } from '../../src/hooks/useToast';
 import { FileText, Send, ChevronLeft } from 'lucide-react-native';
 
+import { tw } from '../../src/lib/tailwind';
+
 export default function ApplyScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
@@ -46,34 +48,34 @@ export default function ApplyScreen() {
   return (
     <KeyboardAvoidingView 
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      className="flex-1 bg-white"
+      style={tw`flex-1 bg-white`}
     >
-      <ScrollView className="flex-1 px-6 pt-16">
-        <View className="flex-row items-center mb-8">
+      <ScrollView contentContainerStyle={tw`flex-grow px-6 pt-16`}>
+        <View style={tw`flex-row items-center mb-8`}>
           <Button 
             title=""
             variant="ghost" 
             onPress={() => router.back()} 
-            className="p-0 mr-4"
+            style={tw`p-0 mr-4`}
             icon={<ChevronLeft size={24} color="#1F2937" />}
           />
-          <Text className="text-2xl font-bold text-gray-900">Apply for Position</Text>
+          <Text style={tw`text-2xl font-bold text-gray-900`}>Apply for Position</Text>
         </View>
 
         {job && (
-          <View className="bg-primary/5 p-6 rounded-3xl mb-8">
-            <Text className="text-gray-400 font-bold text-[10px] uppercase tracking-widest mb-1">Applying to</Text>
-            <Text className="text-xl font-bold text-gray-900">{job.title}</Text>
-            <Text className="text-primary font-semibold">{job.company}</Text>
+          <View style={tw`bg-primary/5 p-6 rounded-3xl mb-8`}>
+            <Text style={tw`text-gray-400 font-bold text-[10px] uppercase tracking-widest mb-1`}>Applying to</Text>
+            <Text style={tw`text-xl font-bold text-gray-900`}>{job.title}</Text>
+            <Text style={tw`text-primary font-semibold`}>{job.company}</Text>
           </View>
         )}
 
-        <View className="mb-6">
-          <View className="flex-row items-center mb-4">
-            <FileText size={20} color="#014D9F" className="mr-2" />
-            <Text className="text-lg font-bold text-gray-900">Cover Letter (Optional)</Text>
+        <View style={tw`mb-6`}>
+          <View style={tw`flex-row items-center mb-4`}>
+            <FileText size={20} color="#014D9F" style={tw`mr-2`} />
+            <Text style={tw`text-lg font-bold text-gray-900`}>Cover Letter (Optional)</Text>
           </View>
-          <Text className="text-gray-500 text-sm mb-4">
+          <Text style={tw`text-gray-500 text-sm mb-4`}>
             Briefly explain why you're a good fit for this role. Max 500 characters.
           </Text>
           <Input
@@ -82,14 +84,14 @@ export default function ApplyScreen() {
             onChangeText={setCoverLetter}
             multiline
             numberOfLines={8}
-            className="h-48 textAlignVertical-top"
+            inputStyle={tw`h-48 text-align-vertical-top`}
             maxLength={500}
           />
         </View>
 
-        <View className="bg-gray-50 p-4 rounded-2xl mb-10">
-          <Text className="text-[10px] text-gray-400 font-bold uppercase tracking-tighter mb-2">Note</Text>
-          <Text className="text-gray-500 text-xs leading-5">
+        <View style={tw`bg-gray-50 p-4 rounded-2xl mb-10`}>
+          <Text style={tw`text-[10px] text-gray-400 font-bold uppercase tracking-tighter mb-2`}>Note</Text>
+          <Text style={tw`text-gray-500 text-xs leading-5`}>
             By applying, your profile details (Skills, Experience, Resume) will be shared with the employer as per our privacy policy.
           </Text>
         </View>
@@ -100,7 +102,7 @@ export default function ApplyScreen() {
           loading={applyMutation.isPending}
           icon={<Send size={20} color="#FFF" />}
           size="lg"
-          className="mb-20"
+          style={tw`mb-20`}
         />
       </ScrollView>
     </KeyboardAvoidingView>

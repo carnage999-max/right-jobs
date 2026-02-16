@@ -1,11 +1,6 @@
 import React from 'react';
 import { TouchableOpacity, Text, ActivityIndicator, View } from 'react-native';
-import { clsx, type ClassValue } from 'clsx';
-import { twMerge } from 'tailwind-merge';
-
-function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
-}
+import { tw } from '../../lib/tailwind';
 
 interface ButtonProps {
   onPress: () => void;
@@ -14,8 +9,8 @@ interface ButtonProps {
   size?: 'sm' | 'md' | 'lg';
   loading?: boolean;
   disabled?: boolean;
-  className?: string;
-  textClassName?: string;
+  style?: any;
+  textStyle?: any;
   icon?: React.ReactNode;
 }
 
@@ -26,8 +21,8 @@ export const Button: React.FC<ButtonProps> = ({
   size = 'md',
   loading = false,
   disabled = false,
-  className,
-  textClassName,
+  style,
+  textStyle,
   icon,
 }) => {
   const variants = {
@@ -63,20 +58,20 @@ export const Button: React.FC<ButtonProps> = ({
       onPress={onPress}
       disabled={disabled || loading}
       activeOpacity={0.7}
-      className={cn(
-        'flex-row items-center justify-center',
-        variants[variant],
-        sizes[size],
-        (disabled || loading) && 'opacity-50',
-        className
-      )}
+      style={[
+        tw`flex-row items-center justify-center ${variants[variant]} ${sizes[size]} ${disabled || loading ? 'opacity-50' : ''}`,
+        style
+      ]}
     >
       {loading ? (
         <ActivityIndicator color={variant === 'outline' || variant === 'ghost' ? '#000' : '#fff'} />
       ) : (
-        <View className="flex-row items-center">
-          {icon && <View className="mr-2">{icon}</View>}
-          <Text className={cn(textColors[variant], textSizes[size], textClassName)}>
+        <View style={tw`flex-row items-center`}>
+          {icon && <View style={tw`mr-2`}>{icon}</View>}
+          <Text style={[
+            tw`${textColors[variant]} ${textSizes[size]}`,
+            textStyle
+          ]}>
             {title}
           </Text>
         </View>

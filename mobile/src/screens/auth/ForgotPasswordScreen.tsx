@@ -6,7 +6,13 @@ import { useToast } from '../../hooks/useToast';
 import { apiClient } from '../../services/api/client';
 import { KeyRound } from 'lucide-react-native';
 
-export const ForgotPasswordScreen = ({ navigation }: any) => {
+import { tw } from '../../lib/tailwind';
+
+import { useRouter } from 'expo-router';
+
+// @ts-ignore
+export const ForgotPasswordScreen = (): any => {
+  const router = useRouter();
   const { showSuccess, showError } = useToast();
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
@@ -17,11 +23,10 @@ export const ForgotPasswordScreen = ({ navigation }: any) => {
     try {
       await apiClient.post('/auth/forgot-password', { email });
       showSuccess('Email Sent', 'If an account exists, you will receive reset instructions.');
-      navigation.navigate('Login');
+      router.push('/(auth)/login' as any);
     } catch (error: any) {
-      // Per instructions: "do not reveal whether an email exists"
       showSuccess('Success', 'Check your email for reset instructions.');
-      navigation.navigate('Login');
+      router.push('/(auth)/login' as any);
     } finally {
       setLoading(false);
     }
@@ -30,15 +35,15 @@ export const ForgotPasswordScreen = ({ navigation }: any) => {
   return (
     <KeyboardAvoidingView 
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      className="flex-1 bg-background-light"
+      style={tw`flex-1 bg-white`}
     >
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }} className="px-6 py-12 items-center">
-        <View className="bg-warning/10 p-6 rounded-full mb-8">
-          <KeyRound size={48} color="#F59E0B" />
+      <ScrollView contentContainerStyle={tw`flex-grow px-6 py-12 items-center`}>
+        <View style={tw`bg-primary/5 p-6 rounded-full mb-8`}>
+          <KeyRound size={48} color="#014D9F" />
         </View>
 
-        <Text className="text-3xl font-bold text-gray-900 mb-2 text-center">Forgot Password?</Text>
-        <Text className="text-gray-500 text-center mb-10">
+        <Text style={tw`text-3xl font-black text-gray-900 mb-2 text-center`}>Forgot Password?</Text>
+        <Text style={tw`text-gray-500 font-medium text-center mb-10`}>
           Enter your email address and we'll send you instructions to reset your password.
         </Text>
 
@@ -55,12 +60,12 @@ export const ForgotPasswordScreen = ({ navigation }: any) => {
           title="Send Instructions"
           onPress={onSubmit}
           loading={loading}
-          className="w-full mb-6"
+          style={tw`w-full mb-6 shadow-lg shadow-primary/20 h-14`}
         />
 
         <Button
           title="Back to Login"
-          onPress={() => navigation.navigate('Login')}
+          onPress={() => router.push('/(auth)/login' as any)}
           variant="ghost"
         />
       </ScrollView>
