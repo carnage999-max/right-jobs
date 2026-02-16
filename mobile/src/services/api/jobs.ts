@@ -12,7 +12,7 @@ export interface Job {
 }
 
 export const jobsService = {
-  getJobs: async (params?: { search?: string; location?: string; page?: number }) => {
+  getJobs: async (params?: { search?: string; location?: string; category?: string; page?: number }) => {
     const response = await apiClient.get<Job[]>('/jobs', { params });
     return response.data;
   },

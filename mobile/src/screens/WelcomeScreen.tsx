@@ -1,8 +1,8 @@
 import React from 'react';
-import { View, Text, Image, TouchableOpacity, SafeAreaView, Dimensions } from 'react-native';
+import { View, Text, TouchableOpacity, SafeAreaView, Dimensions, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Button } from '../components/ui/Button';
-import { ChevronRight, Globe, Lock, Rocket } from 'lucide-react-native';
+import { ArrowRight, Globe, ShieldCheck, Zap, Briefcase } from 'lucide-react-native';
 import { tw } from '../lib/tailwind';
 
 const { width } = Dimensions.get('window');
@@ -12,74 +12,77 @@ export const WelcomeScreen = () => {
 
   return (
     <SafeAreaView style={tw`flex-1 bg-white`}>
-      <View style={tw`flex-1 px-8 justify-between py-10`}>
-        {/* Decorative Background Element */}
-        <View style={[tw`absolute top-0 right-0 w-64 h-64 rounded-full bg-primary`, { opacity: 0.03, transform: [{ translateX: 100 }, { translateY: -100 }] }]} />
+      <ScrollView contentContainerStyle={tw`flex-grow`}>
+        {/* Decorative Background Elements */}
+        <View style={[tw`absolute top--20 right--20 w-80 h-80 rounded-full bg-[#014D9F]`, { opacity: 0.1, filter: 'blur(80px)' } as any]} />
+        <View style={[tw`absolute top-1/2 left--20 w-64 h-64 rounded-full bg-orange-200`, { opacity: 0.1, filter: 'blur(80px)' } as any]} />
         
-        <View style={tw`items-center mt-12`}>
-          <Image 
-            source={require('../../assets/images/logo-nobg.png')} 
-            style={tw`w-48 h-24 mb-10`}
-            resizeMode="contain"
-          />
-          
-          <View style={tw`w-full space-y-8 mb-10`}>
-             <View style={tw`flex-row items-center gap-x-4 mb-6`}>
-                <View style={tw`w-12 h-12 rounded-2xl bg-primary/10 items-center justify-center`}>
-                    <Globe size={24} color="#014D9F" />
-                </View>
-                <View style={tw`flex-1`}>
-                   <Text style={tw`text-lg font-bold text-gray-900`}>Global Opportunities</Text>
-                   <Text style={tw`text-gray-500`}>Access elite jobs from top companies worldwide.</Text>
-                </View>
-             </View>
+        <View style={tw`flex-1 px-6 justify-between py-10`}>
+          <View style={tw`items-center mt-6`}>
+            {/* Logo Section */}
+            <View style={tw`flex-row items-center gap-2 mb-12`}>
+              <View style={tw`h-8 w-8 flex items-center justify-center rounded-lg bg-[#014D9F] shadow-lg shadow-[#014D9F40]`}>
+                <Briefcase size={16} color="#FFF" />
+              </View>
+              <Text style={tw`text-lg font-bold tracking-tighter text-slate-900 uppercase`}>RIGHT JOBS</Text>
+            </View>
 
-             <View style={tw`flex-row items-center gap-x-4 mb-6`}>
-                <View style={tw`w-12 h-12 rounded-2xl bg-secondary/10 items-center justify-center`}>
-                    <Lock size={24} color="#EA5D1A" />
-                </View>
-                <View style={tw`flex-1`}>
-                   <Text style={tw`text-lg font-bold text-gray-900`}>Verified Profiles</Text>
-                   <Text style={tw`text-gray-500`}>Direct access to decision makers with ID verification.</Text>
-                </View>
-             </View>
-
-             <View style={tw`flex-row items-center gap-x-4`}>
-                <View style={tw`w-12 h-12 rounded-2xl bg-primary/10 items-center justify-center`}>
-                    <Rocket size={24} color="#014D9F" />
-                </View>
-                <View style={tw`flex-1`}>
-                   <Text style={tw`text-lg font-bold text-gray-900`}>Fast Application</Text>
-                   <Text style={tw`text-gray-500`}>Apply with a single tap using your smart profile.</Text>
-                </View>
-             </View>
+            {/* Hero Text */}
+            <View style={tw`items-center mb-10`}>
+              <Text style={tw`text-5xl font-black text-slate-900 text-center leading-[1.1] tracking-tighter`}>
+                The <Text style={tw`text-[#014D9F] italic`}>Right</Text> Job, {'\n'}Right Now.
+              </Text>
+              <Text style={tw`mt-6 text-lg text-slate-600 font-medium text-center px-4`}>
+                Trust-first hiring for verified talent and serious employers.
+              </Text>
+            </View>
+            
+            {/* Feature Cards / List */}
+            <View style={tw`w-full space-y-6 mb-10`}>
+               {[
+                 { icon: Globe, label: 'Global Opportunities', color: '#014D9F', desc: 'Access elite jobs from top companies worldwide.' },
+                 { icon: ShieldCheck, label: 'Security You Can Trust', color: '#10B981', desc: 'Mandatory ID verification for all employers.' },
+                 { icon: Zap, label: 'Fast Application', color: '#EA5D1A', desc: 'Apply with a single tap using your smart profile.' }
+               ].map((feature, idx) => (
+                 <View key={idx} style={tw`flex-row items-start gap-x-4 mb-6`}>
+                    <View style={[tw`w-12 h-12 rounded-2xl items-center justify-center shadow-sm`, { backgroundColor: feature.color + '15' }]}>
+                        <feature.icon size={22} color={feature.color} />
+                    </View>
+                    <View style={tw`flex-1 pt-1`}>
+                       <Text style={tw`text-base font-bold text-slate-900`}>{feature.label}</Text>
+                       <Text style={tw`text-slate-500 text-sm mt-0.5 leading-5`}>{feature.desc}</Text>
+                    </View>
+                 </View>
+               ))}
+            </View>
           </View>
 
-          <Text style={tw`text-3xl font-black text-gray-900 text-center leading-tight mb-2`}>
-            Find Your <Text style={tw`text-primary`}>Right</Text> Job.
-          </Text>
-          <Text style={tw`text-gray-400 text-center font-medium px-4`}>
-            The most secure and transparent platform for elite hiring.
-          </Text>
+          <View style={tw`w-full gap-y-4`}>
+            <Button 
+              title="Browse Elite Jobs" 
+              onPress={() => router.push('/(auth)/signup' as any)}
+              style={tw`rounded-2xl h-16 bg-[#014D9F] shadow-xl shadow-[#014D9F40]`}
+              textStyle={tw`text-xl font-bold text-white`}
+              icon={<ArrowRight size={22} color="#FFF" />}
+            />
+            
+            <TouchableOpacity 
+              onPress={() => router.push('/(auth)/login' as any)}
+              style={tw`py-4 items-center`}
+            >
+              <Text style={tw`text-slate-500 text-base font-medium`}>
+                Already a member? <Text style={tw`text-[#014D9F] font-black`}>Sign In</Text>
+              </Text>
+            </TouchableOpacity>
+            
+            <View style={tw`items-center`}>
+              <View style={tw`bg-slate-100 px-3 py-1 rounded-full`}>
+                <Text style={tw`text-[10px] text-slate-400 font-bold uppercase tracking-widest`}>Authorized Access Only</Text>
+              </View>
+            </View>
+          </View>
         </View>
-
-        <View style={tw`w-full gap-y-4 mb-6`}>
-          <Button 
-            title="Get Started Now" 
-            onPress={() => router.push('/(auth)/signup' as any)}
-            style={tw`rounded-2xl h-16 shadow-lg shadow-primary/20`}
-            icon={<ChevronRight size={20} color="#FFF" />}
-          />
-          <TouchableOpacity 
-            onPress={() => router.push('/(auth)/login' as any)}
-            style={tw`py-4 items-center`}
-          >
-            <Text style={tw`text-gray-600 text-base font-medium`}>
-              Already a member? <Text style={tw`text-primary font-black`}>Log In</Text>
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 };

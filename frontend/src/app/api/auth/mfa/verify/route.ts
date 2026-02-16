@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { getAuthSession } from "@/lib/auth-mobile";
 import prisma from "@/lib/prisma";
 import { z } from "zod";
+import { headers } from "next/headers";
 
 const verifyMfaSchema = z.object({
   otp: z.string().length(6),
@@ -9,9 +10,9 @@ const verifyMfaSchema = z.object({
 
 export async function POST(req: Request) {
   try {
-    const session = await auth();
+    const session = await getAuthSession();
     
-    if (!session || session.user.role !== "ADMIN") {
+    if (!session || session.user.role.toUpperCase() !== "ADMIN") {
       return NextResponse.json({ ok: false, message: "Unauthorized" }, { status: 401 });
     }
 
@@ -42,6 +43,20 @@ export async function POST(req: Request) {
     await prisma.adminOtp.delete({
       where: { email: session.user.email! }
     });
+
+    const authHeader = (await headers()).get("authorization");
+    const isMobile = authHeader?.startsWith("Bearer ");
+
+    if (isMobile) {
+      const newToken = Buffer.from(JSON.stringify({ 
+        id: session.user.id, 
+        email: session.user.email, 
+        role: session.user.role,
+        mfaComplete: true,
+        exp: Date.now() + 30 * 24 * 60 * 60 * 1000 
+      })).toString('base64');
+      return NextResponse.json({ ok: true, message: "MFA Verified", token: newToken });
+    }
 
     return NextResponse.json({ ok: true, message: "MFA Verified" });
   } catch (error) {

@@ -6,6 +6,7 @@ import { adminService } from '../../src/services/api/admin';
 import { QUERY_KEYS } from '../../src/constants/queryKeys';
 import { Input } from '../../src/components/ui/Input';
 import { useToast } from '../../src/hooks/useToast';
+import tw from 'twrnc';
 
 export default function AdminUsersScreen() {
   const [search, setSearch] = useState('');
@@ -44,43 +45,43 @@ export default function AdminUsersScreen() {
   };
 
   const renderUser = ({ item }: any) => (
-    <View className="bg-white p-5 rounded-[32px] mb-4 shadow-sm border border-gray-100">
-      <View className="flex-row items-center mb-4">
-        <View className="bg-primary/10 w-12 h-12 rounded-2xl items-center justify-center mr-4">
+    <View style={tw`bg-white p-5 rounded-[32px] mb-4 shadow-sm border border-gray-100`}>
+      <View style={tw`flex-row items-center mb-4`}>
+        <View style={tw`bg-[#014D9F10] w-12 h-12 rounded-2xl items-center justify-center mr-4`}>
           <Users size={24} color="#014D9F" />
         </View>
-        <View className="flex-1">
-          <Text className="text-gray-900 font-bold text-base">{item.name || 'Anonymous'}</Text>
-          <Text className="text-gray-400 text-xs font-medium">{item.email}</Text>
+        <View style={tw`flex-1`}>
+          <Text style={tw`text-gray-900 font-bold text-base`}>{item.name || 'Anonymous'}</Text>
+          <Text style={tw`text-gray-400 text-xs font-medium`}>{item.email}</Text>
         </View>
-        <View className={`px-2.5 py-1 rounded-lg ${item.role === 'ADMIN' ? 'bg-primary/10' : 'bg-gray-100'}`}>
-          <Text className={`text-[9px] font-black uppercase tracking-widest ${item.role === 'ADMIN' ? 'text-primary' : 'text-gray-600'}`}>
+        <View style={tw`px-2.5 py-1 rounded-lg ${item.role === 'ADMIN' ? 'bg-[#014D9F10]' : 'bg-gray-100'}`}>
+          <Text style={tw`text-[9px] font-black uppercase tracking-widest ${item.role === 'ADMIN' ? 'text-[#014D9F]' : 'text-gray-600'}`}>
             {item.role}
           </Text>
         </View>
       </View>
 
-      <View className="flex-row gap-x-3">
+      <View style={tw`flex-row gap-x-3`}>
         <TouchableOpacity 
-          className={`flex-1 flex-row items-center justify-center py-2.5 rounded-xl border ${item.isBanned ? 'bg-error/10 border-error' : 'bg-transparent border-gray-100'}`}
+          style={tw`flex-1 flex-row items-center justify-center py-2.5 rounded-xl border ${item.isBanned ? 'bg-red-50 border-red-500' : 'bg-transparent border-gray-100'}`}
           onPress={() => confirmAction(item.id, item.isBanned ? 'unban' : 'ban', item.name || item.email)}
         >
-          <Ban size={14} color={item.isBanned ? '#EF4444' : '#64748B'} className="mr-2" />
-          <Text className={`text-[11px] font-bold ${item.isBanned ? 'text-error' : 'text-gray-500'}`}>
+          <Ban size={14} color={item.isBanned ? '#EF4444' : '#64748B'} style={tw`mr-2`} />
+          <Text style={tw`text-[11px] font-bold ${item.isBanned ? 'text-red-500' : 'text-gray-500'}`}>
             {item.isBanned ? 'Unban' : 'Ban'}
           </Text>
         </TouchableOpacity>
 
         <TouchableOpacity 
-          className="flex-1 flex-row items-center justify-center py-2.5 rounded-xl border border-gray-100"
+          style={tw`flex-1 flex-row items-center justify-center py-2.5 rounded-xl border border-gray-100`}
           onPress={() => confirmAction(item.id, 'suspend', item.name || item.email)}
         >
-          <Clock size={14} color="#64748B" className="mr-2" />
-          <Text className="text-[11px] font-bold text-gray-500">Suspend</Text>
+          <Clock size={14} color="#64748B" style={tw`mr-2`} />
+          <Text style={tw`text-[11px] font-bold text-gray-500`}>Suspend</Text>
         </TouchableOpacity>
 
         <TouchableOpacity 
-          className="flex-row items-center justify-center w-12 h-10 rounded-xl bg-error/5 border border-error/10"
+          style={tw`flex-row items-center justify-center w-12 h-10 rounded-xl bg-red-50 border border-red-100`}
           onPress={() => confirmAction(item.id, 'delete', item.name || item.email)}
         >
           <Trash2 size={16} color="#EF4444" />
@@ -90,24 +91,24 @@ export default function AdminUsersScreen() {
   );
 
   return (
-    <View className="flex-1 bg-background-light px-6 pt-16">
-      <View className="flex-row items-center mb-6">
-        <View className="bg-primary/10 p-3 rounded-2xl mr-4">
+    <View style={tw`flex-1 bg-gray-50 px-6 pt-16`}>
+      <View style={tw`flex-row items-center mb-6`}>
+        <View style={tw`bg-[#014D9F10] p-3 rounded-2xl mr-4`}>
           <Users size={28} color="#014D9F" />
         </View>
-        <Text className="text-2xl font-bold text-gray-900">User Management</Text>
+        <Text style={tw`text-2xl font-bold text-gray-900`}>User Management</Text>
       </View>
 
       <Input
         placeholder="Search users..."
         value={search}
         onChangeText={setSearch}
-        containerClassName="mb-6"
+        containerStyle={tw`mb-6`}
         icon={<Search size={20} color="#94A3B8" />}
       />
 
       {isLoading ? (
-        <ActivityIndicator size="large" color="#014D9F" className="mt-20" />
+        <ActivityIndicator size="large" color="#014D9F" style={tw`mt-20`} />
       ) : (
         <FlatList
           data={data?.data || []}
@@ -115,7 +116,7 @@ export default function AdminUsersScreen() {
           keyExtractor={(item) => item.id}
           contentContainerStyle={{ paddingBottom: 150 }}
           ListEmptyComponent={
-            <Text className="text-gray-400 text-center py-10">No users found</Text>
+            <Text style={tw`text-gray-400 text-center py-10`}>No users found</Text>
           }
         />
       )}

@@ -3,6 +3,8 @@ import { z } from "zod";
 import bcrypt from "bcryptjs";
 import prisma from "@/lib/prisma";
 import { rateLimit } from "@/lib/rate-limit";
+import { generateAdminOtp } from "@/lib/tokens";
+import { sendOTPEmail } from "@/lib/mail";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -51,7 +53,24 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: false, message: "Invalid email or password" }, { status: 401 });
     }
 
-    const token = Buffer.from(JSON.stringify({ id: user.id, email: user.email, exp: Date.now() + 30 * 24 * 60 * 60 * 1000 })).toString('base64');
+    const token = Buffer.from(JSON.stringify({ 
+      id: user.id, 
+      email: user.email, 
+      role: user.role, 
+      exp: Date.now() + 30 * 24 * 60 * 60 * 1000 
+    })).toString('base64');
+
+    // If Admin, trigger MFA code proactively
+    if (user.role.toUpperCase() === "ADMIN") {
+      try {
+        const { otp } = await generateAdminOtp(user.email);
+        await sendOTPEmail(user.email, otp);
+        console.log("[API/AUTH/LOGIN] MFA OTP sent to admin:", user.email);
+      } catch (otpError) {
+        console.error("[API/AUTH/LOGIN] Failed to send MFA OTP:", otpError);
+        // We continue anyway, the user can use 'Resend' on mobile
+      }
+    }
 
     console.log("[API/AUTH/LOGIN] Login successful for:", email);
     return NextResponse.json({

@@ -71,13 +71,6 @@ export default function AdminTabLayout() {
         }}
       />
       <Tabs.Screen
-        name="reviews"
-        options={{
-          title: 'Reviews',
-          tabBarIcon: ({ color }) => <TabBarIcon Icon={MessageSquare} color={color} />,
-        }}
-      />
-      <Tabs.Screen
         name="payments"
         options={{
           title: 'Pay',
@@ -85,17 +78,21 @@ export default function AdminTabLayout() {
         }}
       />
       <Tabs.Screen
+        name="reviews"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
         name="notifications"
         options={{
-          title: 'Broadcast',
-          tabBarIcon: ({ color }) => <TabBarIcon Icon={Bell} color={color} />,
+          href: null,
         }}
       />
       <Tabs.Screen
         name="audit"
         options={{
-          title: 'Audit',
-          tabBarIcon: ({ color }) => <TabBarIcon Icon={History} color={color} />,
+          href: null,
         }}
       />
     </Tabs>

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { getAuthSession } from "@/lib/auth-mobile";
 import { generateAdminOtp } from "@/lib/tokens";
 import { sendOTPEmail } from "@/lib/mail";
 import { rateLimit } from "@/lib/rate-limit";
@@ -10,9 +10,9 @@ export async function POST(req: Request) {
     if (!success) {
       return NextResponse.json({ ok: false, message: "Too many attempts. Please wait." }, { status: 429 });
     }
-    const session = await auth();
+    const session = await getAuthSession();
     
-    if (!session || session.user.role !== "ADMIN") {
+    if (!session || session.user.role.toUpperCase() !== "ADMIN") {
       return NextResponse.json({ ok: false, message: "Unauthorized" }, { status: 401 });
     }
 

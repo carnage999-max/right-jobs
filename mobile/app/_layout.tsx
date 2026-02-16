@@ -93,21 +93,25 @@ function AuthGate() {
 
     const inAuthGroup = segments[0] === '(auth)';
     const inAdminGroup = segments[0] === '(admin)';
-    const isAdmin = user?.role === 'admin' || user?.role === 'ADMIN';
+    const inTabsGroup = segments[0] === '(tabs)';
+    
+    const isAdmin = user?.role?.toUpperCase() === 'ADMIN';
 
     if (!user && !inAuthGroup) {
       // Redirect to welcome if not logged in and not already in auth group
       router.replace('/(auth)/welcome');
-    } else if (user && inAuthGroup) {
-      // If logged in and in auth group, check for MFA
-      if (isAdmin && !user.mfaComplete) {
-        router.replace('/(auth)/mfa');
-      } else {
+    } else if (user) {
+      if (isAdmin) {
+        if (!user.mfaComplete) {
+          if (segments[1] !== 'mfa') router.replace('/(auth)/mfa');
+        } else if (!inAdminGroup) {
+          // If admin, MFA complete, but not in admin group, redirect to dashboard
+          router.replace('/(admin)/dashboard');
+        }
+      } else if (inAuthGroup || inAdminGroup) {
+        // Regular user in auth or admin group, redirect to user tabs
         router.replace('/(tabs)');
       }
-    } else if (user && isAdmin && !user.mfaComplete && !inAuthGroup && ((segments as string[])[1] !== 'mfa')) {
-      // If admin but MFA not complete and not on MFA screen
-      router.replace('/(auth)/mfa');
     }
   }, [user, isLoading, segments]);
 
