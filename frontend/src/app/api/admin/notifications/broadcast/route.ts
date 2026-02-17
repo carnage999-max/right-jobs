@@ -37,28 +37,34 @@ export async function POST(req: Request) {
     }
 
     const emails = targetUsers.map(u => u.email);
+    const FROM_EMAIL = '"Right Jobs" <info@rightjob.net>';
 
     if (emails.length > 0) {
-      // resend.emails.send supports up to 50 recipients in 'to' as an array for simple plans, 
-      // but for "broadcast" it's better to loop or use their batch API if available.
-      // We'll do a simple batch send.
-      await resend.emails.send({
-        from: process.env.EMAIL_FROM || "onboarding@resend.dev",
-        to: emails,
-        subject: subject,
-        html: `
-          <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 40px; border: 1px solid #eee; border-radius: 20px;">
-            <h1 style="color: #014D9F; font-size: 24px; font-weight: 900; margin-bottom: 20px;">System Notification</h1>
-            <div style="color: #333; line-height: 1.6; font-size: 16px;">
-              ${content.replace(/\n/g, '<br>')}
+      const BATCH_SIZE = 50;
+      for (let i = 0; i < emails.length; i += BATCH_SIZE) {
+        const batch = emails.slice(i, i + BATCH_SIZE);
+        await resend.emails.send({
+          from: FROM_EMAIL,
+          to: batch,
+          subject: subject,
+          html: `
+            <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 40px; border: 1px solid #eee; border-radius: 20px;">
+              <h1 style="color: #014D9F; font-size: 24px; font-weight: 900; margin-bottom: 20px;">System Notification</h1>
+              <div style="color: #333; line-height: 1.6; font-size: 16px;">
+                ${content.replace(/\n/g, '<br>')}
+              </div>
+              <p style="margin-top: 30px; font-size: 14px; color: #666;">
+                Best regards,<br>
+                The Right Jobs Team
+              </p>
+              <hr style="margin: 40px 0; border: none; border-top: 1px solid #eee;" />
+              <p style="color: #999; font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;">
+                This is an official administrative broadcast from Right Jobs.
+              </p>
             </div>
-            <hr style="margin: 40px 0; border: none; border-top: 1px solid #eee;" />
-            <p style="color: #999; font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;">
-              This is an official administrative broadcast from Right Jobs.
-            </p>
-          </div>
-        `,
-      });
+          `,
+        });
+      }
     }
 
     await logAdminAction({

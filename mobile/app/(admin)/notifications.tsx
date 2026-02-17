@@ -10,6 +10,8 @@ import { Button } from '../../src/components/ui/Button';
 import { useToast } from '../../src/hooks/useToast';
 import { tw } from '../../src/lib/tailwind';
 
+import { AdminBottomNav } from '../../src/components/AdminBottomNav';
+
 const targetOptions = [
   { id: 'ALL', label: 'All Users', icon: Users, color: 'bg-blue-100' },
   { id: 'JOB_SEEKERS', label: 'Job Seekers', icon: Briefcase, color: 'bg-orange-100' },
@@ -35,10 +37,16 @@ export default function AdminNotificationsScreen() {
 
   return (
     <KeyboardAvoidingView 
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0}
       style={tw`flex-1 bg-slate-50`}
     >
-      <ScrollView style={tw`flex-1 px-6 pt-16`} contentContainerStyle={{ paddingBottom: 100 }}>
+      <ScrollView 
+        style={tw`flex-1 px-6 pt-16`} 
+        contentContainerStyle={{ paddingBottom: 160 }}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
         {/* Header */}
         <View style={tw`flex-row items-center justify-between mb-8`}>
           <View style={tw`flex-row items-center flex-1`}>
@@ -115,7 +123,7 @@ export default function AdminNotificationsScreen() {
             {/* Footer */}
             <View style={tw`pt-2 gap-y-4`}>
               <Text style={tw`text-[9px] font-bold text-slate-400 uppercase tracking-widest`}>
-                Reaching <Text style={tw`text-[#014D9F] italic`}>~1,200</Text> active sessions
+                Reaching <Text style={tw`text-[#014D9F] italic`}>Global Audience</Text>
               </Text>
               <Button
                 title="Execute Broadcast"
@@ -129,6 +137,7 @@ export default function AdminNotificationsScreen() {
           </View>
         </View>
       </ScrollView>
+      <AdminBottomNav />
     </KeyboardAvoidingView>
   );
 }
