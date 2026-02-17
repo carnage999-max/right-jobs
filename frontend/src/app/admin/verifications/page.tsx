@@ -129,7 +129,7 @@ export default function AdminVerificationsPage() {
                   <TableCell>
                      <div className="flex items-center gap-2">
                         <ShieldCheck className="h-4 w-4 text-primary" />
-                        <span className="text-xs font-bold text-slate-600 uppercase tracking-tight">{v.idType.replace("_", " ")}</span>
+                        <span className="text-xs font-bold text-slate-600 uppercase tracking-tight">{v.idType ? v.idType.replace("_", " ") : "STANDARD ID"}</span>
                      </div>
                   </TableCell>
                   <TableCell>
@@ -138,7 +138,7 @@ export default function AdminVerificationsPage() {
                     </Badge>
                   </TableCell>
                   <TableCell className="text-slate-500 font-bold text-xs uppercase tracking-tight">
-                    {new Date(v.createdAt).toLocaleDateString()}
+                    {v.createdAt ? new Date(v.createdAt).toLocaleDateString() : "RECENT"}
                   </TableCell>
                   <TableCell>
                     <DropdownMenu>

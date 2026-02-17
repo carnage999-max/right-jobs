@@ -37,13 +37,13 @@ export async function POST(req: Request) {
     }
 
     const emails = targetUsers.map(u => u.email);
-    const FROM_EMAIL = '"Right Jobs" <info@rightjob.net>';
+    const FROM_EMAIL = process.env.EMAIL_FROM || '"Right Jobs" <info@rightjob.net>';
 
     if (emails.length > 0) {
       const BATCH_SIZE = 50;
       for (let i = 0; i < emails.length; i += BATCH_SIZE) {
         const batch = emails.slice(i, i + BATCH_SIZE);
-        await resend.emails.send({
+        const { error: resendError } = await resend.emails.send({
           from: FROM_EMAIL,
           to: batch,
           subject: subject,
@@ -64,6 +64,10 @@ export async function POST(req: Request) {
             </div>
           `,
         });
+
+        if (resendError) {
+          throw new Error(`Resend error: ${resendError.message}`);
+        }
       }
     }
 
@@ -75,8 +79,18 @@ export async function POST(req: Request) {
     });
 
     return NextResponse.json({ ok: true, message: `Broadcast sent to ${emails.length} users` });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Admin broadcast error:", error);
-    return NextResponse.json({ ok: false, message: "Internal server error" }, { status: 500 });
+    if (error instanceof z.ZodError) {
+      return NextResponse.json({ 
+        ok: false, 
+        message: "Validation failed", 
+        issues: error.issues 
+      }, { status: 400 });
+    }
+    return NextResponse.json({ 
+      ok: false, 
+      message: error.message || "Internal server error" 
+    }, { status: 500 });
   }
 }

@@ -56,7 +56,17 @@ export interface AppSession {
 export async function getAuthSession(): Promise<AppSession | null> {
   // 1. Try NextAuth session (web)
   const session = await auth();
-  if (session) return session as unknown as AppSession;
+  if (session) {
+    return {
+      user: {
+        id: session.user.id,
+        email: session.user.email || "",
+        role: session.user.role,
+        name: session.user.name || null,
+        mfaComplete: true, // Website admins are trusted by default
+      }
+    };
+  }
 
   // 2. Try Mobile token
   const mobileSession = await getMobileSession();

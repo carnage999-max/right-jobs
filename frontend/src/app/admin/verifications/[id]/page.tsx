@@ -79,9 +79,9 @@ export default function AdminVerificationReviewPage({ params }: { params: Promis
   }
 
   const documents = [
-    { type: "ID Card (Front)", url: verification.docFrontUrl, label: "FRONT" },
-    { type: "ID Card (Back)", url: verification.docBackUrl, label: "BACK" },
-    { type: "Live Selfie", url: verification.selfieUrl, label: "SELFIE" },
+    { type: "ID Card (Front)", url: verification?.docFrontUrl, label: "FRONT" },
+    { type: "ID Card (Back)", url: verification?.docBackUrl, label: "BACK" },
+    { type: "Live Selfie", url: verification?.selfieUrl, label: "SELFIE" },
   ].filter(d => !!d.url);
 
   return (
