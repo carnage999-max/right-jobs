@@ -84,9 +84,9 @@ export default function AdminDashboardScreen() {
     enabled: !!user?.mfaComplete,
   });
 
-  const { data: auditLogs } = useQuery({
+  const { data: auditLogs } = useQuery<any>({
     queryKey: ['ADMIN_AUDIT_LOGS'],
-    queryFn: adminService.getAuditLogs,
+    queryFn: () => adminService.getAuditLogs({}),
     enabled: !!user?.mfaComplete,
   });
 
@@ -127,9 +127,16 @@ export default function AdminDashboardScreen() {
     { label: "Apps Issued", value: stats?.data?.totalApplications?.value, change: stats?.data?.totalApplications?.change, trend: stats?.data?.totalApplications?.trend, icon: ArrowUpRight },
   ];
 
-  // Map backend chart data to Victory format
-  const appsData = chartData?.data?.map((d: any) => ({ x: d.name, y: d.apps })) || [];
-  const signupsData = chartData?.data?.map((d: any) => ({ x: d.name, y: d.signups })) || [];
+  // Map backend chart data to Victory format - Ensure values are numbers to avoid NaN errors in SVG paths
+  const appsData = chartData?.data?.map((d: any) => ({ 
+    x: d.name, 
+    y: typeof d.apps === 'number' ? d.apps : 0 
+  }))?.filter((d: any) => !isNaN(d.y)) || [];
+
+  const signupsData = chartData?.data?.map((d: any) => ({ 
+    x: d.name, 
+    y: typeof d.signups === 'number' ? d.signups : 0 
+  }))?.filter((d: any) => !isNaN(d.y)) || [];
 
   return (
     <View style={tw`flex-1 bg-slate-50`}>
@@ -137,7 +144,7 @@ export default function AdminDashboardScreen() {
       <View style={[tw`absolute top-20 right--20 w-80 h-80 rounded-full bg-primary`, { opacity: 0.05, filter: 'blur(100px)' } as any]} />
       <View style={[tw`absolute bottom-40 left--20 w-80 h-80 rounded-full bg-blue-200`, { opacity: 0.05, filter: 'blur(100px)' } as any]} />
 
-      <ScrollView style={tw`flex-1 px-6 pt-16`} contentContainerStyle={{ paddingBottom: 120 }}>
+      <ScrollView style={tw`flex-1 px-6 pt-16`} contentContainerStyle={{ paddingBottom: 180 }}>
         {/* Header */}
         <View style={tw`flex-row justify-between items-center mb-10`}>
           <View>

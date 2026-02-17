@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import { Briefcase, Search, Plus, MapPin, DollarSign, ChevronRight } from 'lucide-react-native';
 import { adminService } from '../../src/services/api/admin';
@@ -59,7 +59,11 @@ export default function AdminJobsScreen() {
   );
 
   return (
-    <View style={tw`flex-1 bg-gray-50 px-6 pt-16`}>
+    <KeyboardAvoidingView 
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      style={tw`flex-1 bg-gray-50`}
+    >
+      <View style={tw`flex-1 px-6 pt-16`}>
       <View style={tw`flex-row justify-between items-center mb-6`}>
         <View style={tw`flex-row items-center`}>
           <TouchableOpacity 
@@ -93,7 +97,7 @@ export default function AdminJobsScreen() {
           data={data?.data || []}
           renderItem={renderItem}
           keyExtractor={(item) => item.id}
-          contentContainerStyle={{ paddingBottom: 150 }}
+          contentContainerStyle={{ paddingBottom: 160 }}
           ListEmptyComponent={
             <View style={tw`items-center py-20`}>
               <Briefcase size={48} color="#E2E8F0" style={tw`mb-4`} />
@@ -121,7 +125,8 @@ export default function AdminJobsScreen() {
           )}
         />
       )}
+      </View>
       <AdminBottomNav />
-    </View>
+    </KeyboardAvoidingView>
   );
 }

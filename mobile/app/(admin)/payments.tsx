@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import { CreditCard, DollarSign, Search, Calendar, Download } from 'lucide-react-native';
 import { adminService } from '../../src/services/api/admin';
@@ -62,7 +62,11 @@ export default function AdminPaymentsScreen() {
   };
 
   return (
-    <View style={tw`flex-1 bg-gray-50 px-6 pt-16`}>
+    <KeyboardAvoidingView 
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      style={tw`flex-1 bg-gray-50`}
+    >
+      <View style={tw`flex-1 px-6 pt-16`}>
       <View style={tw`flex-row items-center mb-6`}>
         <TouchableOpacity 
           style={tw`p-3 rounded-2xl mr-4 bg-slate-100 border border-slate-200`}
@@ -88,7 +92,7 @@ export default function AdminPaymentsScreen() {
           data={data?.data || []}
           renderItem={renderItem}
           keyExtractor={(item) => item.id}
-          contentContainerStyle={{ paddingBottom: 150 }}
+          contentContainerStyle={{ paddingBottom: 160 }}
           ListEmptyComponent={
             <View style={tw`items-center py-20`}>
               <CreditCard size={48} color="#E2E8F0" style={tw`mb-4`} />
@@ -97,7 +101,8 @@ export default function AdminPaymentsScreen() {
           }
         />
       )}
+      </View>
       <AdminBottomNav />
-    </View>
+    </KeyboardAvoidingView>
   );
 }

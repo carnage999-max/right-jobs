@@ -15,6 +15,11 @@ export const adminService = {
     const response = await apiClient.post('/admin/users/action', { id: userId, action });
     return response.data;
   },
+
+  updateUser: async (userId: string, data: { name: string; role: string }) => {
+    const response = await apiClient.patch(`/admin/users/${userId}`, data);
+    return response.data;
+  },
   
   getVerifications: async () => {
     const response = await apiClient.get('/admin/verifications');
@@ -41,8 +46,8 @@ export const adminService = {
     return response.data;
   },
 
-  getAuditLogs: async () => {
-    const response = await apiClient.get('/admin/audit-logs');
+  getAuditLogs: async (params?: { page?: number; limit?: number; userId?: string }) => {
+    const response = await apiClient.get('/admin/audit-logs', { params });
     return response.data;
   },
 
