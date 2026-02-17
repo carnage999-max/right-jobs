@@ -64,7 +64,7 @@ export function AdminSidebar(props: any) {
             icon={item.icon}
             label={item.label}
             route={item.route}
-            active={pathname.includes(item.route) || (item.route.includes('dashboard') && pathname === '/(admin)')}
+            active={pathname === item.route.replace('/(admin)', '') || pathname === item.route}
             onPress={() => router.push(item.route as any)}
           />
         ))}
