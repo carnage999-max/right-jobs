@@ -26,8 +26,8 @@ export const adminService = {
     return response.data;
   },
   
-  decideVerification: async (id: string, decision: 'approve' | 'reject', reason?: string) => {
-    const response = await apiClient.post(`/admin/verifications/${id}`, { decision, reason });
+  decideVerification: async (id: string, status: 'VERIFIED' | 'REJECTED', adminNotes?: string) => {
+    const response = await apiClient.post(`/admin/verifications/${id}/review`, { status, adminNotes });
     return response.data;
   },
 

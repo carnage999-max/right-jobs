@@ -62,9 +62,10 @@ export default function AdminVerificationsPage() {
 
   const handleAction = async (id: string, action: string) => {
     try {
-      const resp = await fetch(`/api/admin/verifications/${id}/action`, {
+      const status = action === "APPROVE" ? "VERIFIED" : "REJECTED";
+      const resp = await fetch(`/api/admin/verifications/${id}/review`, {
         method: "POST",
-        body: JSON.stringify({ action }),
+        body: JSON.stringify({ status }),
         headers: { "Content-Type": "application/json" },
       });
       const data = await resp.json();
