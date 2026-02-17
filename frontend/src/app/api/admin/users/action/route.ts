@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { getAuthSession } from "@/lib/auth-mobile";
 import prisma from "@/lib/prisma";
 import { generateVerificationToken } from "@/lib/tokens";
 import { sendPasswordResetEmail, sendForcedPasswordResetEmail } from "@/lib/mail";
@@ -13,7 +13,7 @@ const updateUserSchema = z.object({
 
 export async function POST(req: Request) {
   try {
-    const session = await auth();
+    const session = await getAuthSession();
     
     if (!session || session.user.role !== "ADMIN") {
       return NextResponse.json({ ok: false, message: "Unauthorized" }, { status: 401 });

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { getAuthSession } from "@/lib/auth-mobile";
 import prisma from "@/lib/prisma";
 import { logAdminAction } from "@/lib/audit";
 import { sendUserProfileUpdatedEmail } from "@/lib/mail";
@@ -15,7 +15,7 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await auth();
+    const session = await getAuthSession();
     if (!session || session.user.role !== "ADMIN") {
       return NextResponse.json({ ok: false, message: "Unauthorized" }, { status: 401 });
     }
