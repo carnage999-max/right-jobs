@@ -1,9 +1,9 @@
 import React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity, Image } from 'react-native';
 import { DrawerContentScrollView } from '@react-navigation/drawer';
 import { useAuth } from '../context/AuthContext';
 import { useRouter, usePathname } from 'expo-router';
-import { tw } from '../../lib/tailwind';
+import { tw } from '../lib/tailwind';
 import { 
   LayoutDashboard, 
   Users, 
@@ -47,12 +47,14 @@ export function AdminSidebar(props: any) {
   return (
     <View style={tw`flex-1 bg-white` as any}>
       {/* Header */}
-      <View style={tw`px-6 pt-16 pb-6 border-b border-slate-100` as any}>
-        <View style={tw`flex-row items-center gap-3` as any}>
-          <View style={tw`h-8 w-8 items-center justify-center rounded-lg bg-[#014D9F]` as any}>
-            <ShieldCheck size={20} color="white" />
-          </View>
-          <Text style={tw`text-xl font-bold tracking-tight text-slate-900` as any}>RightAdmin</Text>
+      <View style={tw`px-6 pt-16 pb-6 border-b border-slate-100`}>
+        <View style={tw`flex-row items-center gap-3`}>
+          <Image 
+            source={require('../../assets/images/logo.png')} 
+            style={tw`h-10 w-10`}
+            resizeMode="contain"
+          />
+          <Text style={tw`text-xl font-bold tracking-tight text-slate-900`}>RightAdmin</Text>
         </View>
       </View>
 

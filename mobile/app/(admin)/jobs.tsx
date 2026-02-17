@@ -6,16 +6,22 @@ import { adminService } from '../../src/services/api/admin';
 import { jobsService } from '../../src/services/api/jobs';
 import { QUERY_KEYS } from '../../src/constants/queryKeys';
 import { Input } from '../../src/components/ui/Input';
-import { useRouter } from 'expo-router';
-import tw from 'twrnc';
+import { useRouter, useNavigation } from 'expo-router';
+import { DrawerActions } from '@react-navigation/native';
+import { tw } from '../../src/lib/tailwind';
+import { useAuth } from '../../src/context/AuthContext';
+import { AdminBottomNav } from '../../src/components/AdminBottomNav';
 
 export default function AdminJobsScreen() {
+  const { user } = useAuth();
   const [search, setSearch] = useState('');
   const router = useRouter();
+  const navigation = useNavigation();
 
   const { data, isLoading } = useQuery({
     queryKey: [QUERY_KEYS.ADMIN_JOBS, search],
-    queryFn: () => jobsService.getJobs({ search }), // Admins can use standard job search for preview
+    queryFn: () => adminService.getJobs({ search }),
+    enabled: !!user?.mfaComplete,
   });
 
   const renderItem = ({ item }: any) => (
@@ -55,9 +61,12 @@ export default function AdminJobsScreen() {
     <View style={tw`flex-1 bg-gray-50 px-6 pt-16`}>
       <View style={tw`flex-row justify-between items-center mb-6`}>
         <View style={tw`flex-row items-center`}>
-          <View style={tw`bg-[#014D9F10] p-3 rounded-2xl mr-4`}>
+          <TouchableOpacity 
+            style={tw`p-3 rounded-2xl mr-4 bg-slate-100 border border-slate-200`}
+            onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
+          >
             <Briefcase size={28} color="#014D9F" />
-          </View>
+          </TouchableOpacity>
           <Text style={tw`text-2xl font-black text-gray-900`}>Job Board</Text>
         </View>
         <TouchableOpacity 
@@ -80,10 +89,10 @@ export default function AdminJobsScreen() {
         <ActivityIndicator size="large" color="#014D9F" style={tw`mt-20`} />
       ) : (
         <FlatList
-          data={data || []}
+          data={data?.data || []}
           renderItem={renderItem}
           keyExtractor={(item) => item.id}
-          contentContainerStyle={{ paddingBottom: 150 }}
+          contentContainerStyle={{ paddingBottom: 120 }}
           ListEmptyComponent={
             <View style={tw`items-center py-20`}>
               <Briefcase size={48} color="#E2E8F0" style={tw`mb-4`} />
@@ -92,6 +101,7 @@ export default function AdminJobsScreen() {
           }
         />
       )}
+      <AdminBottomNav />
     </View>
   );
 }

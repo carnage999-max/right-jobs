@@ -7,7 +7,7 @@ const { auth } = NextAuth(authConfig);
 export default auth((req) => {
   const { nextUrl } = req;
   const isLoggedIn = !!req.auth;
-  const isApiAuthRoute = nextUrl.pathname.startsWith("/api/auth");
+  const isApiRoute = nextUrl.pathname.startsWith("/api");
   const isPublicRoute = [
     "/",
     "/about",
@@ -32,7 +32,7 @@ export default auth((req) => {
   const isAppRoute = nextUrl.pathname.startsWith("/app");
   const isMfaRoute = nextUrl.pathname === "/auth/mfa";
 
-  if (isApiAuthRoute) {
+  if (isApiRoute) {
     return NextResponse.next();
   }
 

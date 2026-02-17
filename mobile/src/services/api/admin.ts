@@ -55,4 +55,9 @@ export const adminService = {
     const response = await apiClient.get('/admin/payments');
     return response.data;
   },
+
+  getJobs: async (params?: { search?: string; page?: number; limit?: number }) => {
+    const response = await apiClient.get('/admin/jobs', { params });
+    return response.data;
+  },
 };

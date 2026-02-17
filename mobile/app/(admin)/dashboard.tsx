@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Dimensions } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import { 
@@ -18,8 +18,11 @@ import {
 import { VictoryChart, VictoryArea, VictoryAxis, VictoryTooltip, VictoryVoronoiContainer } from 'victory-native';
 import { QUERY_KEYS } from '../../src/constants/queryKeys';
 import { adminService } from '../../src/services/api/admin';
-import { useRouter } from 'expo-router';
-import tw from 'twrnc';
+import { useRouter, useNavigation } from 'expo-router';
+import { DrawerActions } from '@react-navigation/native';
+import { tw } from '../../src/lib/tailwind';
+import { AdminBottomNav } from '../../src/components/AdminBottomNav';
+import { useAuth } from '../../src/context/AuthContext';
 
 const { width } = Dimensions.get('window');
 
@@ -41,7 +44,8 @@ const StatCard = ({ label, value, change, trend, icon: Icon }: any) => {
           </Text>
         </View>
       </View>
-      <View style={tw`space-y-1`}>
+      <View>
+
         <Text style={tw`text-slate-400 text-[10px] font-black uppercase tracking-[0.1em]`}>{label}</Text>
         <Text style={tw`text-2xl font-black text-slate-900 tracking-tight`}>{value?.toLocaleString() || '0'}</Text>
       </View>
@@ -51,31 +55,67 @@ const StatCard = ({ label, value, change, trend, icon: Icon }: any) => {
 
 export default function AdminDashboardScreen() {
   const router = useRouter();
+  const navigation = useNavigation();
+  const { user } = useAuth();
 
-  const { data: stats, isLoading: statsLoading } = useQuery({
+  // Check MFA status for admin users
+  useEffect(() => {
+    if (user?.role?.toUpperCase() === 'ADMIN' && !user.mfaComplete) {
+      console.log('[Dashboard] Admin user without MFA, redirecting...');
+      router.replace('/(auth)/mfa');
+    }
+  }, [user]);
+
+  const { data: stats, isLoading: statsLoading, isError: statsError, refetch: refetchStats } = useQuery({
     queryKey: [QUERY_KEYS.ADMIN_STATS],
     queryFn: adminService.getStats,
+    enabled: !!user?.mfaComplete,
   });
 
-  const { data: chartData, isLoading: chartLoading } = useQuery({
+  const { data: chartData, isLoading: chartLoading, isError: chartError, refetch: refetchCharts } = useQuery({
     queryKey: ['ADMIN_CHARTS'],
     queryFn: adminService.getCharts,
+    enabled: !!user?.mfaComplete,
   });
 
   const { data: verifications } = useQuery({
     queryKey: [QUERY_KEYS.ADMIN_VERIFICATIONS],
     queryFn: adminService.getVerifications,
+    enabled: !!user?.mfaComplete,
   });
 
   const { data: auditLogs } = useQuery({
     queryKey: ['ADMIN_AUDIT_LOGS'],
     queryFn: adminService.getAuditLogs,
+    enabled: !!user?.mfaComplete,
   });
 
   if (statsLoading || chartLoading) {
     return (
       <View style={tw`flex-1 justify-center items-center bg-slate-50`}>
         <ActivityIndicator size="large" color="#014D9F" />
+      </View>
+    );
+  }
+
+  // Handle data fetch errors or HTML "ghosting" (status 200 but no .data)
+  if (statsError || chartError || !stats?.data) {
+    return (
+      <View style={tw`flex-1 justify-center items-center bg-slate-50 px-8`}>
+        <ShieldAlert size={48} color="#DC2626" style={tw`mb-4`} />
+        <Text style={tw`text-xl font-bold text-slate-900 mb-2 text-center`}>System Sync Required</Text>
+        <Text style={tw`text-slate-500 text-center mb-6`}>
+          The mobile app is receiving an invalid response. This often happens if the API is restricted by server-side security middleware.
+        </Text>
+        <TouchableOpacity 
+          style={tw`bg-[#014D9F] px-8 py-3 rounded-xl`}
+          onPress={() => {
+            refetchStats();
+            refetchCharts();
+          }}
+        >
+          <Text style={tw`text-white font-bold`}>Retry Connection</Text>
+        </TouchableOpacity>
       </View>
     );
   }
@@ -97,21 +137,24 @@ export default function AdminDashboardScreen() {
       <View style={[tw`absolute top-20 right--20 w-80 h-80 rounded-full bg-primary`, { opacity: 0.05, filter: 'blur(100px)' } as any]} />
       <View style={[tw`absolute bottom-40 left--20 w-80 h-80 rounded-full bg-blue-200`, { opacity: 0.05, filter: 'blur(100px)' } as any]} />
 
-      <ScrollView style={tw`flex-1 px-6 pt-16`} contentContainerStyle={{ paddingBottom: 100 }}>
+      <ScrollView style={tw`flex-1 px-6 pt-16`} contentContainerStyle={{ paddingBottom: 120 }}>
         {/* Header */}
         <View style={tw`flex-row justify-between items-center mb-10`}>
           <View>
-            <Text style={tw`text-primary font-black text-[10px] uppercase tracking-[0.2em] mb-1`}>Administrator</Text>
+            <Text style={tw`text-primary font-black text-[10px] uppercase tracking-widest mb-1`}>Administrator</Text>
             <View style={tw`flex-row items-center`}>
-              <View style={tw`bg-primary p-2 rounded-xl mr-3 shadow-lg shadow-primary/30`}>
-                <LayoutDashboard size={22} color="#FFF" />
-              </View>
+              <TouchableOpacity 
+                onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
+                style={tw`p-2 rounded-xl mr-3 bg-slate-100 border border-slate-200`}
+              >
+                <LayoutDashboard size={22} color="#014D9F" />
+              </TouchableOpacity>
               <Text style={tw`text-3xl font-black text-slate-900 tracking-tight`}>Dashboard</Text>
             </View>
           </View>
           <TouchableOpacity 
             style={tw`bg-white px-4 py-2 rounded-full shadow-md flex-row items-center border border-slate-100`}
-            onPress={() => router.replace('/(tabs)/profile')}
+            onPress={() => router.replace('/(tabs)')}
           >
             <ArrowLeftRight size={16} color="#014D9F" style={tw`mr-2`} />
             <Text style={tw`text-primary font-bold text-xs`}>Seeker</Text>
@@ -201,7 +244,7 @@ export default function AdminDashboardScreen() {
                 </View>
                 <View style={tw`flex-1`}>
                   <Text style={tw`text-slate-900 font-black text-sm`}>{item.user?.name || item.user?.email}</Text>
-                  <Text style={tw`text-slate-400 text-[10px] font-bold uppercase tracking-[0.15em] mt-1`}>{new Date(item.createdAt).toLocaleDateString()}</Text>
+                  <Text style={tw`text-slate-400 text-[10px] font-bold uppercase tracking-wide mt-1`}>{new Date(item.createdAt).toLocaleDateString()}</Text>
                 </View>
                 <View style={tw`bg-slate-50 p-2 rounded-full`}>
                    <ChevronRight size={16} color="#94A3B8" />
@@ -255,6 +298,7 @@ export default function AdminDashboardScreen() {
           )}
         </View>
       </ScrollView>
+      <AdminBottomNav />
     </View>
   );
 }

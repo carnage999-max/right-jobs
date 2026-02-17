@@ -6,15 +6,22 @@ import { adminService } from '../../src/services/api/admin';
 import { QUERY_KEYS } from '../../src/constants/queryKeys';
 import { useToast } from '../../src/hooks/useToast';
 import { Button } from '../../src/components/ui/Button';
-import tw from 'twrnc';
+import { tw } from '../../src/lib/tailwind';
+import { useNavigation } from 'expo-router';
+import { DrawerActions } from '@react-navigation/native';
+import { useAuth } from '../../src/context/AuthContext';
+import { AdminBottomNav } from '../../src/components/AdminBottomNav';
 
 export default function AdminVerificationsScreen() {
+  const { user } = useAuth();
+  const navigation = useNavigation();
   const queryClient = useQueryClient();
   const { showSuccess, showError } = useToast();
 
   const { data, isLoading } = useQuery({
     queryKey: [QUERY_KEYS.ADMIN_VERIFICATIONS],
     queryFn: () => adminService.getVerifications(),
+    enabled: !!user?.mfaComplete,
   });
 
   const decideMutation = useMutation({
@@ -84,9 +91,12 @@ export default function AdminVerificationsScreen() {
   return (
     <View style={tw`flex-1 bg-gray-50 px-6 pt-16`}>
       <View style={tw`flex-row items-center mb-6`}>
-        <View style={tw`bg-orange-50 p-3 rounded-2xl mr-4`}>
-          <ShieldAlert size={28} color="#F59E0B" />
-        </View>
+        <TouchableOpacity 
+          style={tw`p-3 rounded-2xl mr-4 bg-slate-100 border border-slate-200`}
+          onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
+        >
+          <ShieldAlert size={28} color="#014D9F" />
+        </TouchableOpacity>
         <Text style={tw`text-2xl font-bold text-gray-900`}>ID Verifications</Text>
       </View>
 
@@ -106,6 +116,7 @@ export default function AdminVerificationsScreen() {
           }
         />
       )}
+      <AdminBottomNav />
     </View>
   );
 }

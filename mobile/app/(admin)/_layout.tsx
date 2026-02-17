@@ -11,7 +11,8 @@ export default function AdminLayout() {
       <Drawer
         drawerContent={(props) => <AdminSidebar {...props} />}
         screenOptions={{
-          headerShown: true,
+          headerShown: false,
+          drawerActiveTintColor: '#014D9F',
           headerStyle: { 
             backgroundColor: '#ffffff', 
             shadowOpacity: 0, 

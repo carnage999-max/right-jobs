@@ -5,14 +5,21 @@ import { CreditCard, DollarSign, Search, Calendar, Download } from 'lucide-react
 import { adminService } from '../../src/services/api/admin';
 import { QUERY_KEYS } from '../../src/constants/queryKeys';
 import { Input } from '../../src/components/ui/Input';
-import tw from 'twrnc';
+import { tw } from '../../src/lib/tailwind';
+import { useNavigation } from 'expo-router';
+import { DrawerActions } from '@react-navigation/native';
+import { useAuth } from '../../src/context/AuthContext';
+import { AdminBottomNav } from '../../src/components/AdminBottomNav';
 
 export default function AdminPaymentsScreen() {
+  const { user } = useAuth();
+  const navigation = useNavigation();
   const [search, setSearch] = useState('');
   
   const { data, isLoading } = useQuery({
     queryKey: [QUERY_KEYS.ADMIN_PAYMENTS],
     queryFn: () => adminService.getPayments(),
+    enabled: !!user?.mfaComplete,
   });
 
   const renderItem = ({ item }: any) => {
@@ -57,9 +64,12 @@ export default function AdminPaymentsScreen() {
   return (
     <View style={tw`flex-1 bg-gray-50 px-6 pt-16`}>
       <View style={tw`flex-row items-center mb-6`}>
-        <View style={tw`bg-green-50 p-3 rounded-2xl mr-4`}>
-          <DollarSign size={28} color="#10B981" />
-        </View>
+        <TouchableOpacity 
+          style={tw`p-3 rounded-2xl mr-4 bg-slate-100 border border-slate-200`}
+          onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
+        >
+          <DollarSign size={28} color="#014D9F" />
+        </TouchableOpacity>
         <Text style={tw`text-2xl font-black text-gray-900`}>Transactions</Text>
       </View>
 
@@ -87,6 +97,7 @@ export default function AdminPaymentsScreen() {
           }
         />
       )}
+      <AdminBottomNav />
     </View>
   );
 }

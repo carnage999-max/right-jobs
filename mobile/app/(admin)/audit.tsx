@@ -1,18 +1,25 @@
 import React, { useState } from 'react';
-import { View, Text, FlatList, ActivityIndicator } from 'react-native';
+import { View, Text, FlatList, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import { ShieldCheck, Search, Clock, ShieldAlert } from 'lucide-react-native';
 import { adminService } from '../../src/services/api/admin';
 import { QUERY_KEYS } from '../../src/constants/queryKeys';
 import { Input } from '../../src/components/ui/Input';
-import tw from 'twrnc';
+import { useRouter, useNavigation } from 'expo-router';
+import { DrawerActions } from '@react-navigation/native';
+import { tw } from '../../src/lib/tailwind';
+import { useAuth } from '../../src/context/AuthContext';
+import { AdminBottomNav } from '../../src/components/AdminBottomNav';
 
 export default function AdminAuditLogsScreen() {
+  const { user } = useAuth();
+  const navigation = useNavigation();
   const [search, setSearch] = useState('');
   
   const { data, isLoading } = useQuery({
     queryKey: [QUERY_KEYS.ADMIN_AUDIT_LOGS],
     queryFn: () => adminService.getAuditLogs(),
+    enabled: !!user?.mfaComplete,
   });
 
   const renderItem = ({ item }: any) => {
@@ -57,9 +64,12 @@ export default function AdminAuditLogsScreen() {
   return (
     <View style={tw`flex-1 bg-gray-50 px-6 pt-16`}>
       <View style={tw`flex-row items-center mb-6`}>
-        <View style={tw`bg-[#014D9F20] p-3 rounded-2xl mr-4`}>
+        <TouchableOpacity 
+          style={tw`p-3 rounded-2xl mr-4 bg-slate-100 border border-slate-200`}
+          onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
+        >
           <ShieldAlert size={28} color="#014D9F" />
-        </View>
+        </TouchableOpacity>
         <Text style={tw`text-2xl font-black text-gray-900`}>Audit Logs</Text>
       </View>
 
@@ -87,6 +97,7 @@ export default function AdminAuditLogsScreen() {
           }
         />
       )}
+      <AdminBottomNav />
     </View>
   );
 }

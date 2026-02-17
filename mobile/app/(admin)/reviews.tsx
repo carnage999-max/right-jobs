@@ -1,13 +1,18 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { MessageSquare, Trash2, Flag, User, Star } from 'lucide-react-native';
 import { adminService } from '../../src/services/api/admin';
 import { QUERY_KEYS } from '../../src/constants/queryKeys';
 import { useToast } from '../../src/hooks/useToast';
+import { useNavigation } from 'expo-router';
+import { DrawerActions } from '@react-navigation/native';
+import { tw } from '../../src/lib/tailwind';
+import { AdminBottomNav } from '../../src/components/AdminBottomNav';
 
 export default function AdminReviewsScreen() {
   const queryClient = useQueryClient();
+  const navigation = useNavigation();
   const { showSuccess, showError } = useToast();
 
   const { data, isLoading } = useQuery({
@@ -26,19 +31,19 @@ export default function AdminReviewsScreen() {
   });
 
   const renderItem = ({ item }: any) => (
-    <View className="bg-white p-5 rounded-[32px] mb-4 shadow-sm border border-gray-100">
-      <View className="flex-row justify-between items-start mb-3">
-        <View className="flex-row items-center flex-1">
-          <View className="bg-gray-100 w-10 h-10 rounded-full items-center justify-center mr-3">
+    <View style={tw`bg-white p-5 rounded-3xl mb-4 shadow-sm border border-gray-100`}>
+      <View style={tw`flex-row justify-between items-start mb-3`}>
+        <View style={tw`flex-row items-center flex-1`}>
+          <View style={tw`bg-gray-100 w-10 h-10 rounded-full items-center justify-center mr-3`}>
             <User size={20} color="#64748B" />
           </View>
-          <View className="flex-1">
-            <Text className="text-gray-900 font-bold text-sm">{item.author?.name || 'User'}</Text>
-            <View className="flex-row items-center">
+          <View style={tw`flex-1`}>
+            <Text style={tw`text-gray-900 font-bold text-sm`}>{item.author?.name || 'User'}</Text>
+            <View style={tw`flex-row items-center`}>
               {[1, 2, 3, 4, 5].map((s) => (
                 <Star key={s} size={10} color={s <= item.rating ? '#F59E0B' : '#E2E8F0'} fill={s <= item.rating ? '#F59E0B' : 'transparent'} />
               ))}
-              <Text className="text-gray-400 text-[10px] font-bold ml-2 uppercase tracking-widest">
+              <Text style={tw`text-gray-400 text-[10px] font-bold ml-2 uppercase tracking-widest`}>
                 {new Date(item.createdAt).toLocaleDateString()}
               </Text>
             </View>
@@ -47,38 +52,41 @@ export default function AdminReviewsScreen() {
         <Badge variant={item.isFlagged ? 'error' : 'success'} />
       </View>
 
-      <Text className="text-gray-600 text-sm leading-5 mb-4">{item.content}</Text>
+      <Text style={tw`text-gray-600 text-sm leading-5 mb-4`}>{item.content}</Text>
 
-      <View className="flex-row gap-x-2">
+      <View style={tw`flex-row gap-x-2`}>
         <TouchableOpacity 
-          className="bg-error/10 p-2.5 rounded-xl flex-1 flex-row items-center justify-center"
+          style={tw`bg-red-50 p-2.5 rounded-xl flex-1 flex-row items-center justify-center`}
           onPress={() => actionMutation.mutate({ id: item.id, action: 'delete' })}
         >
           <Trash2 size={16} color="#EF4444" />
-          <Text className="text-error font-bold text-xs ml-2">Delete</Text>
+          <Text style={tw`text-red-500 font-bold text-xs ml-2`}>Delete</Text>
         </TouchableOpacity>
         <TouchableOpacity 
-          className="bg-gray-100 p-2.5 rounded-xl flex-1 flex-row items-center justify-center"
+          style={tw`bg-gray-50 p-2.5 rounded-xl flex-1 flex-row items-center justify-center border border-gray-100`}
           onPress={() => actionMutation.mutate({ id: item.id, action: 'flag' })}
         >
           <Flag size={16} color="#64748B" />
-          <Text className="text-gray-500 font-bold text-xs ml-2">Flag</Text>
+          <Text style={tw`text-gray-500 font-bold text-xs ml-2`}>Flag</Text>
         </TouchableOpacity>
       </View>
     </View>
   );
 
   return (
-    <View className="flex-1 bg-background-light px-6 pt-16">
-      <View className="flex-row items-center mb-6">
-        <View className="bg-indigo-100 p-3 rounded-2xl mr-4">
-          <MessageSquare size={28} color="#6366F1" />
-        </View>
-        <Text className="text-2xl font-black text-gray-900">Reviews</Text>
+    <View style={tw`flex-1 bg-gray-50 px-6 pt-16`}>
+      <View style={tw`flex-row items-center mb-6`}>
+        <TouchableOpacity 
+          style={tw`p-3 rounded-2xl mr-4 bg-slate-100 border border-slate-200`}
+          onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
+        >
+          <MessageSquare size={28} color="#014D9F" />
+        </TouchableOpacity>
+        <Text style={tw`text-2xl font-black text-gray-900`}>Reviews</Text>
       </View>
 
       {isLoading ? (
-        <ActivityIndicator size="large" color="#6366F1" className="mt-20" />
+        <ActivityIndicator size="large" color="#014D9F" style={tw`mt-20`} />
       ) : (
         <FlatList
           data={data?.data || []}
@@ -86,20 +94,21 @@ export default function AdminReviewsScreen() {
           keyExtractor={(item) => item.id}
           contentContainerStyle={{ paddingBottom: 150 }}
           ListEmptyComponent={
-            <View className="items-center py-20">
-              <MessageSquare size={48} color="#E2E8F0" className="mb-4" />
-              <Text className="text-gray-400 text-center font-bold">No reviews found</Text>
+            <View style={tw`items-center py-20`}>
+              <MessageSquare size={48} color="#E2E8F0" style={tw`mb-4 opacity-30`} />
+              <Text style={tw`text-gray-400 text-center font-bold`}>No reviews found</Text>
             </View>
           }
         />
       )}
+      <AdminBottomNav />
     </View>
   );
 }
 
 const Badge = ({ variant }: { variant: 'error' | 'success' }) => (
-  <View className={`px-2 py-0.5 rounded-lg ${variant === 'error' ? 'bg-error/10' : 'bg-success/10'}`}>
-    <Text className={`text-[8px] font-black uppercase tracking-wider ${variant === 'error' ? 'text-error' : 'text-success'}`}>
+  <View style={tw`px-2 py-0.5 rounded-lg ${variant === 'error' ? 'bg-red-50' : 'bg-green-50'}`}>
+    <Text style={tw`text-[8px] font-black uppercase tracking-wider ${variant === 'error' ? 'text-red-500' : 'text-green-500'}`}>
       {variant === 'error' ? 'Flagged' : 'Active'}
     </Text>
   </View>
