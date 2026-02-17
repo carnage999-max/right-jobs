@@ -19,10 +19,10 @@ import {
 const SidebarItem = ({ icon: Icon, label, route, active, onPress }: any) => (
   <TouchableOpacity 
     onPress={onPress}
-    style={tw`flex-row items-center gap-3 px-3 py-3 rounded-xl mb-1 ${active ? 'bg-[#014D9F]/10' : 'bg-transparent'}`}
+    style={tw`flex-row items-center gap-3 px-3 py-3 rounded-xl mb-1 ${active ? 'bg-[#014D9F]/10' : 'bg-transparent'}` as any}
   >
     <Icon size={20} color={active ? '#014D9F' : '#475569'} />
-    <Text style={tw`text-sm font-bold ${active ? 'text-[#014D9F]' : 'text-slate-600'}`}>
+    <Text style={tw`text-sm font-bold ${active ? 'text-[#014D9F]' : 'text-slate-600'}` as any}>
       {label}
     </Text>
   </TouchableOpacity>
@@ -45,19 +45,19 @@ export function AdminSidebar(props: any) {
   ];
 
   return (
-    <View style={tw`flex-1 bg-white`}>
+    <View style={tw`flex-1 bg-white` as any}>
       {/* Header */}
-      <View style={tw`px-6 pt-16 pb-6 border-b border-slate-100`}>
-        <View style={tw`flex-row items-center gap-3`}>
-          <View style={tw`h-8 w-8 items-center justify-center rounded-lg bg-[#014D9F]`}>
+      <View style={tw`px-6 pt-16 pb-6 border-b border-slate-100` as any}>
+        <View style={tw`flex-row items-center gap-3` as any}>
+          <View style={tw`h-8 w-8 items-center justify-center rounded-lg bg-[#014D9F]` as any}>
             <ShieldCheck size={20} color="white" />
           </View>
-          <Text style={tw`text-xl font-bold tracking-tight text-slate-900`}>RightAdmin</Text>
+          <Text style={tw`text-xl font-bold tracking-tight text-slate-900` as any}>RightAdmin</Text>
         </View>
       </View>
 
       {/* Navigation */}
-      <DrawerContentScrollView {...props} contentContainerStyle={tw`pt-4 px-4`}>
+      <DrawerContentScrollView {...props} contentContainerStyle={tw`pt-4 px-4` as any}>
         {menuItems.map((item) => (
           <SidebarItem
             key={item.route}
@@ -71,18 +71,18 @@ export function AdminSidebar(props: any) {
       </DrawerContentScrollView>
 
       {/* Footer */}
-      <View style={tw`p-4 border-t border-slate-100 pb-8`}>
-        <View style={tw`flex-row items-center gap-3 mb-4 px-2`}>
-            <View style={tw`h-10 w-10 rounded-full bg-[#014D9F]/10 items-center justify-center border-2 border-[#014D9F]/20`}>
-                <Text style={tw`text-[#014D9F] font-bold`}>
+      <View style={tw`p-4 border-t border-slate-100 pb-8` as any}>
+        <View style={tw`flex-row items-center gap-3 mb-4 px-2` as any}>
+            <View style={tw`h-10 w-10 rounded-full bg-[#014D9F]/10 items-center justify-center border-2 border-[#014D9F]/20` as any}>
+                <Text style={tw`text-[#014D9F] font-bold` as any}>
                     {user?.name?.[0] || 'A'}
                 </Text>
             </View>
-            <View style={tw`flex-1`}>
-                <Text style={tw`text-sm font-bold text-slate-900`} numberOfLines={1}>
+            <View style={tw`flex-1` as any}>
+                <Text style={tw`text-sm font-bold text-slate-900` as any} numberOfLines={1}>
                     {user?.name || 'Admin User'}
                 </Text>
-                <Text style={tw`text-[10px] font-black text-slate-400 uppercase tracking-widest`}>
+                <Text style={tw`text-[10px] font-black text-slate-400 uppercase tracking-widest` as any}>
                     {user?.role || 'ADMIN'}
                 </Text>
             </View>
@@ -93,10 +93,10 @@ export function AdminSidebar(props: any) {
                 await signOut();
                 router.replace('/(auth)/welcome');
             }}
-            style={tw`flex-row items-center gap-3 px-3 py-3 rounded-xl`}
+            style={tw`flex-row items-center gap-3 px-3 py-3 rounded-xl` as any}
         >
             <LogOut size={20} color="#DC2626" />
-            <Text style={tw`text-sm font-bold text-red-600`}>Logout</Text>
+            <Text style={tw`text-sm font-bold text-red-600` as any}>Logout</Text>
         </TouchableOpacity>
       </View>
     </View>
