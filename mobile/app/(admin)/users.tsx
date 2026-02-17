@@ -16,83 +16,120 @@ export default function AdminUsersScreen() {
   const { user } = useAuth();
   const navigation = useNavigation();
   const [search, setSearch] = useState('');
+  const [page, setPage] = useState(1);
   const queryClient = useQueryClient();
   const { showSuccess, showError } = useToast();
 
   const { data, isLoading } = useQuery({
-    queryKey: [QUERY_KEYS.ADMIN_USERS, search],
-    queryFn: () => adminService.getUsers({ search }),
+    queryKey: [QUERY_KEYS.ADMIN_USERS, search, page],
+    queryFn: () => adminService.getUsers({ search, page }),
     enabled: !!user?.mfaComplete,
   });
 
   const actionMutation = useMutation({
-    mutationFn: ({ userId, action }: { userId: string, action: string }) => 
-      adminService.actionUser(userId, action),
+    mutationFn: ({ userId, action }: { userId: string, action: string }) => {
+      // Map mobile actions to backend enums
+      let backendAction = action.toUpperCase();
+      if (action === 'ban') backendAction = 'SUSPEND';
+      if (action === 'unban') backendAction = 'ACTIVATE';
+      if (action === 'suspend') backendAction = 'SUSPEND';
+      
+      return adminService.actionUser(userId, backendAction);
+    },
     onSuccess: (data: any) => {
       showSuccess('Success', data.message || 'Action completed');
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.ADMIN_USERS] });
     },
-    onError: () => showError('Error', 'Failed to perform action'),
+    onError: (err: any) => {
+      console.error('[Action Error]', err);
+      showError('Error', 'Failed to perform action');
+    },
   });
 
-  const confirmAction = (userId: string, action: string, userName: string) => {
-    const actionText = action.charAt(0).toUpperCase() + action.slice(1);
+  const showActions = (item: any) => {
+    const options = [
+      item.isSuspended ? 'Activate User' : 'Suspend User',
+      'Force Password Reset',
+      'Delete User',
+      'Cancel'
+    ];
+    const destructiveIndex = 2;
+    const cancelIndex = 3;
+
     Alert.alert(
-      `${actionText} User`,
-      `Are you sure you want to ${action} ${userName}?`,
+      item.name || item.email,
+      'Select administrative action',
       [
-        { text: "Cancel", style: "cancel" },
         { 
-          text: actionText, 
-          style: action === 'delete' || action === 'ban' ? 'destructive' : 'default',
-          onPress: () => actionMutation.mutate({ userId, action }) 
-        }
+          text: item.isSuspended ? 'Activate User' : 'Suspend User', 
+          onPress: () => actionMutation.mutate({ userId: item.id, action: item.isSuspended ? 'unban' : 'ban' }) 
+        },
+        { 
+          text: 'Force Password Reset', 
+          onPress: () => actionMutation.mutate({ userId: item.id, action: 'FORCE_PASSWORD_RESET' }) 
+        },
+        { 
+          text: 'Delete User', 
+          style: 'destructive',
+          onPress: () => {
+            Alert.alert(
+              'Confirm Delete',
+              `Are you sure you want to PERMANENTLY delete ${item.name || item.email}?`,
+              [
+                { text: 'Cancel', style: 'cancel' },
+                { text: 'Delete', style: 'destructive', onPress: () => actionMutation.mutate({ userId: item.id, action: 'delete' }) }
+              ]
+            );
+          }
+        },
+        { text: 'Cancel', style: 'cancel' }
       ]
     );
   };
 
   const renderUser = ({ item }: any) => (
     <View style={tw`bg-white p-5 rounded-[32px] mb-4 shadow-sm border border-gray-100`}>
-      <View style={tw`flex-row items-center mb-4`}>
+      <View style={tw`flex-row items-center`}>
         <View style={tw`bg-[#014D9F10] w-12 h-12 rounded-2xl items-center justify-center mr-4`}>
           <Users size={24} color="#014D9F" />
         </View>
         <View style={tw`flex-1`}>
-          <Text style={tw`text-gray-900 font-bold text-base`}>{item.name || 'Anonymous'}</Text>
+          <View style={tw`flex-row items-center gap-2 mb-0.5`}>
+            <Text style={tw`text-gray-900 font-bold text-base`}>{item.name || 'Anonymous'}</Text>
+            {item.isSuspended && (
+              <View style={tw`bg-red-50 px-1.5 py-0.5 rounded-md`}>
+                <Text style={tw`text-[8px] font-black text-red-500 uppercase tracking-tighter`}>Suspended</Text>
+              </View>
+            )}
+          </View>
           <Text style={tw`text-gray-400 text-xs font-medium`}>{item.email}</Text>
         </View>
-        <View style={tw`px-2.5 py-1 rounded-lg ${item.role === 'ADMIN' ? 'bg-[#014D9F10]' : 'bg-gray-100'}`}>
-          <Text style={tw`text-[9px] font-black uppercase tracking-widest ${item.role === 'ADMIN' ? 'text-[#014D9F]' : 'text-gray-600'}`}>
-            {item.role}
-          </Text>
+        <View style={tw`flex-row items-center gap-2`}>
+          <View style={tw`px-2.5 py-1 rounded-lg ${item.role === 'ADMIN' ? 'bg-[#014D9F10]' : 'bg-gray-100'}`}>
+            <Text style={tw`text-[9px] font-black uppercase tracking-widest ${item.role === 'ADMIN' ? 'text-[#014D9F]' : 'text-gray-600'}`}>
+              {item.role}
+            </Text>
+          </View>
+          <TouchableOpacity 
+            onPress={() => showActions(item)}
+            style={tw`p-2 rounded-xl bg-slate-50 border border-slate-100`}
+          >
+            <MoreVertical size={18} color="#64748B" />
+          </TouchableOpacity>
         </View>
       </View>
 
-      <View style={tw`flex-row gap-x-3`}>
-        <TouchableOpacity 
-          style={tw`flex-1 flex-row items-center justify-center py-2.5 rounded-xl border ${item.isBanned ? 'bg-red-50 border-red-500' : 'bg-transparent border-gray-100'}`}
-          onPress={() => confirmAction(item.id, item.isBanned ? 'unban' : 'ban', item.name || item.email)}
-        >
-          <Ban size={14} color={item.isBanned ? '#EF4444' : '#64748B'} style={tw`mr-2`} />
-          <Text style={tw`text-[11px] font-bold ${item.isBanned ? 'text-red-500' : 'text-gray-500'}`}>
-            {item.isBanned ? 'Unban' : 'Ban'}
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity 
-          style={tw`flex-1 flex-row items-center justify-center py-2.5 rounded-xl border border-gray-100`}
-          onPress={() => confirmAction(item.id, 'suspend', item.name || item.email)}
-        >
-          <Clock size={14} color="#64748B" style={tw`mr-2`} />
-          <Text style={tw`text-[11px] font-bold text-gray-500`}>Suspend</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity 
-          style={tw`flex-row items-center justify-center w-12 h-10 rounded-xl bg-red-50 border border-red-100`}
-          onPress={() => confirmAction(item.id, 'delete', item.name || item.email)}
-        >
-          <Trash2 size={16} color="#EF4444" />
-        </TouchableOpacity>
+      <View style={tw`mt-4 flex-row items-center gap-4`}>
+        <View style={tw`flex-row items-center gap-1.5`}>
+          <Clock size={12} color="#94A3B8" />
+          <Text style={tw`text-[10px] font-bold text-slate-400`}>Joined {new Date(item.createdAt).toLocaleDateString()}</Text>
+        </View>
+        {item.emailVerifiedAt && (
+          <View style={tw`flex-row items-center gap-1.5`}>
+            <ShieldCheck size={12} color="#10B981" />
+            <Text style={tw`text-[10px] font-bold text-green-500`}>Verified</Text>
+          </View>
+        )}
       </View>
     </View>
   );
@@ -124,10 +161,29 @@ export default function AdminUsersScreen() {
           data={data?.data || []}
           renderItem={renderUser}
           keyExtractor={(item) => item.id}
-          contentContainerStyle={{ paddingBottom: 120 }}
+          contentContainerStyle={{ paddingBottom: 150 }}
           ListEmptyComponent={
             <Text style={tw`text-gray-400 text-center py-10`}>No users found</Text>
           }
+          ListFooterComponent={data?.pagination && (
+            <View style={tw`flex-row justify-between items-center py-6 px-4`}>
+              <TouchableOpacity 
+                disabled={page === 1}
+                onPress={() => setPage(page - 1)}
+                style={tw`px-4 py-2 rounded-xl bg-white border border-slate-200 ${page === 1 ? 'opacity-50' : ''}`}
+              >
+                <Text style={tw`font-bold text-slate-600`}>Previous</Text>
+              </TouchableOpacity>
+              <Text style={tw`text-slate-400 font-bold`}>Page {page} of {data.pagination.totalPages}</Text>
+              <TouchableOpacity 
+                disabled={page >= data.pagination.totalPages}
+                onPress={() => setPage(page + 1)}
+                style={tw`px-4 py-2 rounded-xl bg-white border border-slate-200 ${page >= data.pagination.totalPages ? 'opacity-50' : ''}`}
+              >
+                <Text style={tw`font-bold text-slate-600`}>Next</Text>
+              </TouchableOpacity>
+            </View>
+          )}
         />
       )}
       <AdminBottomNav />

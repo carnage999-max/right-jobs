@@ -6,13 +6,13 @@ export const adminService = {
     return response.data;
   },
   
-  getUsers: async (params?: { search?: string; role?: string }) => {
+  getUsers: async (params?: { search?: string; role?: string; page?: number }) => {
     const response = await apiClient.get('/admin/users', { params });
     return response.data;
   },
 
   actionUser: async (userId: string, action: string) => {
-    const response = await apiClient.post(`/admin/users/${userId}/action`, { action });
+    const response = await apiClient.post('/admin/users/action', { id: userId, action });
     return response.data;
   },
   

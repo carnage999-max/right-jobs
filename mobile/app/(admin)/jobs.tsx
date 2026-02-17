@@ -15,12 +15,13 @@ import { AdminBottomNav } from '../../src/components/AdminBottomNav';
 export default function AdminJobsScreen() {
   const { user } = useAuth();
   const [search, setSearch] = useState('');
+  const [page, setPage] = useState(1);
   const router = useRouter();
   const navigation = useNavigation();
 
   const { data, isLoading } = useQuery({
-    queryKey: [QUERY_KEYS.ADMIN_JOBS, search],
-    queryFn: () => adminService.getJobs({ search }),
+    queryKey: [QUERY_KEYS.ADMIN_JOBS, search, page],
+    queryFn: () => adminService.getJobs({ search, page }),
     enabled: !!user?.mfaComplete,
   });
 
@@ -92,13 +93,32 @@ export default function AdminJobsScreen() {
           data={data?.data || []}
           renderItem={renderItem}
           keyExtractor={(item) => item.id}
-          contentContainerStyle={{ paddingBottom: 120 }}
+          contentContainerStyle={{ paddingBottom: 150 }}
           ListEmptyComponent={
             <View style={tw`items-center py-20`}>
               <Briefcase size={48} color="#E2E8F0" style={tw`mb-4`} />
               <Text style={tw`text-gray-400 text-center font-bold`}>No jobs to moderate</Text>
             </View>
           }
+          ListFooterComponent={data?.pagination && (
+            <View style={tw`flex-row justify-between items-center py-6 px-4`}>
+              <TouchableOpacity 
+                disabled={page === 1}
+                onPress={() => setPage(page - 1)}
+                style={tw`px-4 py-2 rounded-xl bg-white border border-slate-200 ${page === 1 ? 'opacity-50' : ''}`}
+              >
+                <Text style={tw`font-bold text-slate-600`}>Previous</Text>
+              </TouchableOpacity>
+              <Text style={tw`text-slate-400 font-bold`}>Page {page} of {data.pagination.totalPages}</Text>
+              <TouchableOpacity 
+                disabled={page >= data.pagination.totalPages}
+                onPress={() => setPage(page + 1)}
+                style={tw`px-4 py-2 rounded-xl bg-white border border-slate-200 ${page >= data.pagination.totalPages ? 'opacity-50' : ''}`}
+              >
+                <Text style={tw`font-bold text-slate-600`}>Next</Text>
+              </TouchableOpacity>
+            </View>
+          )}
         />
       )}
       <AdminBottomNav />
