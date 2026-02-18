@@ -85,7 +85,6 @@ export default function AdminVerificationReviewPage({ params }: { params: Promis
   ].filter(d => !!d.url);
 
   return (
-  return (
     <div className="max-w-6xl mx-auto space-y-6 md:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 p-4 md:p-0">
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <Button variant="ghost" className="ios-button h-10 px-4 font-bold text-slate-500 hover:bg-slate-100 rounded-xl w-full md:w-auto justify-start" onClick={() => router.back()}>
