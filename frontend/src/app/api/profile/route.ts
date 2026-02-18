@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { getAuthSession } from "@/lib/auth-mobile";
 import prisma from "@/lib/prisma";
 import { z } from "zod";
 
@@ -14,7 +14,7 @@ const profileSchema = z.object({
 
 export async function GET() {
   try {
-    const session = await auth();
+    const session = await getAuthSession();
     if (!session || !session.user) {
       return NextResponse.json({ ok: false, message: "Unauthorized" }, { status: 401 });
     }
@@ -69,7 +69,7 @@ export async function GET() {
 
 export async function PATCH(req: Request) {
   try {
-    const session = await auth();
+    const session = await getAuthSession();
     if (!session || !session.user) {
       return NextResponse.json({ ok: false, message: "Unauthorized" }, { status: 401 });
     }

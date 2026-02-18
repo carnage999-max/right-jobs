@@ -81,7 +81,7 @@ export const MFAScreen = () => {
               <Lock size={32} color="#014D9F" />
             </View>
             <Text style={tw`text-3xl font-black text-white tracking-tight text-center`}>Security Protocol</Text>
-            <Text style={tw`text-slate-400 font-bold uppercase text-[10px] tracking-[0.2em] mt-2 text-center`}>
+            <Text style={tw`text-slate-400 font-bold uppercase text-[10px] tracking-wider mt-2 text-center`}>
               Administrative Multi-Factor
             </Text>
           </View>
@@ -97,7 +97,7 @@ export const MFAScreen = () => {
             keyboardType="number-pad"
             maxLength={6}
             autoFocus
-            inputStyle={tw`h-20 text-center text-3xl font-black tracking-[0.3em] bg-[#1e293b] border-slate-700 text-white rounded-2xl`}
+            inputStyle={tw`h-20 text-center text-3xl font-black tracking-widest bg-[#1e293b] border-slate-700 text-white rounded-2xl`}
             containerStyle={tw`mb-8`}
           />
 

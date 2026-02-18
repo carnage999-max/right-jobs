@@ -56,7 +56,7 @@ export const VerifyEmailScreen = ({ route, navigation }: any) => {
           onChangeText={setToken}
           keyboardType="number-pad"
           maxLength={6}
-          className="text-center text-2xl tracking-[10px]"
+          className="text-center text-2xl tracking-widest"
           autoFocus
         />
 
