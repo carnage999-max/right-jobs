@@ -36,10 +36,10 @@ const ProfileScreen = () => {
   const isEmployer = user?.role?.toUpperCase() === 'EMPLOYER';
 
   const menuItems = [
-    { icon: UserIcon, label: 'Personal Dossier', desc: 'Edit identity & credentials', action: () => {} },
-    { icon: FileText, label: 'Resume & Documents', desc: 'Manage your curriculum vitae', action: () => {} },
-    { icon: ShieldCheck, label: 'Compliance Status', desc: 'ID Verification & trust score', action: () => {} },
-    { icon: Settings, label: 'Preferences', desc: 'System & notification settings', action: () => router.push('/settings') },
+    { icon: UserIcon, label: 'Personal Dossier', desc: 'Edit identity & credentials', action: () => router.push('/profile/personal' as any) },
+    { icon: FileText, label: 'Resume & Documents', desc: 'Manage your curriculum vitae', action: () => router.push('/profile/documents' as any) },
+    { icon: ShieldCheck, label: 'Compliance Status', desc: 'ID Verification & trust score', action: () => router.push('/profile/compliance' as any) },
+    { icon: Settings, label: 'Preferences', desc: 'System & notification settings', action: () => router.push('/settings' as any) },
   ];
 
   if (isLoading) {
@@ -58,7 +58,7 @@ const ProfileScreen = () => {
         showsVerticalScrollIndicator={false}
     >
       {/* Premium Header Background */}
-      <View style={tw`bg-slate-900 pt-20 pb-16 px-6 rounded-b-[3rem] shadow-2xl relative overflow-hidden`}>
+      <View style={tw`bg-slate-900 pt-20 pb-12 px-6 rounded-b-[3rem] shadow-2xl relative overflow-hidden`}>
          <View style={[tw`absolute top--20 right--20 w-80 h-80 rounded-full bg-primary/20`, { filter: 'blur(80px)' } as any]} />
          
          <View style={tw`items-center`}>
@@ -107,7 +107,7 @@ const ProfileScreen = () => {
          </View>
       </View>
 
-      <View style={tw`px-6 -mt-8`}>
+      <View style={tw`px-6 mt-6`}>
         {isAdmin && (
             <TouchableOpacity 
             onPress={() => router.push('/(admin)/dashboard' as any)}
@@ -165,7 +165,7 @@ const ProfileScreen = () => {
         </View>
 
         <Button
-            title="Disconnect Session"
+            title="Log Out"
             onPress={signOut}
             variant="ghost"
             icon={<LogOut size={20} color="#EF4444" />}
@@ -175,10 +175,10 @@ const ProfileScreen = () => {
 
         <View style={tw`items-center pb-10`}>
             <View style={tw`flex-row items-center gap-2 mb-2`}>
-                <Zap size={14} color="#CBD5E1" />
-                <Text style={tw`text-slate-300 text-[10px] font-black uppercase tracking-[0.3em]`}>RightJobs Nexus v1.2</Text>
+                <Zap size={14} color="#94A3B8" />
+                <Text style={tw`text-slate-400 text-[10px] font-black uppercase tracking-[0.3em]`}>RightJobs v1.2</Text>
             </View>
-            <Text style={tw`text-slate-200 text-[8px] font-bold`}>Authenticated Secure Connection Established</Text>
+            <Text style={tw`text-slate-400 text-[8px] font-bold`}>Authenticated Secure Connection Established</Text>
         </View>
       </View>
     </ScrollView>

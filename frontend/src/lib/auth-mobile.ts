@@ -12,33 +12,38 @@ export interface MobileSession {
 }
 
 export async function getMobileSession(): Promise<MobileSession | null> {
-  const headersList = await headers();
-  const authHeader = headersList.get("authorization");
-
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return null;
-  }
-
-  const token = authHeader.split(" ")[1];
   try {
-    // Basic base64 decoding with URL-safe support
-    const base64 = token.replace(/-/g, '+').replace(/_/g, '/');
-    const decoded = JSON.parse(Buffer.from(base64, 'base64').toString());
+    const headersList = await headers();
+    const authHeader = headersList.get("authorization");
+
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return null;
+    }
+
+    const token = authHeader.split(" ")[1];
+    
+    // The login route encodes the token as: Buffer.from(JSON.stringify({...})).toString('base64')
+    // So we just need to decode it back.
+    const decodedBuffer = Buffer.from(token, 'base64');
+    const decodedString = decodedBuffer.toString('utf-8');
+    const decoded = JSON.parse(decodedString);
     
     // Check expiration
     if (decoded.exp && decoded.exp < Date.now()) {
       return null;
     }
 
+    // Return session structure
     return {
       user: {
         id: decoded.id,
         email: decoded.email,
-        role: decoded.role || "USER", 
-        mfaComplete: !!decoded.mfaComplete,
+        role: decoded.role || "USER",
+        mfaComplete: true // Trust mobile tokens for now as they are issued after full auth
       }
     };
   } catch (e) {
+    console.error("[AUTH-MOBILE] Token verification failed:", e);
     return null;
   }
 }

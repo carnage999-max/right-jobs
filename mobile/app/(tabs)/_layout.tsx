@@ -5,6 +5,7 @@ import { Home, Briefcase, FileText, User, LayoutDashboard } from 'lucide-react-n
 import { useAuth } from '../../src/context/AuthContext';
 import { useColorScheme } from '@/components/useColorScheme';
 import Colors from '@/constants/Colors';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 /**
  * You can explore the built-in icon families and icons on the web at https://icons.expo.fyi/
@@ -21,6 +22,7 @@ export default function TabLayout() {
   const colorScheme = useColorScheme();
   const { user } = useAuth();
   const isAdmin = user?.role === 'admin';
+  const insets = useSafeAreaInsets();
 
   return (
     <Tabs
@@ -32,14 +34,15 @@ export default function TabLayout() {
         tabBarLabelStyle: {
           fontWeight: 'bold',
           fontSize: 10,
-          marginBottom: 8,
+          marginBottom: 4,
         },
         tabBarStyle: {
           backgroundColor: colorScheme === 'dark' ? '#0F172A' : '#FFFFFF',
           borderTopWidth: 1,
           borderTopColor: colorScheme === 'dark' ? '#1E293B' : '#F1F5F9',
-          height: Platform.OS === 'ios' ? 88 : 68,
-          paddingTop: 12,
+          height: 60 + insets.bottom,
+          paddingTop: 10,
+          paddingBottom: insets.bottom + 4,
           borderTopLeftRadius: 0,
           borderTopRightRadius: 0,
           elevation: 0,
@@ -63,7 +66,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="applications"
         options={{
-          title: 'Apps',
+          title: 'Applications',
           tabBarIcon: ({ color }) => <TabBarIcon Icon={FileText} color={color} />,
         }}
       />

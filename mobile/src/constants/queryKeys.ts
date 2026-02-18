@@ -1,5 +1,6 @@
 export const QUERY_KEYS = {
   USER: 'user',
+  PROFILE: 'profile',
   JOBS: 'jobs',
   JOB_DETAILS: 'job_details',
   APPLICATIONS: 'applications',
