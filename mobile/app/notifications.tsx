@@ -1,8 +1,8 @@
 import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity, FlatList } from 'react-native';
 import { useRouter } from 'expo-router';
-import { ChevronLeft, Bell, CheckCircle2, AlertCircle, InfoIcon } from 'lucide-react-native';
-import { tw } from '../../src/lib/tailwind';
+import { ChevronLeft, Bell, CheckCircle2, AlertCircle, Info, Archive, Trash2 } from 'lucide-react-native';
+import { tw } from '../src/lib/tailwind';
 
 interface Notification {
   id: string;
@@ -172,25 +172,32 @@ export default function NotificationsScreen() {
 
   return (
     <View style={tw`flex-1 bg-slate-50`}>
-      {/* Header */}
-      <View style={tw`bg-white pt-12 pb-4 px-6 border-b border-slate-100 flex-row items-center justify-between`}>
-        <View style={tw`flex-row items-center gap-3`}>
-          <TouchableOpacity
-            onPress={() => router.back()}
-            style={tw`p-2 -ml-2 rounded-full`}
-          >
-            <ChevronLeft size={24} color="#0F172A" />
-          </TouchableOpacity>
-          <View>
-            <Text style={tw`text-xl font-black text-slate-900 tracking-tight`}>Notifications</Text>
-            {unreadCount > 0 && (
-              <Text style={tw`text-xs text-slate-500 font-bold uppercase tracking-widest`}>
-                {unreadCount} unread
-              </Text>
-            )}
+      {/* System Header */}
+      <View style={tw`bg-slate-50 pt-12 pb-3 px-6 border-b border-slate-100 flex-row items-center justify-between`}>
+        <TouchableOpacity
+          onPress={() => router.back()}
+          style={tw`p-2 -ml-2 rounded-full`}
+        >
+          <ChevronLeft size={24} color="#0F172A" />
+        </TouchableOpacity>
+        <Bell size={24} color="#014D9F" />
+      </View>
+
+      {/* Custom Header */}
+      <View style={tw`bg-white pt-4 pb-4 px-6 border-b border-slate-100`}>
+        <View style={tw`flex-row items-center justify-between mb-2`}>
+          <Text style={tw`text-2xl font-black text-slate-900 tracking-tighter`}>Notifications</Text>
+          <View style={tw`flex-row gap-2`}>
+            <TouchableOpacity style={tw`p-2 rounded-lg bg-slate-100 hover:bg-slate-200`}>
+              <Archive size={18} color="#475569" />
+            </TouchableOpacity>
           </View>
         </View>
-        <Bell size={24} color="#014D9F" />
+        {unreadCount > 0 && (
+          <Text style={tw`text-xs text-slate-500 font-bold uppercase tracking-widest`}>
+            {unreadCount} unread
+          </Text>
+        )}
       </View>
 
       {notifications.length > 0 ? (
