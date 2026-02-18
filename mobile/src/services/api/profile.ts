@@ -30,5 +30,10 @@ export const profileService = {
   updateResumeFilename: async (resumeFilename: string) => {
     const response = await apiClient.patch('/profile', { resumeFilename });
     return response.data;
+  },
+  // Request password reset
+  requestPasswordReset: async () => {
+    const response = await apiClient.post('/auth/forgot-password', {});
+    return response.data;
   }
 };

@@ -1,16 +1,42 @@
-import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Dimensions } from 'react-native';
+import React, { useMemo } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, Dimensions, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../../src/context/AuthContext';
 import { Button } from '../../src/components/ui/Button';
 import { Briefcase, Bell, ShieldCheck, Zap, ArrowRight, User as UserIcon } from 'lucide-react-native';
 import { tw } from '../../src/lib/tailwind';
+import { useQuery } from '@tanstack/react-query';
+import { profileService } from '../../src/services/api/profile';
+import { QUERY_KEYS } from '../../src/constants/queryKeys';
 
 const { width } = Dimensions.get('window');
 
 export default function HomeScreen() {
   const { user } = useAuth();
   const router = useRouter();
+
+  // Fetch profile to calculate real visibility score
+  const { data: profileData } = useQuery({
+    queryKey: [QUERY_KEYS.PROFILE],
+    queryFn: () => profileService.getProfile(),
+  });
+
+  const profile = profileData?.data;
+
+  // Calculate visibility score from actual profile data
+  const visibilityScore = useMemo(() => {
+    if (!profile) return 10;
+
+    let score = 10; // Base score
+    if (profile.user?.name) score += 20;
+    if (profile.bio) score += 20;
+    if (profile.location) score += 10;
+    if (profile.skills?.length > 0) score += 10;
+    if (profile.resumeUrl) score += 10;
+    if (profile.verificationStatus === 'VERIFIED') score += 20;
+
+    return Math.min(score, 100);
+  }, [profile]);
 
   return (
     <View style={tw`flex-1 bg-slate-50`}>
@@ -30,7 +56,10 @@ export default function HomeScreen() {
                Hello, <Text style={tw`text-primary italic`}>{user?.name?.split(' ')[0] || 'Member'}</Text>
             </Text>
           </View>
-          <TouchableOpacity style={tw`bg-white h-12 w-12 rounded-2xl items-center justify-center shadow-lg shadow-slate-200/50 border border-slate-100`}>
+          <TouchableOpacity 
+            onPress={() => router.push('/notifications')}
+            style={tw`bg-white h-12 w-12 rounded-2xl items-center justify-center shadow-lg shadow-slate-200/50 border border-slate-100`}
+          >
             <Bell size={22} color="#94A3B8" />
             <View style={tw`absolute top-3 right-3 w-2.5 h-2.5 bg-orange-500 rounded-full border-2 border-white`} />
           </TouchableOpacity>
@@ -42,8 +71,12 @@ export default function HomeScreen() {
            
            <View style={tw`flex-row items-center justify-between mb-8`}>
               <View>
-                 <Text style={tw`text-white text-xl font-black tracking-tight mb-1`}>Profile Pulse</Text>
-                 <Text style={tw`text-slate-400 font-bold text-xs uppercase tracking-widest`}>Verification In Progress</Text>
+                 <Text style={tw`text-white text-xl font-black tracking-tight mb-1`}>Visibility Score</Text>
+                 <Text style={tw`text-slate-400 font-bold text-xs uppercase tracking-widest`}>
+                   {profile?.verificationStatus === 'VERIFIED' 
+                     ? 'Identity Verified' 
+                     : 'Complete your profile'}
+                 </Text>
               </View>
               <View style={tw`h-12 w-12 rounded-2xl bg-white/10 items-center justify-center`}>
                  <ShieldCheck size={24} color="#FFF" />
@@ -53,15 +86,23 @@ export default function HomeScreen() {
            <View style={tw`mb-8`}>
               <View style={tw`flex-row justify-between mb-2`}>
                  <Text style={tw`text-slate-400 text-[10px] font-black uppercase tracking-widest`}>Completeness</Text>
-                 <Text style={tw`text-white font-black text-xs`}>85%</Text>
+                 <Text style={tw`text-white font-black text-xs`}>{visibilityScore}%</Text>
               </View>
               <View style={tw`bg-white/10 h-2.5 rounded-full overflow-hidden`}>
-                 <View style={tw`bg-primary h-full w-[85%] rounded-full shadow-lg shadow-primary/50`} />
+                 <View 
+                   style={[
+                     tw`h-full rounded-full shadow-lg shadow-primary/50`,
+                     { 
+                       backgroundColor: visibilityScore > 70 ? '#014D9F' : '#F59E0B',
+                       width: `${visibilityScore}%` 
+                     }
+                   ]} 
+                 />
               </View>
            </View>
 
            <Button 
-             title="Boost Visibility" 
+             title={visibilityScore === 100 ? "Profile Complete" : "Boost Visibility"} 
              onPress={() => router.push('/(tabs)/profile')} 
              style={tw`bg-white h-14 rounded-2xl`} 
              textStyle={tw`text-slate-900 font-black`}

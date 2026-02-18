@@ -21,17 +21,18 @@ export default function ComplianceStatusScreen() {
 
   const profile = profileData?.data;
 
-  // Calculate trust score based on profile completion
-  const trustScore = useMemo(() => {
+  // Calculate trust/visibility score based on actual profile completion
+  // This matches the website's trust score calculation exactly
+  const visibilityScore = useMemo(() => {
     if (!profile) return 10;
 
     let score = 10; // Base score
-    if (profile.user?.name) score += 20;
-    if (profile.bio) score += 20;
-    if (profile.location) score += 10;
-    if (profile.skills?.length > 0) score += 10;
-    if (profile.resumeUrl) score += 10;
-    if (profile.verificationStatus === 'VERIFIED') score += 20;
+    if (profile.user?.name) score += 20; // Name filled
+    if (profile.bio) score += 20; // Bio filled
+    if (profile.location) score += 10; // Location filled
+    if (profile.skills?.length > 0) score += 10; // Skills added
+    if (profile.resumeUrl) score += 10; // Resume uploaded
+    if (profile.verificationStatus === 'VERIFIED') score += 20; // ID verified
 
     return Math.min(score, 100);
   }, [profile]);
@@ -70,8 +71,8 @@ export default function ComplianceStatusScreen() {
               Your account has passed all security checks. You have full access to premium features.
             </Text>
             <View style={tw`bg-white p-4 rounded-xl shadow-sm w-full flex-row items-center justify-between`}>
-              <Text style={tw`text-xs font-bold text-slate-500 uppercase tracking-widest`}>Trust Score</Text>
-              <Text style={tw`font-black text-green-600 text-lg`}>{trustScore}/100</Text>
+              <Text style={tw`text-xs font-bold text-slate-500 uppercase tracking-widest`}>Visibility Score</Text>
+              <Text style={tw`font-black text-green-600 text-lg`}>{visibilityScore}%</Text>
             </View>
           </View>
         ) : isPending ? (
@@ -112,9 +113,9 @@ export default function ComplianceStatusScreen() {
 
         {/* Profile Strength Card */}
         <View style={tw`bg-slate-900 text-white p-6 rounded-[2rem] border border-slate-800 mb-6`}>
-          <Text style={tw`text-xs font-black uppercase tracking-widest text-slate-400 mb-4`}>Profile Strength</Text>
+          <Text style={tw`text-xs font-black uppercase tracking-widest text-slate-400 mb-4`}>Visibility Score</Text>
           <View style={tw`flex-row items-end gap-2 mb-6`}>
-            <Text style={tw`text-5xl font-black tracking-tighter text-white`}>{trustScore}</Text>
+            <Text style={tw`text-5xl font-black tracking-tighter text-white`}>{visibilityScore}</Text>
             <Text style={tw`text-xs font-bold text-slate-500 uppercase mb-2`}>%</Text>
           </View>
           
@@ -122,24 +123,109 @@ export default function ComplianceStatusScreen() {
           <View style={tw`h-3 w-full rounded-full bg-slate-800 overflow-hidden mb-4`}>
             <View 
               style={[
-                tw`h-full ${trustScore > 70 ? 'bg-primary' : 'bg-amber-500'}`,
-                { width: `${trustScore}%` }
+                tw`h-full ${visibilityScore > 70 ? 'bg-primary' : 'bg-amber-500'}`,
+                { width: `${visibilityScore}%` }
               ]}
             />
           </View>
           
           <Text style={tw`text-sm text-slate-400 leading-relaxed`}>
-            {trustScore >= 90 
+            {visibilityScore >= 90 
               ? "You are appearing in the top segment of candidate searches."
-              : trustScore >= 70
+              : visibilityScore >= 70
               ? "Complete your profile to increase your visibility to employers."
               : "Complete all profile sections and verify your ID to reach 100% visibility."}
           </Text>
         </View>
 
+        {/* Breakdown of Score */}
+        <View style={tw`bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 mb-6`}>
+          <Text style={tw`text-lg font-black text-slate-900 mb-4`}>Completion Progress</Text>
+          
+          <View style={tw`space-y-3`}>
+            {/* Name */}
+            <View style={tw`flex-row items-center justify-between p-3 bg-slate-50 rounded-xl`}>
+              <View style={tw`flex-row items-center flex-1`}>
+                <View style={tw`h-5 w-5 rounded-full ${profile?.user?.name ? 'bg-green-100' : 'bg-slate-200'} items-center justify-center mr-3 shrink-0`}>
+                  {profile?.user?.name && <CheckCircle2 size={12} color="#10B981" />}
+                </View>
+                <Text style={tw`font-bold text-slate-900 text-sm`}>Full Name</Text>
+              </View>
+              <Text style={tw`text-xs font-bold ${profile?.user?.name ? 'text-green-600' : 'text-slate-400'} uppercase tracking-wide`}>
+                {profile?.user?.name ? '+20 pts' : 'Pending'}
+              </Text>
+            </View>
+
+            {/* Bio */}
+            <View style={tw`flex-row items-center justify-between p-3 bg-slate-50 rounded-xl`}>
+              <View style={tw`flex-row items-center flex-1`}>
+                <View style={tw`h-5 w-5 rounded-full ${profile?.bio ? 'bg-green-100' : 'bg-slate-200'} items-center justify-center mr-3 shrink-0`}>
+                  {profile?.bio && <CheckCircle2 size={12} color="#10B981" />}
+                </View>
+                <Text style={tw`font-bold text-slate-900 text-sm`}>Professional Bio</Text>
+              </View>
+              <Text style={tw`text-xs font-bold ${profile?.bio ? 'text-green-600' : 'text-slate-400'} uppercase tracking-wide`}>
+                {profile?.bio ? '+20 pts' : 'Pending'}
+              </Text>
+            </View>
+
+            {/* Location */}
+            <View style={tw`flex-row items-center justify-between p-3 bg-slate-50 rounded-xl`}>
+              <View style={tw`flex-row items-center flex-1`}>
+                <View style={tw`h-5 w-5 rounded-full ${profile?.location ? 'bg-green-100' : 'bg-slate-200'} items-center justify-center mr-3 shrink-0`}>
+                  {profile?.location && <CheckCircle2 size={12} color="#10B981" />}
+                </View>
+                <Text style={tw`font-bold text-slate-900 text-sm`}>Location</Text>
+              </View>
+              <Text style={tw`text-xs font-bold ${profile?.location ? 'text-green-600' : 'text-slate-400'} uppercase tracking-wide`}>
+                {profile?.location ? '+10 pts' : 'Pending'}
+              </Text>
+            </View>
+
+            {/* Skills */}
+            <View style={tw`flex-row items-center justify-between p-3 bg-slate-50 rounded-xl`}>
+              <View style={tw`flex-row items-center flex-1`}>
+                <View style={tw`h-5 w-5 rounded-full ${(profile?.skills?.length || 0) > 0 ? 'bg-green-100' : 'bg-slate-200'} items-center justify-center mr-3 shrink-0`}>
+                  {(profile?.skills?.length || 0) > 0 && <CheckCircle2 size={12} color="#10B981" />}
+                </View>
+                <Text style={tw`font-bold text-slate-900 text-sm`}>Skills ({profile?.skills?.length || 0})</Text>
+              </View>
+              <Text style={tw`text-xs font-bold ${(profile?.skills?.length || 0) > 0 ? 'text-green-600' : 'text-slate-400'} uppercase tracking-wide`}>
+                {(profile?.skills?.length || 0) > 0 ? '+10 pts' : 'Pending'}
+              </Text>
+            </View>
+
+            {/* Resume */}
+            <View style={tw`flex-row items-center justify-between p-3 bg-slate-50 rounded-xl`}>
+              <View style={tw`flex-row items-center flex-1`}>
+                <View style={tw`h-5 w-5 rounded-full ${profile?.resumeUrl ? 'bg-green-100' : 'bg-slate-200'} items-center justify-center mr-3 shrink-0`}>
+                  {profile?.resumeUrl && <CheckCircle2 size={12} color="#10B981" />}
+                </View>
+                <Text style={tw`font-bold text-slate-900 text-sm`}>Resume</Text>
+              </View>
+              <Text style={tw`text-xs font-bold ${profile?.resumeUrl ? 'text-green-600' : 'text-slate-400'} uppercase tracking-wide`}>
+                {profile?.resumeUrl ? '+10 pts' : 'Pending'}
+              </Text>
+            </View>
+
+            {/* ID Verification */}
+            <View style={tw`flex-row items-center justify-between p-3 bg-slate-50 rounded-xl`}>
+              <View style={tw`flex-row items-center flex-1`}>
+                <View style={tw`h-5 w-5 rounded-full ${isVerified ? 'bg-green-100' : 'bg-slate-200'} items-center justify-center mr-3 shrink-0`}>
+                  {isVerified && <CheckCircle2 size={12} color="#10B981" />}
+                </View>
+                <Text style={tw`font-bold text-slate-900 text-sm`}>ID Verification</Text>
+              </View>
+              <Text style={tw`text-xs font-bold ${isVerified ? 'text-green-600' : 'text-slate-400'} uppercase tracking-wide`}>
+                {isVerified ? '+20 pts' : 'Pending'}
+              </Text>
+            </View>
+          </View>
+        </View>
+
         {/* Why It Matters Card */}
         <View style={tw`bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 mb-6`}>
-          <Text style={tw`text-lg font-black text-slate-900 mb-4`}>Why Trust Score Matters</Text>
+          <Text style={tw`text-lg font-black text-slate-900 mb-4`}>Why Visibility Matters</Text>
           
           <View style={tw`flex-row gap-3 mb-4`}>
             <View style={tw`h-8 w-8 rounded-full bg-green-100 items-center justify-center shrink-0`}>
@@ -156,53 +242,13 @@ export default function ComplianceStatusScreen() {
           </View>
         </View>
 
-        {/* Trust Requirements */}
-        <View style={tw`space-y-3`}>
-          <Text style={tw`text-xs font-black text-slate-400 uppercase tracking-widest mb-2 ml-1`}>Trust Requirements</Text>
-          
-          {/* Email Confirmed */}
-          <View style={tw`bg-white p-4 rounded-2xl border border-slate-100 flex-row items-center`}>
-            <View style={tw`h-6 w-6 rounded-full bg-green-100 items-center justify-center mr-4 shrink-0`}>
-              <CheckCircle2 size={14} color="#10B981" />
-            </View>
-            <View>
-              <Text style={tw`font-bold text-slate-900 text-sm`}>Email Confirmed</Text>
-              <Text style={tw`text-slate-400 text-[10px] font-bold uppercase tracking-wide`}>Completed</Text>
-            </View>
-          </View>
-
-          {/* Government ID */}
-          <View style={tw`bg-white p-4 rounded-2xl border ${isVerified ? 'border-green-100' : 'border-slate-100'} flex-row items-center ${!isVerified && !isPending ? 'opacity-50' : ''}`}>
-            <View style={tw`h-6 w-6 rounded-full ${isVerified ? 'bg-green-100' : 'border-2 border-slate-200'} items-center justify-center mr-4 shrink-0`}>
-              {isVerified && <CheckCircle2 size={14} color="#10B981" />}
-            </View>
-            <View>
-              <Text style={tw`font-bold text-slate-900 text-sm`}>Government ID</Text>
-              <Text style={tw`text-slate-400 text-[10px] font-bold uppercase tracking-wide`}>
-                {isVerified ? 'Verified' : 'Required'}
-              </Text>
-            </View>
-          </View>
-
-          {/* Selfie Verification */}
-          <View style={tw`bg-white p-4 rounded-2xl border ${isVerified ? 'border-green-100' : 'border-slate-100'} flex-row items-center ${!isVerified && !isPending ? 'opacity-50' : ''}`}>
-            <View style={tw`h-6 w-6 rounded-full ${isVerified ? 'bg-green-100' : 'border-2 border-slate-200'} items-center justify-center mr-4 shrink-0`}>
-              {isVerified && <CheckCircle2 size={14} color="#10B981" />}
-            </View>
-            <View>
-              <Text style={tw`font-bold text-slate-900 text-sm`}>Selfie Verification</Text>
-              <Text style={tw`text-slate-400 text-[10px] font-bold uppercase tracking-wide`}>
-                {isVerified ? 'Verified' : 'Required'}
-              </Text>
-            </View>
-          </View>
-        </View>
-      </ScrollView>
-    </View>
-  );
-}
-         </View>
-
+        {/* Go to Profile Button */}
+        <Button
+          title="Complete Your Profile"
+          style={tw`w-full bg-primary rounded-2xl h-14 shadow-lg shadow-primary/30`}
+          textStyle={tw`font-black text-white`}
+          onPress={() => router.push('/profile/personal' as any)}
+        />
       </ScrollView>
     </View>
   );

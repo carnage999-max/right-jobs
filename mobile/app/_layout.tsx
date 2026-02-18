@@ -5,17 +5,15 @@ import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClientProvider } from '@tanstack/react-query';
 import Toast from 'react-native-toast-message';
 import { AuthProvider } from '../src/context/AuthContext';
 import { useColorScheme } from '@/components/useColorScheme';
+import { queryClient } from '../src/lib/queryClient';
 import 'react-native-reanimated';
 
 import { AnimatedSplashScreen } from '../src/components/AnimatedSplashScreen';
 import { useState } from 'react';
-
-// Create a client
-const queryClient = new QueryClient();
 
 export {
   // Catch any errors thrown by the Layout component.
