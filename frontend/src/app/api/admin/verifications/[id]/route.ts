@@ -37,6 +37,22 @@ export async function GET(
       return NextResponse.json({ ok: false, message: "Verification not found" }, { status: 404 });
     }
 
+    // Generate signed URLs for private S3 documents
+    const { getSignedDownloadUrl } = await import("@/lib/s3");
+    
+    if (verification.docFrontUrl) {
+      const key = verification.docFrontUrl.split(".com/")[1];
+      if (key) verification.docFrontUrl = await getSignedDownloadUrl(key);
+    }
+    if (verification.docBackUrl) {
+      const key = verification.docBackUrl.split(".com/")[1];
+      if (key) verification.docBackUrl = await getSignedDownloadUrl(key);
+    }
+    if (verification.selfieUrl) {
+      const key = verification.selfieUrl.split(".com/")[1];
+      if (key) verification.selfieUrl = await getSignedDownloadUrl(key);
+    }
+
     return NextResponse.json({ ok: true, data: verification });
   } catch (error) {
     console.error("Fetch verification error:", error);

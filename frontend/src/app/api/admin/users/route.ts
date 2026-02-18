@@ -40,9 +40,21 @@ export async function GET(req: Request) {
       prisma.user.count(),
     ]);
 
+    // Generate signed URLs for avatars
+    const { getSignedDownloadUrl } = await import("@/lib/s3");
+    const usersWithSignedUrls = await Promise.all(users.map(async (user) => {
+      if (user.avatarUrl) {
+        const key = user.avatarUrl.split(".com/")[1];
+        if (key) {
+          return { ...user, avatarUrl: await getSignedDownloadUrl(key) };
+        }
+      }
+      return user;
+    }));
+
     return NextResponse.json({ 
       ok: true, 
-      data: users,
+      data: usersWithSignedUrls,
       pagination: {
         total,
         page,

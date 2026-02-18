@@ -52,6 +52,14 @@ export async function GET() {
       return NextResponse.json({ ok: true, data: newProfile });
     }
 
+    if (profile?.user?.avatarUrl) {
+      const { getSignedDownloadUrl } = await import("@/lib/s3");
+      const key = profile.user.avatarUrl.split(".com/")[1];
+      if (key) {
+        (profile.user as any).avatarUrl = await getSignedDownloadUrl(key);
+      }
+    }
+
     return NextResponse.json({ ok: true, data: profile });
   } catch (error) {
     console.error("Profile fetch error:", error);

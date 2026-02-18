@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, FlatList, TouchableOpacity, ActivityIndicator, Dimensions, ScrollView } from 'react-native';
+import { View, Text, TextInput, FlatList, TouchableOpacity, ActivityIndicator, Dimensions, ScrollView, Image } from 'react-native';
+import { useRouter } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { Search, Filter, MapPin, Briefcase, Sparkles, Clock, DollarSign, ChevronRight } from 'lucide-react-native';
 import { jobsService } from '../../src/services/api/jobs';
@@ -17,6 +18,7 @@ const CATEGORIES = [
 ];
 
 export default function JobsScreen() {
+  const router = useRouter();
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   
@@ -26,36 +28,52 @@ export default function JobsScreen() {
   });
 
   const renderJobItem = ({ item }: { item: any }) => (
-    <TouchableOpacity style={tw`bg-white p-6 rounded-[2rem] mb-6 shadow-xl shadow-slate-200/50 border border-slate-50`}>
+    <TouchableOpacity 
+      onPress={() => router.push({ pathname: '/(tabs)/jobs', params: { id: item.id } } as any)}
+      style={tw`bg-white p-6 rounded-[2.5rem] mb-6 shadow-xl shadow-slate-200/50 border border-slate-50`}
+    >
       <View style={tw`flex-row gap-4`}>
-        <View style={tw`h-14 w-14 rounded-2xl bg-slate-50 border border-slate-100 items-center justify-center shadow-sm`}>
-          <Text style={tw`text-primary font-black text-xl`}>{item.companyName?.[0] || item.company?.[0] || 'J'}</Text>
+        <View style={tw`h-16 w-16 rounded-2xl bg-white border border-slate-100 items-center justify-center shadow-lg shadow-slate-200/50 overflow-hidden shrink-0`}>
+          {item.companyLogoUrl ? (
+            <Image source={{ uri: item.companyLogoUrl }} style={tw`h-full w-full`} resizeMode="cover" />
+          ) : (
+            <View style={tw`h-full w-full bg-primary/5 flex items-center justify-center`}>
+              <Text style={tw`text-primary font-black text-2xl`}>{item.companyName?.[0] || 'J'}</Text>
+            </View>
+          )}
         </View>
         <View style={tw`flex-1`}>
           <View style={tw`flex-row justify-between items-start mb-1`}>
-            <Text style={tw`text-lg font-black text-slate-900 flex-1 mr-2 leading-tight tracking-tight`}>{item.title}</Text>
+            <Text style={tw`text-xl font-black text-slate-900 flex-1 mr-2 leading-tight tracking-tight`}>{item.title}</Text>
           </View>
           <View style={tw`flex-row items-center mb-4`}>
-             <Briefcase size={12} color="#014D9F" style={tw`mr-1`} />
-             <Text style={tw`text-slate-500 font-bold text-xs`}>{item.companyName || item.company}</Text>
+             <Briefcase size={14} color="#014D9F" style={tw`mr-1`} />
+             <Text style={tw`text-slate-900 font-extrabold text-sm`}>{item.companyName}</Text>
           </View>
 
-          <View style={tw`flex-row flex-wrap gap-3`}>
-            <View style={tw`flex-row items-center bg-slate-50 px-2.5 py-1 rounded-lg`}>
-              <MapPin size={10} color="#94A3B8" />
+          <View style={tw`flex-row flex-wrap gap-2`}>
+            <View style={tw`flex-row items-center bg-slate-50 px-3 py-1.5 rounded-xl`}>
+              <MapPin size={12} color="#94A3B8" />
               <Text style={tw`text-[10px] font-bold text-slate-500 ml-1 uppercase tracking-tight`}>{item.location}</Text>
             </View>
-            <View style={tw`flex-row items-center bg-slate-100 px-2.5 py-1 rounded-lg`}>
-              <DollarSign size={10} color="#10B981" />
-              <Text style={tw`text-[10px] font-bold text-slate-700 ml-1`}>{item.salaryRange || 'Competitive'}</Text>
+            <View style={tw`flex-row items-center bg-green-50 px-3 py-1.5 rounded-xl`}>
+              <DollarSign size={12} color="#10B981" />
+              <Text style={tw`text-[10px] font-bold text-green-700 ml-1`}>{item.salaryRange || 'Competitive'}</Text>
             </View>
           </View>
         </View>
-        <View style={tw`justify-center`}>
-           <View style={tw`bg-slate-50 p-2 rounded-full`}>
-              <ChevronRight size={16} color="#CBD5E1" />
-           </View>
+      </View>
+      
+      <View style={tw`flex-row justify-between items-center mt-6 pt-6 border-t border-slate-50`}>
+        <View style={tw`bg-slate-100 px-3 py-1.5 rounded-full`}>
+          <Text style={tw`text-[10px] font-black text-slate-900 uppercase tracking-widest`}>
+            {item.type?.replace('_', ' ') || 'Full Time'}
+          </Text>
         </View>
+        <TouchableOpacity style={tw`bg-primary px-6 py-2.5 rounded-xl flex-row items-center`}>
+          <Text style={tw`text-white font-black text-xs mr-2`}>Apply Now</Text>
+          <Sparkles size={12} color="#FFF" />
+        </TouchableOpacity>
       </View>
     </TouchableOpacity>
   );

@@ -28,7 +28,6 @@ const authSchema = z.object({
   name: z.string().optional(),
   email: z.string().email('Invalid email address'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
-  role: z.enum(['seeker', 'employer']).default('seeker'),
 });
 
 type AuthFormValues = z.infer<typeof authSchema>;
@@ -46,7 +45,6 @@ export const LoginScreen = () => {
       name: '',
       email: '',
       password: '',
-      role: 'seeker',
     },
   });
 
@@ -183,34 +181,6 @@ export const LoginScreen = () => {
               </View>
             )}
           />
-
-          {mode === 'signup' && (
-            <Controller
-              control={control}
-              name="role"
-              render={({ field: { onChange, value } }) => (
-                <View style={tw`mb-6 mt-2`}>
-                  <Text style={tw`text-sm font-bold text-slate-700 mb-3 ml-1`}>Account Type</Text>
-                  <View style={tw`flex-row gap-x-3`}>
-                    <TouchableOpacity 
-                      onPress={() => onChange('seeker')}
-                      style={tw`flex-1 py-3 rounded-2xl border-2 items-center ${value === 'seeker' ? 'bg-primary/5 border-primary' : 'bg-slate-50 border-slate-100'}`}
-                    >
-                      <Briefcase size={18} color={value === 'seeker' ? '#014D9F' : '#94A3B8'} style={tw`mb-1`} />
-                      <Text style={tw`font-bold text-[11px] ${value === 'seeker' ? 'text-primary' : 'text-slate-400'}`}>Job Seeker</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity 
-                      onPress={() => onChange('employer')}
-                      style={tw`flex-1 py-3 rounded-2xl border-2 items-center ${value === 'employer' ? 'bg-primary/5 border-primary' : 'bg-slate-50 border-slate-100'}`}
-                    >
-                      <ShieldCheck size={18} color={value === 'employer' ? '#014D9F' : '#94A3B8'} style={tw`mb-1`} />
-                      <Text style={tw`font-bold text-[11px] ${value === 'employer' ? 'text-primary' : 'text-slate-400'}`}>Employer</Text>
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              )}
-            />
-          )}
 
           <Button
             title={mode === 'login' ? 'Sign In Now' : 'Create My Account'}

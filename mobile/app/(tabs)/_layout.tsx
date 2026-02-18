@@ -26,23 +26,24 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+        tabBarInactiveTintColor: '#94A3B8',
         headerShown: false,
+        tabBarShowLabel: true,
+        tabBarLabelStyle: {
+          fontWeight: 'bold',
+          fontSize: 10,
+          marginBottom: 8,
+        },
         tabBarStyle: {
-          backgroundColor: colorScheme === 'dark' ? '#1E293B' : '#FFFFFF',
-          borderTopWidth: 0,
-          elevation: 10,
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: 10 },
-          shadowOpacity: 0.1,
-          shadowRadius: 20,
-          position: 'absolute',
-          bottom: 25,
-          left: 20,
-          right: 20,
-          height: 65,
-          borderRadius: 32,
-          paddingBottom: 10,
-          paddingTop: 10,
+          backgroundColor: colorScheme === 'dark' ? '#0F172A' : '#FFFFFF',
+          borderTopWidth: 1,
+          borderTopColor: colorScheme === 'dark' ? '#1E293B' : '#F1F5F9',
+          height: Platform.OS === 'ios' ? 88 : 68,
+          paddingTop: 12,
+          borderTopLeftRadius: 0,
+          borderTopRightRadius: 0,
+          elevation: 0,
+          shadowOpacity: 0,
         },
       }}>
       <Tabs.Screen
@@ -71,6 +72,19 @@ export default function TabLayout() {
         options={{
           title: 'Profile',
           tabBarIcon: ({ color }) => <TabBarIcon Icon={User} color={color} />,
+        }}
+      />
+      {/* Hide non-functional and extra tabs */}
+      <Tabs.Screen
+        name="admin"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="two"
+        options={{
+          href: null,
         }}
       />
     </Tabs>

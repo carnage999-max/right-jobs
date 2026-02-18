@@ -1,86 +1,185 @@
 import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Image, ActivityIndicator, Platform } from 'react-native';
 import { useAuth } from '../../src/context/AuthContext';
 import { Button } from '../../src/components/ui/Button';
-import { User, Settings, ShieldCheck, LogOut, ChevronRight, FileText } from 'lucide-react-native';
+import { 
+  User as UserIcon, 
+  Settings, 
+  ShieldCheck, 
+  LogOut, 
+  ChevronRight, 
+  FileText, 
+  MapPin, 
+  Briefcase,
+  Sparkles,
+  Zap,
+  LayoutDashboard,
+  PlusCircle
+} from 'lucide-react-native';
 import { useRouter } from 'expo-router';
+import { useQuery } from '@tanstack/react-query';
+import { profileService } from '../../src/services/api/profile';
+import { QUERY_KEYS } from '../../src/constants/queryKeys';
+import { tw } from '../../src/lib/tailwind';
 
 const ProfileScreen = () => {
   const { user, signOut } = useAuth();
   const router = useRouter();
 
-  const isAdmin = user?.role === 'admin' || user?.role === 'ADMIN';
+  const { data: profileData, isLoading } = useQuery({
+    queryKey: [QUERY_KEYS.PROFILE],
+    queryFn: () => profileService.getProfile(),
+  });
+
+  const profile = profileData?.data;
+  const isAdmin = user?.role?.toUpperCase() === 'ADMIN';
+  const isEmployer = user?.role?.toUpperCase() === 'EMPLOYER';
 
   const menuItems = [
-    { icon: User, label: 'Edit Profile', action: () => {} },
-    { icon: FileText, label: 'My Resume', action: () => {} },
-    { icon: ShieldCheck, label: 'ID Verification', action: () => {} },
-    { icon: Settings, label: 'Settings', action: () => router.push('/settings') },
+    { icon: UserIcon, label: 'Personal Dossier', desc: 'Edit identity & credentials', action: () => {} },
+    { icon: FileText, label: 'Resume & Documents', desc: 'Manage your curriculum vitae', action: () => {} },
+    { icon: ShieldCheck, label: 'Compliance Status', desc: 'ID Verification & trust score', action: () => {} },
+    { icon: Settings, label: 'Preferences', desc: 'System & notification settings', action: () => router.push('/settings') },
   ];
 
+  if (isLoading) {
+    return (
+      <View style={tw`flex-1 bg-slate-50 justify-center items-center`}>
+        <ActivityIndicator size="large" color="#014D9F" />
+        <Text style={tw`mt-4 text-[10px] font-black uppercase text-slate-300 tracking-widest`}>Syncing Profile</Text>
+      </View>
+    );
+  }
+
   return (
-    <ScrollView className="flex-1 bg-background-light px-6 pt-16">
-      <View className="items-center mb-10">
-        <View className="relative mb-4">
-          <View className="w-24 h-24 bg-primary/10 rounded-full items-center justify-center border-4 border-white shadow-sm">
-            <User size={48} color="#0EA5E9" />
-          </View>
-          <TouchableOpacity 
-            className="absolute bottom-0 right-0 bg-white p-2 rounded-full shadow-md border border-gray-100"
-          >
-            <Settings size={16} color="#64748B" />
-          </TouchableOpacity>
-        </View>
-        <Text className="text-2xl font-bold text-gray-900">{user?.name || 'Full Name'}</Text>
-        <Text className="text-gray-500 mb-2">{user?.email || 'email@example.com'}</Text>
-        <View className="bg-success/10 px-3 py-1 rounded-full">
-          <Text className="text-success text-xs font-bold uppercase">Verified</Text>
-        </View>
-      </View>
-
-      {isAdmin && (
-        <TouchableOpacity 
-          onPress={() => router.push('/(admin)/dashboard')}
-          className="bg-secondary rounded-2xl p-4 mb-6 flex-row items-center shadow-lg"
-        >
-          <View className="bg-white/20 p-2 rounded-xl mr-4">
-            <ShieldCheck size={24} color="#FFF" />
-          </View>
-          <View className="flex-1">
-            <Text className="text-white font-bold text-lg">Admin Mode</Text>
-            <Text className="text-white/80 text-sm">Manage users, jobs and more</Text>
-          </View>
-          <ChevronRight size={20} color="#FFF" />
-        </TouchableOpacity>
-      )}
-
-      <View className="bg-white rounded-3xl p-2 shadow-sm mb-6">
-        {menuItems.map((item, idx) => (
-          <TouchableOpacity 
-            key={idx}
-            onPress={item.action}
-            className={`flex-row items-center p-4 ${idx !== menuItems.length - 1 ? 'border-b border-gray-50' : ''}`}
-          >
-            <View className="bg-gray-50 p-2 rounded-xl mr-4">
-              <item.icon size={20} color="#64748B" />
+    <ScrollView 
+        style={tw`flex-1 bg-slate-50`} 
+        contentContainerStyle={{ paddingBottom: 120 }}
+        showsVerticalScrollIndicator={false}
+    >
+      {/* Premium Header Background */}
+      <View style={tw`bg-slate-900 pt-20 pb-16 px-6 rounded-b-[3rem] shadow-2xl relative overflow-hidden`}>
+         <View style={[tw`absolute top--20 right--20 w-80 h-80 rounded-full bg-primary/20`, { filter: 'blur(80px)' } as any]} />
+         
+         <View style={tw`items-center`}>
+            <View style={tw`relative mb-6`}>
+              <View style={tw`w-32 h-32 bg-white rounded-[2.5rem] items-center justify-center border-4 border-slate-800 shadow-2xl overflow-hidden`}>
+                {user?.avatarUrl ? (
+                  <Image source={{ uri: user.avatarUrl }} style={tw`w-full h-full`} resizeMode="cover" />
+                ) : (
+                  <UserIcon size={56} color="#014D9F" />
+                )}
+              </View>
+              <TouchableOpacity 
+                style={tw`absolute bottom-1 right-1 bg-primary p-2.5 rounded-2xl shadow-lg border-2 border-slate-900`}
+              >
+                <Sparkles size={16} color="#FFF" />
+              </TouchableOpacity>
             </View>
-            <Text className="flex-1 text-gray-800 font-medium text-base">{item.label}</Text>
-            <ChevronRight size={20} color="#CBD5E1" />
-          </TouchableOpacity>
-        ))}
+
+            <Text style={tw`text-3xl font-black text-white tracking-tighter mb-1`}>
+                {user?.name || 'Full Name'}
+            </Text>
+            <View style={tw`flex-row items-center gap-2 mb-4`}>
+                <View style={tw`bg-primary/20 px-3 py-1 rounded-full border border-primary/30`}>
+                    <Text style={tw`text-primary text-[10px] font-black uppercase tracking-widest`}>
+                        {user?.role || 'Member'}
+                    </Text>
+                </View>
+                {profile?.verificationStatus === 'VERIFIED' && (
+                    <View style={tw`bg-green-500/20 px-3 py-1 rounded-full border border-green-500/30 flex-row items-center gap-1`}>
+                        <ShieldCheck size={10} color="#10B981" />
+                        <Text style={tw`text-green-400 text-[10px] font-black uppercase tracking-widest`}>Verified</Text>
+                    </View>
+                )}
+            </View>
+         </View>
+
+         {/* Completeness Bar */}
+         <View style={tw`bg-white/10 p-4 rounded-3xl mt-4 border border-white/5`}>
+            <View style={tw`flex-row justify-between mb-2`}>
+                <Text style={tw`text-slate-400 text-[10px] font-black uppercase tracking-widest`}>Profile Pulse</Text>
+                <Text style={tw`text-white font-black text-[10px]`}>85%</Text>
+            </View>
+            <View style={tw`bg-white/10 h-2 rounded-full overflow-hidden`}>
+                <View style={[tw`bg-primary h-full rounded-full shadow-lg shadow-primary/50`, { width: '85%' }]} />
+            </View>
+         </View>
       </View>
 
-      <Button
-        title="Sign Out"
-        onPress={signOut}
-        variant="ghost"
-        icon={<LogOut size={20} color="#EF4444" />}
-        textClassName="text-error"
-        className="mb-10"
-      />
+      <View style={tw`px-6 -mt-8`}>
+        {isAdmin && (
+            <TouchableOpacity 
+            onPress={() => router.push('/(admin)/dashboard' as any)}
+            style={tw`bg-white rounded-[2rem] p-6 mb-8 flex-row items-center shadow-2xl shadow-slate-200/50 border border-slate-100`}
+            >
+            <View style={tw`bg-slate-900 p-3 rounded-2xl mr-4`}>
+                <LayoutDashboard size={24} color="#FFF" />
+            </View>
+            <View style={tw`flex-1`}>
+                <Text style={tw`text-slate-900 font-black text-lg tracking-tight`}>Admin Command Center</Text>
+                <Text style={tw`text-slate-400 font-bold text-xs uppercase tracking-widest`}>System Management</Text>
+            </View>
+            <View style={tw`bg-slate-50 p-2 rounded-xl`}>
+                <ChevronRight size={20} color="#CBD5E1" />
+            </View>
+            </TouchableOpacity>
+        )}
 
-      <View className="items-center pb-32">
-        <Text className="text-gray-300 text-xs">RightJobs Mobile v1.0.0</Text>
+        {isEmployer && (
+            <TouchableOpacity 
+            onPress={() => router.push('/post-job' as any)}
+            style={tw`bg-white rounded-[2rem] p-6 mb-8 flex-row items-center shadow-2xl shadow-slate-200/50 border border-slate-100`}
+            >
+            <View style={tw`bg-primary p-3 rounded-2xl mr-4`}>
+                <PlusCircle size={24} color="#FFF" />
+            </View>
+            <View style={tw`flex-1`}>
+                <Text style={tw`text-slate-900 font-black text-lg tracking-tight`}>Employer Center</Text>
+                <Text style={tw`text-slate-400 font-bold text-xs uppercase tracking-widest`}>Post a New Opportunity</Text>
+            </View>
+            <View style={tw`bg-slate-50 p-2 rounded-xl`}>
+                <ChevronRight size={20} color="#CBD5E1" />
+            </View>
+            </TouchableOpacity>
+        )}
+
+        <Text style={tw`text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-4 ml-1`}>Account Control</Text>
+        <View style={tw`bg-white rounded-[2.5rem] p-2 shadow-xl shadow-slate-200/50 border border-slate-50 mb-8`}>
+            {menuItems.map((item, idx) => (
+            <TouchableOpacity 
+                key={idx}
+                onPress={item.action}
+                style={tw`flex-row items-center p-5 ${idx !== menuItems.length - 1 ? 'border-b border-slate-50' : ''}`}
+            >
+                <View style={[tw`p-3 rounded-2xl mr-4`, { backgroundColor: idx === 0 ? '#014D9F10' : '#F1F5F9' }]}>
+                    <item.icon size={20} color={idx === 0 ? '#014D9F' : '#64748B'} />
+                </View>
+                <View style={tw`flex-1`}>
+                    <Text style={tw`text-slate-900 font-black text-base tracking-tight`}>{item.label}</Text>
+                    <Text style={tw`text-slate-400 font-medium text-[10px] mt-0.5`}>{item.desc}</Text>
+                </View>
+                <ChevronRight size={18} color="#CBD5E1" />
+            </TouchableOpacity>
+            ))}
+        </View>
+
+        <Button
+            title="Disconnect Session"
+            onPress={signOut}
+            variant="ghost"
+            icon={<LogOut size={20} color="#EF4444" />}
+            style={tw`h-16 rounded-[2rem] border-2 border-red-50 mb-10`}
+            textStyle={tw`text-red-600 font-black tracking-tight`}
+        />
+
+        <View style={tw`items-center pb-10`}>
+            <View style={tw`flex-row items-center gap-2 mb-2`}>
+                <Zap size={14} color="#CBD5E1" />
+                <Text style={tw`text-slate-300 text-[10px] font-black uppercase tracking-[0.3em]`}>RightJobs Nexus v1.2</Text>
+            </View>
+            <Text style={tw`text-slate-200 text-[8px] font-bold`}>Authenticated Secure Connection Established</Text>
+        </View>
       </View>
     </ScrollView>
   );

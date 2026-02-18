@@ -7,7 +7,6 @@ import { signIn, useSession } from "next-auth/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { motion, AnimatePresence } from "framer-motion";
 import { 
   Briefcase, 
   Loader2, 
@@ -30,14 +29,16 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
+import { CardFooter } from "@/components/ui/card";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 
 const authSchema = z.object({
   name: z.string().optional().or(z.literal('')), 
   email: z.string().email("Invalid email address"),
   password: z.string().min(6, "Password must be at least 6 characters"),
+  website: z.string().optional(), // Honeypot field
 });
 
 type AuthFormValues = z.infer<typeof authSchema>;
@@ -50,6 +51,7 @@ export function UnifiedAuth({ initialMode = "login" }: { initialMode?: "login" |
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { data: session, status } = useSession();
+  const { executeRecaptcha } = useGoogleReCaptcha();
 
   const form = useForm<AuthFormValues>({
     resolver: zodResolver(authSchema),
@@ -57,6 +59,7 @@ export function UnifiedAuth({ initialMode = "login" }: { initialMode?: "login" |
       name: "",
       email: "",
       password: "",
+      website: "",
     },
   });
 
@@ -76,7 +79,6 @@ export function UnifiedAuth({ initialMode = "login" }: { initialMode?: "login" |
   useEffect(() => {
     if (status === "authenticated") {
         const dashboardUrl = session?.user?.role === "ADMIN" ? "/admin" : "/app";
-        // Check if we are already at the target or on a public/auth route
         if (pathname.startsWith("/auth")) {
             router.push(dashboardUrl);
         }
@@ -84,12 +86,20 @@ export function UnifiedAuth({ initialMode = "login" }: { initialMode?: "login" |
   }, [status, session, router, pathname]);
 
   async function onSubmit(values: AuthFormValues) {
+    if (!executeRecaptcha) {
+      toast.error("reCAPTCHA not initialized. Please try again.");
+      return;
+    }
+
     setIsLoading(true);
     try {
+      const captchaToken = await executeRecaptcha(mode === "login" ? "login" : "signup");
+
       if (mode === "login") {
         const result = await signIn("credentials", {
           email: values.email,
           password: values.password,
+          captchaToken,
           redirect: false,
         });
 
@@ -97,21 +107,13 @@ export function UnifiedAuth({ initialMode = "login" }: { initialMode?: "login" |
           toast.error("Invalid email or password.");
         } else {
           toast.success("Welcome back!");
-          // Since we don't have the role in the 'result', we can rely on the middleware 
-          // or do a quick session check. For now, let's just push to /admin if we are sure,
-          // but better to let a separate check handle it or push to /app and let middleware redirect.
-          // Actually, let's just push to /admin if we know they're admin, but we don't here.
-          // I will use a clever way: redirect to a generic /dashboard route that we don't have? No.
-          // Let's just push to /app and the middleware will fix it for admins.
-          // BUT the user said they land on profile.
-          
           const callbackUrl = searchParams.get("callbackUrl") || "/app";
           router.push(callbackUrl);
         }
       } else {
         const response = await fetch("/api/auth/signup", {
           method: "POST",
-          body: JSON.stringify(values),
+          body: JSON.stringify({ ...values, captchaToken }),
           headers: { "Content-Type": "application/json" },
         });
 
@@ -119,14 +121,13 @@ export function UnifiedAuth({ initialMode = "login" }: { initialMode?: "login" |
 
         if (data.ok) {
           toast.success("Account created! Signing you in...");
-          // Auto-login after successful signup
           const loginResult = await signIn("credentials", {
             email: values.email,
             password: values.password,
+            captchaToken,
             redirect: false,
           });
           if (loginResult?.error) {
-            // Fallback: redirect to login page
             toast.info("Please sign in with your new credentials.");
             setMode("login");
           } else {
@@ -237,6 +238,28 @@ export function UnifiedAuth({ initialMode = "login" }: { initialMode?: "login" |
 
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+              {mode === "signup" && (
+                <div style={{ display: 'none' }} aria-hidden="true">
+                  <FormField
+                    control={form.control}
+                    name="website"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Website</FormLabel>
+                        <FormControl>
+                          <Input 
+                            placeholder="Your website" 
+                            tabIndex={-1} 
+                            autoComplete="off"
+                            {...field} 
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              )}
+
               {mode === "signup" && (
                 <FormField
                   control={form.control}

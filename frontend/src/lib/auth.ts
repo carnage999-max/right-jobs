@@ -32,11 +32,26 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
     Credentials({
       async authorize(credentials) {
         const parsedCredentials = z
-          .object({ email: z.string().email(), password: z.string().min(6) })
+          .object({ 
+            email: z.string().email(), 
+            password: z.string().min(6),
+            captchaToken: z.string().optional()
+          })
           .safeParse(credentials);
 
         if (parsedCredentials.success) {
-          const { email, password } = parsedCredentials.data;
+          const { email, password, captchaToken } = parsedCredentials.data;
+
+          // 1. Verify reCAPTCHA for login
+          if (process.env.NODE_ENV === "production" || process.env.RECAPTCHA_SECRET_KEY) {
+            const { verifyCaptcha } = await import("./captcha");
+            const isValid = await verifyCaptcha(captchaToken || "");
+            if (!isValid) {
+              console.warn(`[SECURITY] reCAPTCHA verification failed for login: ${email}`);
+              return null;
+            }
+          }
+
           const user = await prisma.user.findUnique({ where: { email } });
           if (!user) return null;
           const passwordsMatch = await bcrypt.compare(password, user.passwordHash);

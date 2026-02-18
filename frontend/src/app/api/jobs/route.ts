@@ -94,7 +94,19 @@ export async function GET(req: Request) {
       },
     });
 
-    return NextResponse.json({ ok: true, jobs });
+    // Generate signed URLs for company logos
+    const { getSignedDownloadUrl } = await import("@/lib/s3");
+    const jobsWithSignedUrls = await Promise.all(jobs.map(async (job) => {
+      if (job.companyLogoUrl) {
+        const key = job.companyLogoUrl.split(".com/")[1];
+        if (key) {
+          return { ...job, companyLogoUrl: await getSignedDownloadUrl(key) };
+        }
+      }
+      return job;
+    }));
+
+    return NextResponse.json({ ok: true, jobs: jobsWithSignedUrls });
   } catch (error) {
     console.error("Fetch jobs error:", error);
     return NextResponse.json({ ok: false, message: "Failed to fetch jobs" }, { status: 500 });
