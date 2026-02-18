@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { getAuthSession } from "@/lib/auth-mobile";
 import { getPresignedPostUrl } from "@/lib/s3";
 import { v4 as uuidv4 } from "uuid";
 
 export async function POST(req: Request) {
   try {
-    const session = await auth();
+    const session = await getAuthSession();
     if (!session || !session.user) {
       return NextResponse.json({ ok: false, message: "Unauthorized" }, { status: 401 });
     }
