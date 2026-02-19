@@ -65,6 +65,7 @@ model User {
   employerProfile EmployerProfile?
   jobsCreated     Job[]     @relation("JobCreator")
   applications    Application[]
+  applicationDrafts ApplicationDraft[]
   savedJobs       SavedJob[]
   reviewsMade     Review[]  @relation("Reviewer")
   reviewsReceived Review[]  @relation("ReviewTarget")
@@ -137,6 +138,7 @@ model Job {
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
   applications    Application[]
+  applicationDrafts ApplicationDraft[]
   savedByUsers    SavedJob[]
 }
 
@@ -150,6 +152,20 @@ model Application {
   coverLetter String?           @db.Text
   createdAt   DateTime          @default(now())
   updatedAt   DateTime          @updatedAt
+}
+
+model ApplicationDraft {
+  id                String    @id @default(uuid())
+  jobId             String
+  job               Job       @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  userId            String
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  coverLetter       String?   @db.Text
+  selectedResumeUrl String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@unique([userId, jobId])
 }
 
 model Review {

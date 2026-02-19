@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, TextInput, Alert, Image } from 'react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, TextInput, Alert, Image, Modal, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard } from 'react-native';
+import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { jobsService } from '../../../src/services/api/jobs';
+import { profileService } from '../../../src/services/api/profile';
 import { QUERY_KEYS } from '../../../src/constants/queryKeys';
 import { useToast } from '../../../src/hooks/useToast';
 import { Button } from '../../../src/components/ui/Button';
@@ -23,7 +24,13 @@ import {
   Sparkles,
   CheckCircle2,
   Building2,
-  Camera
+  Camera,
+  X,
+  Lock,
+  Send,
+  Edit2,
+  Download,
+  Upload
 } from 'lucide-react-native';
 
 export default function JobDetailScreen() {
@@ -33,6 +40,9 @@ export default function JobDetailScreen() {
   const [coverLetter, setCoverLetter] = useState('');
   const [showApplyForm, setShowApplyForm] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
+  const [selectedResumeUrl, setSelectedResumeUrl] = useState<string | null>(null);
+  const [showResumeSelector, setShowResumeSelector] = useState(false);
+  const [draftLoaded, setDraftLoaded] = useState(false);
 
   const { data: job, isLoading } = useQuery({
     queryKey: [QUERY_KEYS.JOB_DETAILS, id],
@@ -40,13 +50,84 @@ export default function JobDetailScreen() {
     enabled: !!id,
   });
 
+  const { data: profile } = useQuery({
+    queryKey: [QUERY_KEYS.PROFILE],
+    queryFn: () => profileService.getProfile(),
+  });
+
+  // Load draft when component mounts
+  useEffect(() => {
+    if (id && !draftLoaded) {
+      loadDraft();
+    }
+  }, [id, draftLoaded]);
+
+  // Auto-save draft when page loses focus
+  useFocusEffect(
+    useCallback(() => {
+      return () => {
+        // Save draft when navigating away
+        if (id && (coverLetter || selectedResumeUrl)) {
+          jobsService.saveDraft(id, {
+            coverLetter,
+            selectedResumeUrl
+          }).catch(err => console.error('Failed to auto-save draft:', err));
+        }
+      };
+    }, [id, coverLetter, selectedResumeUrl])
+  );
+
+  const loadDraft = async () => {
+    if (!id) return;
+    try {
+      const draft = await jobsService.getDraft(id);
+      if (draft) {
+        setCoverLetter(draft.coverLetter || '');
+        setSelectedResumeUrl(draft.selectedResumeUrl);
+        setDraftLoaded(true);
+        
+        // Show draft recovery prompt
+        Alert.alert(
+          'Draft Found',
+          'You have a saved draft for this application. Would you like to continue?',
+          [
+            { 
+              text: 'Start Fresh', 
+              style: 'cancel',
+              onPress: () => {
+                setCoverLetter('');
+                setSelectedResumeUrl(null);
+                jobsService.deleteDraft(id).catch(() => {});
+              }
+            },
+            { 
+              text: 'Continue', 
+              onPress: () => {
+                // Use the loaded draft
+              }
+            }
+          ]
+        );
+      } else {
+        setDraftLoaded(true);
+      }
+    } catch (error) {
+      console.error('Failed to load draft:', error);
+      setDraftLoaded(true);
+    }
+  };
+
   const applyMutation = useMutation({
-    mutationFn: (data: { coverLetter?: string }) => 
+    mutationFn: (data: { coverLetter?: string; selectedResumeUrl?: string | null }) => 
       jobsService.applyForJob(id as string, data),
     onSuccess: () => {
       showSuccess('Success', 'Application submitted!');
       setShowApplyForm(false);
       setCoverLetter('');
+      setSelectedResumeUrl(null);
+      if (id) {
+        jobsService.deleteDraft(id).catch(() => {});
+      }
       router.back();
     },
     onError: (error: any) => {
@@ -74,13 +155,13 @@ export default function JobDetailScreen() {
         { text: 'Cancel', style: 'cancel' },
         { 
           text: 'Apply', 
-          onPress: () => applyMutation.mutate({ coverLetter })
+          onPress: () => applyMutation.mutate({ coverLetter, selectedResumeUrl })
         }
       ]
     );
   };
 
-  if (isLoading) {
+  if (isLoading || !draftLoaded) {
     return (
       <View style={tw`flex-1 bg-slate-50 justify-center items-center`}>
         <ActivityIndicator size="large" color="#014D9F" />
@@ -138,7 +219,7 @@ export default function JobDetailScreen() {
 
       <ScrollView 
         style={tw`flex-1`}
-        contentContainerStyle={tw`pb-40`}
+        contentContainerStyle={tw`pb-32`}
         showsVerticalScrollIndicator={false}
       >
         {/* Job Type & Verification Badge */}
@@ -304,69 +385,306 @@ export default function JobDetailScreen() {
           </View>
         </View>
 
+        {/* Resume Preview Section */}
+        {profile?.data?.resumeUrl ? (
+          <View style={tw`mx-6 mb-8`}>
+            <View style={tw`flex-row items-center gap-3 mb-4`}>
+              <View style={tw`h-10 w-10 rounded-xl bg-green-100 items-center justify-center`}>
+                <FileText size={20} color="#10B981" />
+              </View>
+              <Text style={[tw`text-lg font-black`, { color: '#0F172A' }]}>Your Resume</Text>
+            </View>
+            
+            <View style={tw`bg-green-50 rounded-2xl border border-green-100 p-4 shadow-sm`}>
+              <View style={tw`flex-row items-center justify-between`}>
+                <View style={tw`flex-1`}>
+                  <Text style={[tw`text-sm font-black mb-1`, { color: '#0F172A' }]}>
+                    {profile.data.resumeFilename || 'resume.pdf'}
+                  </Text>
+                  <Text style={[tw`text-xs`, { color: '#64748B' }]}>Ready to send with application</Text>
+                </View>
+                <View style={tw`flex-row gap-2`}>
+                  <TouchableOpacity 
+                    onPress={() => setShowResumeSelector(true)}
+                    style={tw`bg-white px-3 py-2 rounded-lg border border-slate-200`}
+                  >
+                    <Edit2 size={16} color="#014D9F" />
+                  </TouchableOpacity>
+                  <TouchableOpacity 
+                    onPress={() => profileService.getResumeDownloadUrl().then(r => r?.url && Alert.alert('Download', 'Opening resume...')).catch(() => showError('Error', 'Failed to download'))}
+                    style={tw`bg-primary px-3 py-2 rounded-lg`}
+                  >
+                    <Download size={16} color="#FFF" />
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+          </View>
+        ) : (
+          <View style={tw`mx-6 mb-8`}>
+            <View style={tw`bg-amber-50 rounded-2xl border border-amber-200 p-4 flex-row items-center gap-3`}>
+              <View style={tw`flex-shrink-0`}>
+                <FileText size={20} color="#D97706" />
+              </View>
+              <View style={tw`flex-1`}>
+                <Text style={[tw`text-sm font-black mb-1`, { color: '#0F172A' }]}>No Resume</Text>
+                <Text style={[tw`text-xs`, { color: '#92400E' }]}>Upload a resume first to apply</Text>
+              </View>
+              <TouchableOpacity 
+                onPress={() => router.push('/profile' as any)}
+                style={tw`bg-amber-600 px-3 py-2 rounded-lg`}
+              >
+                <Text style={tw`text-white font-bold text-xs`}>Upload</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
+
         {/* Bottom Spacing */}
         <View style={tw`h-8`} />
       </ScrollView>
 
-      {/* Fixed Bottom Actions */}
-      <View style={tw`absolute bottom-0 left-0 right-0 bg-white border-t border-slate-200 px-6 py-4 pb-8`}>
-        {showApplyForm ? (
-          <View style={tw`space-y-4 mb-4`}>
-            <View style={tw`bg-slate-50 rounded-2xl border border-slate-200 p-4`}>
-              <Text style={[tw`text-xs font-bold uppercase tracking-widest mb-3 ml-1`, { color: '#94A3B8' }]}>
-                Cover Letter (Optional)
-              </Text>
-              <TextInput
-                placeholder="Tell them why you're a great fit..."
-                placeholderTextColor="#94A3B8"
-                value={coverLetter}
-                onChangeText={setCoverLetter}
-                multiline
-                numberOfLines={4}
-                style={[tw`text-base font-medium p-3 bg-white rounded-xl border border-slate-200`, { color: '#0F172A' }]}
-                maxLength={500}
-              />
-              <Text style={[tw`text-[10px] font-bold mt-3`, { color: '#94A3B8' }]}>
-                {coverLetter.length}/500
-              </Text>
+      {/* Fixed Bottom Button Bar */}
+      <View style={tw`bg-white border-t border-slate-100 px-6 py-4 pb-6`}>
+        <TouchableOpacity
+          onPress={() => setShowApplyForm(true)}
+          style={tw`bg-primary rounded-2xl py-5 items-center justify-center shadow-lg shadow-primary/20 active:opacity-90`}
+        >
+          <View style={tw`flex-row items-center justify-center`}>
+            <Sparkles size={24} color="#FFF" style={tw`mr-3`} />
+            <Text style={tw`text-white font-black text-base uppercase tracking-widest`}>Apply Now</Text>
+          </View>
+        </TouchableOpacity>
+      </View>
+
+      {/* Apply Modal */}
+      <Modal
+        visible={showApplyForm}
+        transparent={false}
+        animationType="slide"
+        onRequestClose={() => {
+          setShowApplyForm(false);
+          setCoverLetter('');
+        }}
+        presentationStyle="pageSheet"
+      >
+        <View style={tw`flex-1 bg-white`}>
+          <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            style={tw`flex-1`}
+          >
+            {/* Modal Header - Dark Background */}
+            <View style={tw`bg-slate-950 px-6 pt-12 pb-6`}>
+              <View style={tw`flex-row items-start justify-between mb-4`}>
+                <View style={tw`flex-1 pr-4`}>
+                  <View style={tw`bg-white/10 px-3 py-1.5 rounded-full mb-3 w-fit`}>
+                    <Text style={tw`text-white text-[10px] font-black uppercase tracking-widest`}>
+                      Job Application
+                    </Text>
+                  </View>
+                  <Text style={tw`text-white text-2xl font-black mb-1`}>Ready to Apply?</Text>
+                  <Text style={[tw`text-white/60 text-sm italic leading-tight`, { color: '#94A3B8' }]}>
+                    <Text style={tw`text-white font-bold`}>{job.title}</Text> at {job.companyName}
+                  </Text>
+                </View>
+                <TouchableOpacity 
+                  onPress={() => {
+                    setShowApplyForm(false);
+                    setCoverLetter('');
+                  }}
+                  style={tw`h-10 w-10 bg-white/10 rounded-xl items-center justify-center ml-2`}
+                >
+                  <X size={22} color="#FFF" />
+                </TouchableOpacity>
+              </View>
             </View>
-            <View style={tw`flex-row gap-3`}>
-              <Button
-                title="Cancel"
+
+            <ScrollView 
+              style={tw`flex-1`} 
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={tw`pb-6`}
+            >
+              {/* Modal Content */}
+              <View style={tw`px-6 pt-6 gap-y-6`}>
+                {/* Cover Letter Section */}
+                <View>
+                  <View style={tw`flex-row items-center gap-3 mb-3`}>
+                    <FileText size={20} color="#014D9F" />
+                    <Text style={[tw`text-base font-black`, { color: '#0F172A' }]}>
+                      Why are you a great fit?
+                    </Text>
+                  </View>
+                  <Text style={[tw`text-xs mb-3`, { color: '#64748B' }]}>
+                    Optional - Share why you're interested in this role.
+                  </Text>
+                  <TextInput
+                    placeholder="Tell them about yourself..."
+                    placeholderTextColor="#CBD5E1"
+                    value={coverLetter}
+                    onChangeText={setCoverLetter}
+                    multiline
+                    numberOfLines={5}
+                    style={[tw`p-4 rounded-2xl border border-slate-200 text-base font-medium`, { color: '#0F172A', textAlignVertical: 'top', height: 140 }]}
+                    maxLength={500}
+                  />
+                  <Text style={[tw`text-xs mt-2`, { color: '#94A3B8' }]}>
+                    {coverLetter.length}/500
+                  </Text>
+                </View>
+
+                {/* Profile Resume Card */}
+                <View style={tw`bg-slate-50 p-4 rounded-2xl border border-slate-100`}>
+                  <View style={tw`flex-row items-center justify-between mb-3`}>
+                    <View style={tw`flex-row items-center flex-1`}>
+                      <View style={tw`bg-white p-2.5 rounded-lg mr-3`}>
+                        <FileText size={18} color={selectedResumeUrl ? '#10B981' : '#014D9F'} />
+                      </View>
+                      <View style={tw`flex-1`}>
+                        <Text style={[tw`font-black text-sm`, { color: '#0F172A' }]}>
+                          {selectedResumeUrl ? 'Selected Resume' : 'Master Resume'}
+                        </Text>
+                        <Text style={[tw`text-xs font-semibold mt-0.5`, { color: '#94A3B8' }]}>
+                          {profile?.data?.resumeFilename || 'resume.pdf'}
+                        </Text>
+                      </View>
+                    </View>
+                    <TouchableOpacity 
+                      onPress={() => setShowResumeSelector(true)}
+                      style={tw`bg-white px-3 py-1.5 rounded-lg border border-slate-200`}
+                    >
+                      <Text style={[tw`text-xs font-black uppercase tracking-wider`, { color: '#014D9F' }]}>Change</Text>
+                    </TouchableOpacity>
+                  </View>
+                  {selectedResumeUrl && (
+                    <View style={tw`bg-green-50 p-3 rounded-xl border border-green-100 flex-row items-center`}>
+                      <CheckCircle2 size={16} color="#10B981" style={tw`mr-2`} />
+                      <Text style={[tw`text-xs font-semibold`, { color: '#059669' }]}>Custom resume selected</Text>
+                    </View>
+                  )}
+                </View>
+
+                {/* Privacy Notice */}
+                <View style={tw`bg-slate-50 p-4 rounded-2xl border border-slate-100 flex-row gap-3`}>
+                  <Lock size={16} color="#64748B" style={tw`mt-1 flex-shrink-0`} />
+                  <View style={tw`flex-1`}>
+                    <Text style={[tw`font-black text-sm mb-1`, { color: '#0F172A' }]}>Privacy</Text>
+                    <Text style={[tw`text-xs leading-snug`, { color: '#64748B' }]}>
+                      Your info is only shared with this hiring manager.
+                    </Text>
+                  </View>
+                </View>
+              </View>
+            </ScrollView>
+
+            {/* Modal Footer */}
+            <View style={tw`px-6 py-4 gap-3 border-t border-slate-100 bg-white`}>
+              <TouchableOpacity
+                onPress={handleApply}
+                disabled={applyMutation.isPending}
+                style={[
+                  tw`bg-primary px-6 py-4 rounded-2xl flex-row items-center justify-center shadow-lg shadow-primary/20`,
+                  applyMutation.isPending && tw`opacity-70`
+                ]}
+              >
+                {applyMutation.isPending ? (
+                  <ActivityIndicator size="small" color="#FFF" style={tw`mr-2`} />
+                ) : (
+                  <Send size={20} color="#FFF" style={tw`mr-2`} />
+                )}
+                <Text style={tw`text-white font-black uppercase tracking-wider`}>
+                  {applyMutation.isPending ? 'Submitting...' : 'Submit Application'}
+                </Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity
                 onPress={() => {
                   setShowApplyForm(false);
                   setCoverLetter('');
                 }}
-                variant="outline"
-                style={tw`flex-1 h-12 rounded-2xl`}
-              />
-              <Button
-                title="Submit"
-                onPress={handleApply}
-                loading={applyMutation.isPending}
-                style={tw`flex-1 h-12 rounded-2xl shadow-lg shadow-primary/20`}
-                icon={<Sparkles size={18} color="#FFF" />}
-              />
+                style={tw`bg-white px-6 py-3 rounded-2xl border-2 border-slate-200`}
+              >
+                <Text style={[tw`text-center font-black uppercase tracking-wider text-sm`, { color: '#0F172A' }]}>Cancel</Text>
+              </TouchableOpacity>
             </View>
+          </KeyboardAvoidingView>
+        </View>
+      </Modal>
+
+      {/* Resume Selector Modal */}
+      <Modal
+        visible={showResumeSelector}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowResumeSelector(false)}
+      >
+        <TouchableWithoutFeedback onPress={() => setShowResumeSelector(false)}>
+          <View style={tw`flex-1 bg-black/50 items-end`}>
+            <TouchableWithoutFeedback>
+              <View style={tw`bg-white rounded-t-[32px] w-full pt-8 pb-8 px-6 gap-y-4`}>
+                {/* Header */}
+                <View style={tw`flex-row items-center justify-between mb-4 pb-4 border-b border-slate-100`}>
+                  <Text style={[tw`text-xl font-black`, { color: '#0F172A' }]}>Select Resume</Text>
+                  <TouchableOpacity 
+                    onPress={() => setShowResumeSelector(false)}
+                    style={tw`h-8 w-8 items-center justify-center`}
+                  >
+                    <X size={24} color="#0F172A" />
+                  </TouchableOpacity>
+                </View>
+
+                {/* Master Resume Option */}
+                <TouchableOpacity 
+                  onPress={() => {
+                    setSelectedResumeUrl(null);
+                    setShowResumeSelector(false);
+                  }}
+                  style={[tw`p-4 rounded-2xl flex-row items-center justify-between border-2`, selectedResumeUrl === null ? tw`border-primary bg-primary/5` : tw`border-slate-200 bg-white`]}
+                >
+                  <View style={tw`flex-row items-center flex-1`}>
+                    <View style={tw`bg-primary/10 p-3 rounded-xl mr-3`}>
+                      <FileText size={18} color="#014D9F" />
+                    </View>
+                    <View>
+                      <Text style={[tw`font-black text-sm`, { color: '#0F172A' }]}>Master Resume</Text>
+                      <Text style={[tw`text-xs mt-1`, { color: '#64748B' }]}>
+                        {profile?.data?.resumeFilename || 'resume.pdf'}
+                      </Text>
+                    </View>
+                  </View>
+                  {selectedResumeUrl === null && (
+                    <CheckCircle2 size={22} color="#014D9F" />
+                  )}
+                </TouchableOpacity>
+
+                {/* Divider */}
+                <View style={tw`h-px bg-slate-200 my-2`} />
+
+                {/* Upload New Resume Option */}
+                <TouchableOpacity 
+                  onPress={() => {
+                    setShowResumeSelector(false);
+                    router.push('/profile/documents' as any);
+                  }}
+                  style={tw`p-4 rounded-2xl flex-row items-center gap-3 bg-slate-50 border border-slate-200`}
+                >
+                  <View style={tw`bg-slate-200 p-3 rounded-xl`}>
+                    <Upload size={18} color="#64748B" />
+                  </View>
+                  <Text style={[tw`font-black text-sm`, { color: '#0F172A' }]}>Manage Documents</Text>
+                </TouchableOpacity>
+
+                {/* Info */}
+                <View style={tw`bg-blue-50 p-3 rounded-xl border border-blue-100 flex-row items-start gap-2 mt-2`}>
+                  <FileText size={14} color="#3B82F6" style={tw`mt-0.5 flex-shrink-0`} />
+                  <Text style={[tw`text-xs flex-1`, { color: '#1E40AF' }]}>
+                    The resume you select will be sent with your application. You can change it anytime.
+                  </Text>
+                </View>
+              </View>
+            </TouchableWithoutFeedback>
           </View>
-        ) : (
-          <View style={tw`flex-row gap-3`}>
-            <Button
-              title="Report"
-              onPress={() => showError('Coming Soon', 'Report feature coming soon')}
-              variant="outline"
-              style={tw`flex-1 h-12 rounded-2xl`}
-              icon={<Flag size={18} color="#EF4444" />}
-            />
-            <Button
-              title="Apply Now"
-              onPress={() => setShowApplyForm(true)}
-              style={tw`flex-[2] h-12 rounded-2xl shadow-lg shadow-primary/20`}
-              icon={<Sparkles size={18} color="#FFF" />}
-            />
-          </View>
-        )}
-      </View>
+        </TouchableWithoutFeedback>
+      </Modal>
     </View>
   );
 }

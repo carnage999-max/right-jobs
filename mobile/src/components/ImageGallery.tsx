@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, Modal, Image, Dimensions, ScrollView, StatusBar } from 'react-native';
+import { View, Text, TouchableOpacity, Modal, Image, Dimensions, ScrollView } from 'react-native';
 import { X } from 'lucide-react-native';
 import { tw } from '../lib/tailwind';
 
@@ -34,8 +34,8 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({ images, children }) 
         animationType="fade"
         statusBarTranslucent
         onRequestClose={() => setModalVisible(false)}
+        presentationStyle="overFullScreen"
       >
-        <StatusBar barStyle="light-content" translucent backgroundColor="rgba(0,0,0,0.95)" />
         <View style={tw`flex-1 bg-black/95`}>
           {/* Close Button */}
           <View style={tw`absolute top-8 right-6 z-50`}>

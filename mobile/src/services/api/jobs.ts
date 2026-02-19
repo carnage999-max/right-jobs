@@ -77,4 +77,35 @@ export const jobsService = {
     const response = await apiClient.delete(`/jobs/${jobId}/save`);
     return response.data;
   },
+
+  // Draft management
+  getDraft: async (jobId: string) => {
+    try {
+      const response = await apiClient.get(`/applications/drafts/${jobId}`);
+      return response.data?.data;
+    } catch (error) {
+      console.error('Failed to fetch draft:', error);
+      return null;
+    }
+  },
+
+  saveDraft: async (jobId: string, data: { coverLetter?: string; selectedResumeUrl?: string | null }) => {
+    try {
+      const response = await apiClient.post(`/applications/drafts/${jobId}`, data);
+      return response.data?.data;
+    } catch (error) {
+      console.error('Failed to save draft:', error);
+      throw error;
+    }
+  },
+
+  deleteDraft: async (jobId: string) => {
+    try {
+      const response = await apiClient.delete(`/applications/drafts/${jobId}`);
+      return response.data;
+    } catch (error) {
+      console.error('Failed to delete draft:', error);
+      throw error;
+    }
+  },
 };
