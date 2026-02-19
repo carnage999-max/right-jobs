@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import { auth } from "@/lib/auth";
+import { getAuthSession } from "@/lib/auth-mobile";
 
 export async function GET(req: Request) {
   try {
-    const session = await auth();
+    const session = await getAuthSession();
     if (!session?.user) {
       return NextResponse.json({ ok: false, message: "Unauthorized" }, { status: 401 });
     }
@@ -21,7 +21,7 @@ export async function GET(req: Request) {
       },
     });
 
-    const jobs = savedJobs.map((saved) => saved.job);
+    const jobs = savedJobs.map((saved: any) => saved.job);
 
     return NextResponse.json({ ok: true, jobs });
   } catch (error) {

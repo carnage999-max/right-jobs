@@ -18,7 +18,10 @@ export default function SavedJobsScreen() {
 
   const renderJobCard = (item: any) => (
     <TouchableOpacity 
-      onPress={() => router.push(`/(tabs)/jobs/${item.id}`)}
+      onPress={() => router.push({
+        pathname: '/(tabs)/jobs/[id]',
+        params: { id: item.id }
+      })}
       style={tw`bg-white p-6 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-50 mb-6`}
     >
       <View style={tw`flex-row gap-4`}>

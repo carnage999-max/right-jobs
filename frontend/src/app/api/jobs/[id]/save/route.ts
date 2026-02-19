@@ -1,13 +1,13 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import { auth } from "@/lib/auth";
+import { getAuthSession } from "@/lib/auth-mobile";
 
 export async function POST(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await auth();
+    const session = await getAuthSession();
     if (!session?.user) {
       return NextResponse.json({ ok: false, message: "Unauthorized" }, { status: 401 });
     }
@@ -57,7 +57,7 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await auth();
+    const session = await getAuthSession();
     if (!session?.user) {
       return NextResponse.json({ ok: false, message: "Unauthorized" }, { status: 401 });
     }
