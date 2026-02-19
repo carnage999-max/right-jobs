@@ -122,6 +122,10 @@ function AuthGate() {
       <Stack.Screen name="profile/personal" options={{ headerShown: false }} />
       <Stack.Screen name="profile/documents" options={{ headerShown: false }} />
       <Stack.Screen name="profile/compliance" options={{ headerShown: false }} />
+      <Stack.Screen name="profile/saved-jobs" options={{ headerShown: false }} />
+      <Stack.Screen name="notifications" options={{ headerShown: false }} />
+      <Stack.Screen name="settings" options={{ headerShown: false }} />
+      <Stack.Screen name="applications" options={{ headerShown: false }} />
       <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
     </Stack>
   );

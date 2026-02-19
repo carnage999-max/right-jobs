@@ -65,6 +65,7 @@ model User {
   employerProfile EmployerProfile?
   jobsCreated     Job[]     @relation("JobCreator")
   applications    Application[]
+  savedJobs       SavedJob[]
   reviewsMade     Review[]  @relation("Reviewer")
   reviewsReceived Review[]  @relation("ReviewTarget")
   idVerification  IdVerification?
@@ -136,6 +137,7 @@ model Job {
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
   applications    Application[]
+  savedByUsers    SavedJob[]
 }
 
 model Application {
@@ -208,4 +210,15 @@ model AuditLog {
   metaJson      Json?
   ip            String?
   createdAt     DateTime @default(now())
+}
+
+model SavedJob {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  jobId     String
+  job       Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, jobId])
 }

@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, FlatList, TouchableOpacity, ActivityIndicator, Dimensions, ScrollView, Image } from 'react-native';
+import React, { useState, useRef } from 'react';
+import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, Dimensions, ScrollView, Image, TextInput } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
-import { Search, Filter, MapPin, Briefcase, Sparkles, Clock, DollarSign, ChevronRight } from 'lucide-react-native';
+import { Search, Filter, MapPin, Briefcase, Sparkles, Clock, DollarSign, ChevronRight, Zap } from 'lucide-react-native';
 import { jobsService } from '../../src/services/api/jobs';
 import { QUERY_KEYS } from '../../src/constants/queryKeys';
+import { ImageGallery } from '../../src/components/ImageGallery';
 import { tw } from '../../src/lib/tailwind';
 
 const { width } = Dimensions.get('window');
@@ -21,27 +22,52 @@ export default function JobsScreen() {
   const router = useRouter();
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [searchInput, setSearchInput] = useState('');
+  const searchTimeoutRef = useRef<NodeJS.Timeout>();
   
   const { data: jobs, isLoading } = useQuery({
     queryKey: [QUERY_KEYS.JOBS, search, selectedCategory],
-    queryFn: () => jobsService.getJobs({ search, category: selectedCategory === 'all' ? undefined : selectedCategory }),
+    queryFn: () => jobsService.getJobs({ 
+      search: search || undefined, 
+      category: selectedCategory === 'all' ? undefined : selectedCategory 
+    }),
   });
 
-  const renderJobItem = ({ item }: { item: any }) => (
+  const { data: recommendations } = useQuery({
+    queryKey: [QUERY_KEYS.JOBS, 'recommendations'],
+    queryFn: () => jobsService.getJobs({}),
+  });
+
+  const handleSearch = (text: string) => {
+    setSearchInput(text);
+    // Debounce search
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+    searchTimeoutRef.current = setTimeout(() => {
+      setSearch(text);
+    }, 500);
+  };
+
+  const renderJobCard = (item: any, isRecommendation = false) => (
     <TouchableOpacity 
-      onPress={() => router.push({ pathname: '/(tabs)/jobs', params: { id: item.id } } as any)}
-      style={tw`bg-white p-6 rounded-[2.5rem] mb-6 shadow-xl shadow-slate-200/50 border border-slate-50`}
+      onPress={() => router.push(`/(tabs)/jobs/${item.id}`)}
+      style={tw`bg-white p-6 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-50 ${isRecommendation ? 'mb-4' : 'mb-6'}`}
     >
       <View style={tw`flex-row gap-4`}>
-        <View style={tw`h-16 w-16 rounded-2xl bg-white border border-slate-100 items-center justify-center shadow-lg shadow-slate-200/50 overflow-hidden shrink-0`}>
-          {item.companyLogoUrl ? (
-            <Image source={{ uri: item.companyLogoUrl }} style={tw`h-full w-full`} resizeMode="cover" />
-          ) : (
+        {item.companyLogoUrl ? (
+          <ImageGallery images={[item.companyLogoUrl]}>
+            <View style={tw`h-16 w-16 rounded-2xl bg-white border border-slate-100 items-center justify-center shadow-lg shadow-slate-200/50 overflow-hidden shrink-0`}>
+              <Image source={{ uri: item.companyLogoUrl }} style={tw`h-full w-full`} resizeMode="cover" />
+            </View>
+          </ImageGallery>
+        ) : (
+          <View style={tw`h-16 w-16 rounded-2xl bg-white border border-slate-100 items-center justify-center shadow-lg shadow-slate-200/50 overflow-hidden shrink-0`}>
             <View style={tw`h-full w-full bg-primary/5 flex items-center justify-center`}>
               <Text style={tw`text-primary font-black text-2xl`}>{item.companyName?.[0] || 'J'}</Text>
             </View>
-          )}
-        </View>
+          </View>
+        )}
         <View style={tw`flex-1`}>
           <View style={tw`flex-row justify-between items-start mb-1`}>
             <Text style={tw`text-xl font-black text-slate-900 flex-1 mr-2 leading-tight tracking-tight`}>{item.title}</Text>
@@ -56,10 +82,12 @@ export default function JobsScreen() {
               <MapPin size={12} color="#94A3B8" />
               <Text style={tw`text-[10px] font-bold text-slate-500 ml-1 uppercase tracking-tight`}>{item.location}</Text>
             </View>
-            <View style={tw`flex-row items-center bg-green-50 px-3 py-1.5 rounded-xl`}>
-              <DollarSign size={12} color="#10B981" />
-              <Text style={tw`text-[10px] font-bold text-green-700 ml-1`}>{item.salaryRange || 'Competitive'}</Text>
-            </View>
+            {item.salaryRange && (
+              <View style={tw`flex-row items-center bg-green-50 px-3 py-1.5 rounded-xl`}>
+                <DollarSign size={12} color="#10B981" />
+                <Text style={tw`text-[10px] font-bold text-green-700 ml-1`}>{item.salaryRange}</Text>
+              </View>
+            )}
           </View>
         </View>
       </View>
@@ -70,10 +98,7 @@ export default function JobsScreen() {
             {item.type?.replace('_', ' ') || 'Full Time'}
           </Text>
         </View>
-        <TouchableOpacity style={tw`bg-primary px-6 py-2.5 rounded-xl flex-row items-center`}>
-          <Text style={tw`text-white font-black text-xs mr-2`}>Apply Now</Text>
-          <Sparkles size={12} color="#FFF" />
-        </TouchableOpacity>
+        <ChevronRight size={18} color="#94A3B8" />
       </View>
     </TouchableOpacity>
   );
@@ -84,29 +109,30 @@ export default function JobsScreen() {
       <View style={[tw`absolute top-20 right--20 w-80 h-80 rounded-full bg-primary`, { opacity: 0.05, filter: 'blur(100px)' } as any]} />
       <View style={[tw`absolute bottom-40 left--20 w-80 h-80 rounded-full bg-indigo-100`, { opacity: 0.05, filter: 'blur(100px)' } as any]} />
 
-      <View style={tw`flex-1 px-6 pt-16`}>
+      {/* Fixed Header with Search */}
+      <View style={tw`bg-white border-b border-slate-100 px-6 pt-6 pb-4`}>
         {/* Header Heading */}
-        <View style={tw`mb-8`}>
-          <View style={tw`flex-row items-center gap-2 mb-3 px-3 py-1 bg-primary/10 rounded-full w-44`}>
+        <View style={tw`mb-4`}>
+          <View style={tw`flex-row items-center gap-2 mb-2 px-3 py-1 bg-primary/10 rounded-full w-44`}>
             <Sparkles size={12} color="#014D9F" />
             <Text style={tw`text-[10px] font-black uppercase text-primary tracking-widest`}>Live Opportunities</Text>
           </View>
-          <Text style={tw`text-4xl font-black text-slate-900 tracking-tighter leading-tight`}>
+          <Text style={tw`text-3xl font-black text-slate-900 tracking-tighter`}>
             Find Your Next {'\n'}
             <Text style={tw`text-primary italic`}>Adventure</Text>
           </Text>
         </View>
         
         {/* Search Bar */}
-        <View style={tw`flex-row mb-8 p-1.5 bg-white rounded-[2rem] shadow-2xl shadow-slate-200/60 border border-slate-50 items-center`}>
+        <View style={tw`flex-row mb-4 p-1.5 bg-white rounded-[2rem] shadow-2xl shadow-slate-200/60 border border-slate-50 items-center`}>
           <View style={tw`flex-1 flex-row items-center pl-4`}>
             <Search size={22} color="#94A3B8" />
             <TextInput
               style={tw`flex-1 ml-3 text-base text-slate-900 font-medium h-12`}
-              placeholder="Roles, companies, or keywords..."
+              placeholder="Search jobs, companies..."
               placeholderTextColor="#94A3B8"
-              value={search}
-              onChangeText={setSearch}
+              value={searchInput}
+              onChangeText={handleSearch}
             />
           </View>
           <TouchableOpacity style={tw`bg-primary h-12 w-12 rounded-full items-center justify-center shadow-lg shadow-primary/30 mr-0.5`}>
@@ -115,7 +141,7 @@ export default function JobsScreen() {
         </View>
 
         {/* Category Pills */}
-        <View style={tw`mb-8`}>
+        <View>
            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={tw`gap-x-3`}>
               {CATEGORIES.map((cat) => (
                 <TouchableOpacity 
@@ -130,10 +156,13 @@ export default function JobsScreen() {
               ))}
            </ScrollView>
         </View>
+      </View>
 
+      {/* Scrollable Content */}
+      <View style={tw`flex-1 px-6 pt-6`}>
         <View style={tw`flex-row justify-between items-center mb-6 px-1`}>
            <Text style={tw`text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]`}>
-              {isLoading ? 'Fetching records...' : `${jobs?.length || 0} Positions Available`}
+              {isLoading ? 'Fetching records...' : `${jobs?.length || 0} Positions`}
            </Text>
         </View>
 
@@ -142,10 +171,10 @@ export default function JobsScreen() {
             <ActivityIndicator size="large" color="#014D9F" />
             <Text style={tw`mt-4 text-[10px] font-black uppercase text-slate-300 tracking-widest`}>Initializing Stream</Text>
           </View>
-        ) : (
+        ) : jobs && jobs.length > 0 ? (
           <FlatList
             data={jobs}
-            renderItem={renderJobItem}
+            renderItem={({ item }) => renderJobCard(item)}
             keyExtractor={(item) => item.id}
             showsVerticalScrollIndicator={false}
             ListEmptyComponent={
@@ -157,8 +186,34 @@ export default function JobsScreen() {
                 <Text style={tw`text-slate-400 font-medium text-center mt-2`}>Try adjusting your filters or search keywords.</Text>
               </View>
             }
-            contentContainerStyle={{ paddingBottom: 120 }}
+            contentContainerStyle={{ paddingBottom: 20 }}
           />
+        ) : (
+          <View style={tw`flex-1`}>
+            {/* Recommendations Section */}
+            <View style={tw`mb-12`}>
+              <View style={tw`flex-row items-center gap-2 mb-4`}>
+                <Zap size={20} color="#014D9F" />
+                <Text style={tw`text-xl font-black text-slate-900`}>Recommended for You</Text>
+              </View>
+              
+              {recommendations && recommendations.length > 0 ? (
+                <FlatList
+                  data={recommendations.slice(0, 5)}
+                  renderItem={({ item }) => (
+                    <View key={item.id}>
+                      {renderJobCard(item, true)}
+                    </View>
+                  )}
+                  keyExtractor={(item) => item.id}
+                  scrollEnabled={false}
+                  contentContainerStyle={tw`gap-y-0`}
+                />
+              ) : (
+                <Text style={tw`text-center text-slate-400 py-8`}>No recommendations available</Text>
+              )}
+            </View>
+          </View>
         )}
       </View>
     </View>

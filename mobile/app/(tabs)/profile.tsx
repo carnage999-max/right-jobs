@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Image, ActivityIndicator, Platform } from 'react-native';
 import { useAuth } from '../../src/context/AuthContext';
 import { Button } from '../../src/components/ui/Button';
+import { ImageGallery } from '../../src/components/ImageGallery';
 import { 
   User as UserIcon, 
   Settings, 
@@ -14,7 +15,8 @@ import {
   Sparkles,
   Zap,
   LayoutDashboard,
-  PlusCircle
+  PlusCircle,
+  Bookmark
 } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
@@ -37,6 +39,7 @@ const ProfileScreen = () => {
 
   const menuItems = [
     { icon: UserIcon, label: 'Personal Dossier', desc: 'Edit identity & credentials', action: () => router.push('/profile/personal' as any) },
+    { icon: Bookmark, label: 'Saved Jobs', desc: 'View your bookmarked opportunities', action: () => router.push('/profile/saved-jobs' as any) },
     { icon: FileText, label: 'Resume & Documents', desc: 'Manage your curriculum vitae', action: () => router.push('/profile/documents' as any) },
     { icon: ShieldCheck, label: 'Compliance Status', desc: 'ID Verification & trust score', action: () => router.push('/profile/compliance' as any) },
     { icon: Settings, label: 'Preferences', desc: 'System & notification settings', action: () => router.push('/settings' as any) },
@@ -63,13 +66,17 @@ const ProfileScreen = () => {
          
          <View style={tw`items-center`}>
             <View style={tw`relative mb-6`}>
-              <View style={tw`w-32 h-32 bg-white rounded-[2.5rem] items-center justify-center border-4 border-slate-800 shadow-2xl overflow-hidden`}>
-                {user?.avatarUrl ? (
-                  <Image source={{ uri: user.avatarUrl }} style={tw`w-full h-full`} resizeMode="cover" />
-                ) : (
+              {user?.avatarUrl ? (
+                <ImageGallery images={[user.avatarUrl]}>
+                  <View style={tw`w-32 h-32 bg-white rounded-[2.5rem] items-center justify-center border-4 border-slate-800 shadow-2xl overflow-hidden`}>
+                    <Image source={{ uri: user.avatarUrl }} style={tw`w-full h-full`} resizeMode="cover" />
+                  </View>
+                </ImageGallery>
+              ) : (
+                <View style={tw`w-32 h-32 bg-white rounded-[2.5rem] items-center justify-center border-4 border-slate-800 shadow-2xl overflow-hidden`}>
                   <UserIcon size={56} color="#014D9F" />
-                )}
-              </View>
+                </View>
+              )}
               <TouchableOpacity 
                 style={tw`absolute bottom-1 right-1 bg-primary p-2.5 rounded-2xl shadow-lg border-2 border-slate-900`}
               >

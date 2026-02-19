@@ -74,23 +74,23 @@ export default function ApplicationsScreen() {
 
   return (
     <View style={tw`flex-1 bg-slate-50`}>
-      {/* System Header */}
-      <View style={tw`bg-slate-50 pt-12 pb-3 px-6 border-b border-slate-100 flex-row items-center justify-between`}>
-        <TouchableOpacity
-          onPress={() => router.back()}
-          style={tw`p-2 -ml-2 rounded-full`}
-        >
-          <ChevronLeft size={24} color="#0F172A" />
-        </TouchableOpacity>
+      {/* Header */}
+      <View style={tw`bg-white pt-12 pb-4 px-6 border-b border-slate-100 flex-row items-center justify-between`}>
+        <View style={tw`flex-row items-center flex-1`}>
+          <TouchableOpacity 
+            onPress={() => router.back()}
+            style={tw`p-2 -ml-2 mr-4 rounded-full`}
+          >
+            <ChevronLeft size={24} color="#0F172A" />
+          </TouchableOpacity>
+          <View>
+            <Text style={tw`text-xl font-black text-slate-900 tracking-tight`}>My Applications</Text>
+            <Text style={tw`text-slate-400 text-xs font-bold uppercase tracking-widest mt-1`}>
+              {applications.length} total
+            </Text>
+          </View>
+        </View>
         <FileText size={24} color="#014D9F" />
-      </View>
-
-      {/* Custom Header */}
-      <View style={tw`bg-white pt-4 pb-4 px-6 border-b border-slate-100`}>
-        <Text style={tw`text-2xl font-black text-slate-900 tracking-tighter`}>My Applications</Text>
-        <Text style={tw`text-slate-500 text-xs font-bold uppercase tracking-widest mt-1`}>
-          {applications.length} total
-        </Text>
       </View>
 
       {error || (!applications || applications.length === 0) ? (
