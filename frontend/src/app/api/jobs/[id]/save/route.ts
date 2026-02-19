@@ -46,9 +46,18 @@ export async function POST(
     });
 
     return NextResponse.json({ ok: true, message: "Job saved successfully" }, { status: 201 });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Save job error:", error);
-    return NextResponse.json({ ok: false, message: "Failed to save job" }, { status: 500 });
+    console.error("Save job error details:", {
+      message: error?.message,
+      code: error?.code,
+      meta: error?.meta,
+    });
+    return NextResponse.json({ 
+      ok: false, 
+      message: "Failed to save job",
+      error: process.env.NODE_ENV === 'development' ? error?.message : undefined
+    }, { status: 500 });
   }
 }
 
@@ -80,6 +89,15 @@ export async function DELETE(
       return NextResponse.json({ ok: true, message: "Job not in saved list" });
     }
     console.error("Unsave job error:", error);
-    return NextResponse.json({ ok: false, message: "Failed to remove saved job" }, { status: 500 });
+    console.error("Unsave job error details:", {
+      message: error?.message,
+      code: error?.code,
+      meta: error?.meta,
+    });
+    return NextResponse.json({ 
+      ok: false, 
+      message: "Failed to remove saved job",
+      error: process.env.NODE_ENV === 'development' ? error?.message : undefined
+    }, { status: 500 });
   }
 }
