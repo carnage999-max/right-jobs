@@ -31,6 +31,33 @@ export const profileService = {
     const response = await apiClient.patch('/profile', { resumeFilename });
     return response.data;
   },
+
+  // Multiple resumes management
+  getResumes: async () => {
+    try {
+      const response = await apiClient.get('/resumes');
+      return response.data?.data || [];
+    } catch (error) {
+      console.error('Failed to fetch resumes:', error);
+      return [];
+    }
+  },
+
+  createResume: async (url: string, filename: string) => {
+    const response = await apiClient.post('/resumes', { url, filename });
+    return response.data?.data;
+  },
+
+  deleteResume: async (id: string) => {
+    const response = await apiClient.delete(`/resumes/${id}`);
+    return response.data;
+  },
+
+  setDefaultResume: async (id: string) => {
+    const response = await apiClient.patch(`/resumes/${id}`, { isDefault: true });
+    return response.data?.data;
+  },
+
   // Request password reset
   requestPasswordReset: async () => {
     const response = await apiClient.post('/auth/forgot-password', {});

@@ -66,6 +66,7 @@ model User {
   jobsCreated     Job[]     @relation("JobCreator")
   applications    Application[]
   applicationDrafts ApplicationDraft[]
+  resumes         Resume[]
   savedJobs       SavedJob[]
   reviewsMade     Review[]  @relation("Reviewer")
   reviewsReceived Review[]  @relation("ReviewTarget")
@@ -100,10 +101,21 @@ model Profile {
   bio                String?            @db.Text
   location           String?
   skills             String[]
-  resumeUrl          String?
-  resumeFilename     String?
+  resumeUrl          String?            // @deprecated Use Resume model instead
+  resumeFilename     String?            // @deprecated Use Resume model instead
   verificationStatus VerificationStatus @default(PENDING)
   updatedAt          DateTime           @updatedAt
+}
+
+model Resume {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  url       String
+  filename  String
+  isDefault Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model EmployerProfile {

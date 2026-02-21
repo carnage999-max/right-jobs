@@ -55,6 +55,11 @@ export default function JobDetailScreen() {
     queryFn: () => profileService.getProfile(),
   });
 
+  const { data: resumes = [] } = useQuery({
+    queryKey: [QUERY_KEYS.PROFILE, 'resumes'],
+    queryFn: () => profileService.getResumes(),
+  });
+
   // Load draft when component mounts
   useEffect(() => {
     if (id && !draftLoaded) {
@@ -620,7 +625,7 @@ export default function JobDetailScreen() {
         <TouchableWithoutFeedback onPress={() => setShowResumeSelector(false)}>
           <View style={tw`flex-1 bg-black/50 items-end`}>
             <TouchableWithoutFeedback>
-              <View style={tw`bg-white rounded-t-[32px] w-full pt-8 pb-8 px-6 gap-y-4`}>
+              <View style={tw`bg-white rounded-t-[32px] w-full pt-8 pb-8 px-6 gap-y-4 max-h-[80%]`}>
                 {/* Header */}
                 <View style={tw`flex-row items-center justify-between mb-4 pb-4 border-b border-slate-100`}>
                   <Text style={[tw`text-xl font-black`, { color: '#0F172A' }]}>Select Resume</Text>
@@ -632,34 +637,48 @@ export default function JobDetailScreen() {
                   </TouchableOpacity>
                 </View>
 
-                {/* Master Resume Option */}
-                <TouchableOpacity 
-                  onPress={() => {
-                    setSelectedResumeUrl(null);
-                    setShowResumeSelector(false);
-                  }}
-                  style={[tw`p-4 rounded-2xl flex-row items-center justify-between border-2`, selectedResumeUrl === null ? tw`border-primary bg-primary/5` : tw`border-slate-200 bg-white`]}
-                >
-                  <View style={tw`flex-row items-center flex-1`}>
-                    <View style={tw`bg-primary/10 p-3 rounded-xl mr-3`}>
-                      <FileText size={18} color="#014D9F" />
+                {/* Resumes List */}
+                <ScrollView style={tw`max-h-[50%]`} showsVerticalScrollIndicator={false}>
+                  {resumes.length > 0 ? (
+                    <View style={tw`gap-3`}>
+                      {resumes.map((resume: any) => (
+                        <TouchableOpacity 
+                          key={resume.id}
+                          onPress={() => {
+                            setSelectedResumeUrl(resume.url);
+                            setShowResumeSelector(false);
+                          }}
+                          style={[tw`p-4 rounded-2xl flex-row items-center justify-between border-2`, selectedResumeUrl === resume.url ? tw`border-primary bg-primary/5` : tw`border-slate-200 bg-white`]}
+                        >
+                          <View style={tw`flex-row items-center flex-1`}>
+                            <View style={tw`bg-primary/10 p-3 rounded-xl mr-3`}>
+                              <FileText size={18} color="#014D9F" />
+                            </View>
+                            <View style={tw`flex-1`}>
+                              <Text style={[tw`font-black text-sm`, { color: '#0F172A' }]}>{resume.filename}</Text>
+                              {resume.isDefault && (
+                                <Text style={[tw`text-xs mt-1 font-bold text-green-700`]}>Default</Text>
+                              )}
+                            </View>
+                          </View>
+                          {selectedResumeUrl === resume.url && (
+                            <CheckCircle2 size={22} color="#014D9F" />
+                          )}
+                        </TouchableOpacity>
+                      ))}
                     </View>
-                    <View>
-                      <Text style={[tw`font-black text-sm`, { color: '#0F172A' }]}>Master Resume</Text>
-                      <Text style={[tw`text-xs mt-1`, { color: '#64748B' }]}>
-                        {profile?.data?.resumeFilename || 'resume.pdf'}
-                      </Text>
+                  ) : (
+                    <View style={tw`items-center py-8`}>
+                      <FileText size={32} color="#CBD5E1" style={tw`mb-3`} />
+                      <Text style={tw`text-slate-500 text-sm mb-2`}>No resumes uploaded</Text>
                     </View>
-                  </View>
-                  {selectedResumeUrl === null && (
-                    <CheckCircle2 size={22} color="#014D9F" />
                   )}
-                </TouchableOpacity>
+                </ScrollView>
 
                 {/* Divider */}
-                <View style={tw`h-px bg-slate-200 my-2`} />
+                {resumes.length > 0 && <View style={tw`h-px bg-slate-200 my-2`} />}
 
-                {/* Upload New Resume Option */}
+                {/* Manage Documents Button */}
                 <TouchableOpacity 
                   onPress={() => {
                     setShowResumeSelector(false);
@@ -670,7 +689,10 @@ export default function JobDetailScreen() {
                   <View style={tw`bg-slate-200 p-3 rounded-xl`}>
                     <Upload size={18} color="#64748B" />
                   </View>
-                  <Text style={[tw`font-black text-sm`, { color: '#0F172A' }]}>Manage Documents</Text>
+                  <View style={tw`flex-1`}>
+                    <Text style={[tw`font-black text-sm`, { color: '#0F172A' }]}>Manage Documents</Text>
+                    <Text style={[tw`text-xs mt-1`, { color: '#64748B' }]}>Upload or delete resumes</Text>
+                  </View>
                 </TouchableOpacity>
 
                 {/* Info */}
