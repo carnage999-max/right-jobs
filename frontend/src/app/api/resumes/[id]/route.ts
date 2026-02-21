@@ -88,17 +88,13 @@ export async function PATCH(
 
     // If setting as default, unset other defaults
     if (isDefault) {
-      await prisma.resume.updateMany(
-        {
-          where: {
-            userId: session.user.id,
-            id: { not: id },
-          },
+      await prisma.resume.updateMany({
+        where: {
+          userId: session.user.id,
+          id: { not: id },
         },
-        {
-          data: { isDefault: false },
-        }
-      );
+        data: { isDefault: false },
+      });
     }
 
     const updated = await prisma.resume.update({
