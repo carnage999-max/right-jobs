@@ -85,7 +85,7 @@ export default function ResumeDocumentsScreen() {
       setIsUploading(true);
 
       try {
-        // Step 1: Get presigned URL
+        // Step 1: Get presigned URL for S3 upload
         const presignResult = await profileService.getPresignedUrl(
           file.name,
           'application/pdf',
@@ -96,27 +96,24 @@ export default function ResumeDocumentsScreen() {
           throw new Error('Failed to get upload URL');
         }
 
-        // Step 2: Upload to S3
-        const formData = new FormData();
-        formData.append('file', {
-          uri: file.uri,
-          type: 'application/pdf',
-          name: file.name
-        } as any);
+        // Step 2: Read file and upload to S3 using PUT
+        const fileData = await fetch(file.uri);
+        const blob = await fileData.blob();
 
         const uploadResponse = await fetch(presignResult.url, {
           method: 'PUT',
-          body: formData,
+          body: blob,
           headers: {
-            'Content-Type': 'multipart/form-data'
+            'Content-Type': 'application/pdf'
           }
         });
 
         if (!uploadResponse.ok) {
-          throw new Error('Failed to upload file');
+          console.error('S3 upload failed:', uploadResponse.status, await uploadResponse.text());
+          throw new Error(`S3 upload failed with status ${uploadResponse.status}`);
         }
 
-        // Step 3: Create resume record
+        // Step 3: Save resume record to database
         const createResult = await profileService.createResume(
           presignResult.publicUrl,
           file.name
@@ -126,7 +123,7 @@ export default function ResumeDocumentsScreen() {
           queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.PROFILE, 'resumes'] });
           Alert.alert('Success', 'Resume uploaded successfully!');
         } else {
-          throw new Error('Failed to save resume');
+          throw new Error('Failed to save resume record');
         }
       } catch (error) {
         console.error('Upload error:', error);
