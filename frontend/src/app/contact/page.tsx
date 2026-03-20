@@ -1,8 +1,6 @@
 import { SharedThreeBg } from "@/components/shared-three-bg";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Mail, MessageSquare, MapPin, Phone } from "lucide-react";
+import { ContactForm } from "./ContactForm";
 
 export default function ContactPage() {
   return (
@@ -33,7 +31,43 @@ export default function ContactPage() {
                     </div>
                     <div>
                       <h3 className="font-bold text-slate-900">{item.title}</h3>
-                      <p className="text-primary font-bold">{item.detail}</p>
+                      {item.title === "Email Us" || item.title === "Mailing Address" || item.title === "Phone" ? (
+                        <div className="relative group/link inline-block">
+                          <span className="text-primary font-bold cursor-pointer hover:underline decoration-2 underline-offset-4">
+                            {item.detail}
+                          </span>
+                          <div className="absolute left-0 top-full pt-2 hidden group-hover/link:block z-50 min-w-[220px]">
+                            <div className="bg-white border border-slate-200 shadow-xl rounded-xl p-1.5 flex flex-col animate-in fade-in slide-in-from-top-2 duration-200">
+                              {item.title === "Email Us" ? (
+                                <a 
+                                  href={`mailto:${item.detail}`} 
+                                  className="px-3 py-2 hover:bg-slate-50 text-slate-700 hover:text-primary text-sm font-bold rounded-lg flex items-center gap-2 transition-colors"
+                                >
+                                  <Mail className="w-4 h-4" /> Open in Mail App
+                                </a>
+                              ) : item.title === "Mailing Address" ? (
+                                <a 
+                                  href={`https://maps.google.com/?q=${encodeURIComponent(item.detail)}`} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer" 
+                                  className="px-3 py-2 hover:bg-slate-50 text-slate-700 hover:text-primary text-sm font-bold rounded-lg flex items-center gap-2 transition-colors"
+                                >
+                                  <MapPin className="w-4 h-4" /> Open in Google Maps
+                                </a>
+                              ) : (
+                                <a 
+                                  href={`tel:${item.detail.replace(/[^0-9+]/g, '')}`} 
+                                  className="px-3 py-2 hover:bg-slate-50 text-slate-700 hover:text-primary text-sm font-bold rounded-lg flex items-center gap-2 transition-colors"
+                                >
+                                  <Phone className="w-4 h-4" /> Call Number
+                                </a>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      ) : (
+                        <p className="text-primary font-bold">{item.detail}</p>
+                      )}
                       <p className="text-sm text-slate-400 font-medium">{item.sub}</p>
                     </div>
                   </div>
@@ -41,41 +75,7 @@ export default function ContactPage() {
               </div>
             </div>
 
-            <div className="bg-white rounded-[2.5rem] border border-slate-200 p-8 lg:p-12 shadow-2xl shadow-slate-200/50">
-              <h2 className="text-2xl font-bold text-slate-900 mb-6">Send us a Message</h2>
-              <form className="space-y-6">
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <label className="text-sm font-bold text-slate-700">First Name</label>
-                    <Input placeholder="John" className="h-12 bg-slate-50 border-slate-200 rounded-xl" />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-bold text-slate-700">Last Name</label>
-                    <Input placeholder="Doe" className="h-12 bg-slate-50 border-slate-200 rounded-xl" />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700">Email Address</label>
-                  <Input type="email" placeholder="john@example.com" className="h-12 bg-slate-50 border-slate-200 rounded-xl" />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700">Subject</label>
-                  <select className="w-full h-12 px-4 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/20">
-                    <option>General Inquiry</option>
-                    <option>Technical Support</option>
-                    <option>Billing Question</option>
-                    <option>Partnership</option>
-                  </select>
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700">Message</label>
-                  <Textarea placeholder="How can we help?" className="min-h-[150px] bg-slate-50 border-slate-200 rounded-xl p-4" />
-                </div>
-                <Button className="w-full h-14 text-lg ios-button shadow-xl shadow-primary/20">
-                  Send Message
-                </Button>
-              </form>
-            </div>
+            <ContactForm />
           </div>
         </div>
       </section>

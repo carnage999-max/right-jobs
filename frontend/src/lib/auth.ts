@@ -43,7 +43,7 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
           const { email, password, captchaToken } = parsedCredentials.data;
 
           // 1. Verify reCAPTCHA for login
-          if (process.env.NODE_ENV === "production" || process.env.RECAPTCHA_SECRET_KEY) {
+          if (process.env.NODE_ENV === "production" && process.env.RECAPTCHA_SECRET_KEY) {
             const { verifyCaptcha } = await import("./captcha");
             const isValid = await verifyCaptcha(captchaToken || "");
             if (!isValid) {

@@ -13,7 +13,7 @@ export default auth((req) => {
     "/about",
     "/pricing",
     "/contact",
-    "/blog",
+    "/careers",
     "/privacy",
     "/terms",
     "/cookies",

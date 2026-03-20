@@ -27,6 +27,11 @@ export async function GET() {
             name: true,
             email: true,
             avatarUrl: true,
+            savedJobs: {
+              include: {
+                job: true
+              }
+            }
           }
         }
       }
@@ -45,6 +50,11 @@ export async function GET() {
               name: true,
               email: true,
               avatarUrl: true,
+              savedJobs: {
+                include: {
+                  job: true
+                }
+              }
             }
           }
         }

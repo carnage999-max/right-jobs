@@ -186,20 +186,7 @@ export function UnifiedAuth({ initialMode = "login" }: { initialMode?: "login" |
               </div>
            </div>
 
-           <div className="relative z-10">
-              <div className="p-6 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm">
-                 <p className="text-sm text-slate-400 italic">
-                   "The most secure and transparent platform I've ever used. The ID verification really filters out the noise."
-                 </p>
-                 <div className="mt-4 flex items-center gap-3">
-                    <div className="h-8 w-8 rounded-full bg-slate-700" />
-                    <div>
-                       <p className="text-xs font-bold">Sarah Jenkins</p>
-                       <p className="text-[10px] text-slate-500">Sr. Product Designer @ Vercel</p>
-                    </div>
-                 </div>
-              </div>
-           </div>
+
         </div>
 
         {/* Auth Form */}

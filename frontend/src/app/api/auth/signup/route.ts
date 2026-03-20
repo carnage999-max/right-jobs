@@ -25,7 +25,7 @@ export async function POST(req: Request) {
     const { captchaToken } = body;
 
     // 1. Verify reCAPTCHA
-    if (process.env.NODE_ENV === "production" || process.env.RECAPTCHA_SECRET_KEY) {
+    if (process.env.NODE_ENV === "production" && process.env.RECAPTCHA_SECRET_KEY) {
       const { verifyCaptcha } = await import("@/lib/captcha");
       const isValid = await verifyCaptcha(captchaToken);
       if (!isValid) {

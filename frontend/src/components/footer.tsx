@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
-import { Mail, MapPin, Facebook, Instagram, Youtube } from "lucide-react";
+import { Mail, MapPin, Facebook, Instagram, Youtube, Phone } from "lucide-react";
 
 // Custom X (Twitter) Icon
 const XIcon = (props: React.SVGProps<SVGSVGElement>) => (
@@ -31,7 +31,6 @@ export function Footer() {
     company: [
       { label: "About Us", href: "/about" },
       { label: "Careers", href: "/careers" },
-      { label: "Blog", href: "/blog" },
       { label: "Contact", href: "/contact" },
     ],
     legal: [
@@ -48,12 +47,12 @@ export function Footer() {
         <div className="grid gap-12 lg:grid-cols-[1.5fr_1fr_1fr_1fr]">
           <div className="space-y-6">
             <Link href="/" className="flex items-center">
-              <div className="relative h-20 w-80">
+              <div className="relative h-32 w-full max-w-[350px]">
                 <Image 
                   src="/right-jobs-logo-nobg.png" 
                   alt="Right Jobs Logo" 
                   fill
-                  className="object-contain object-left"
+                  className="object-contain object-left scale-125 origin-left"
                 />
               </div>
             </Link>
@@ -109,14 +108,50 @@ export function Footer() {
             <div className="col-span-2 lg:col-span-1">
               <h4 className="mb-6 text-sm font-bold uppercase tracking-widest text-slate-400">Support</h4>
               <ul className="space-y-4">
-                <li className="flex items-center gap-3 text-slate-600 font-semibold">
-                  <Mail className="h-4 w-4 text-primary" />
-                  <span className="truncate">info@rightjob.net</span>
-                </li>
-                <li className="flex items-start gap-3 text-slate-600 font-semibold">
-                  <MapPin className="h-4 w-4 text-primary shrink-0 mt-1" />
-                  <span>PO Box 52<br/>Detroit, ME 04929</span>
-                </li>
+                {[
+                  { icon: Mail, type: "email", detail: "info@rightjob.net" },
+                  { icon: Phone, type: "phone", detail: "207-947-1999" },
+                  { icon: MapPin, type: "address", detail: "PO Box 52, Detroit, ME 04929" },
+                ].map((item, idx) => (
+                  <li key={idx} className="flex items-start gap-3 text-slate-600 font-semibold relative group/link">
+                    <item.icon className={`h-4 w-4 text-primary shrink-0 ${item.type === 'address' ? 'mt-1' : ''}`} />
+                    <span className="cursor-pointer hover:text-primary transition-colors hover:underline decoration-2 underline-offset-4">
+                      {item.type === "address" ? (
+                         <>PO Box 52<br/>Detroit, ME 04929</>
+                      ) : (
+                         item.detail
+                      )}
+                    </span>
+                    <div className="absolute left-0 bottom-full pb-2 hidden group-hover/link:block z-50 min-w-[220px]">
+                      <div className="bg-white border border-slate-200 shadow-xl rounded-xl p-1.5 flex flex-col animate-in fade-in slide-in-from-bottom-2 duration-200">
+                        {item.type === "email" ? (
+                          <a 
+                            href={`mailto:${item.detail}`} 
+                            className="px-3 py-2 hover:bg-slate-50 text-slate-700 hover:text-primary text-sm font-bold rounded-lg flex items-center gap-2 transition-colors"
+                          >
+                            <Mail className="w-4 h-4" /> Open in Mail App
+                          </a>
+                        ) : item.type === "address" ? (
+                          <a 
+                            href={`https://maps.google.com/?q=${encodeURIComponent(item.detail)}`} 
+                            target="_blank" 
+                            rel="noopener noreferrer" 
+                            className="px-3 py-2 hover:bg-slate-50 text-slate-700 hover:text-primary text-sm font-bold rounded-lg flex items-center gap-2 transition-colors"
+                          >
+                            <MapPin className="w-4 h-4" /> Open in Google Maps
+                          </a>
+                        ) : (
+                          <a 
+                            href={`tel:${item.detail.replace(/[^0-9+]/g, '')}`} 
+                            className="px-3 py-2 hover:bg-slate-50 text-slate-700 hover:text-primary text-sm font-bold rounded-lg flex items-center gap-2 transition-colors"
+                          >
+                            <Phone className="w-4 h-4" /> Call Number
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  </li>
+                ))}
               </ul>
             </div>
           </div>

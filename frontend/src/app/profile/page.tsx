@@ -17,12 +17,14 @@ import {
   Plus,
   X,
   AlertCircle,
-  Edit2
+  Edit2,
+  Bookmark
 } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { useSession } from "next-auth/react";
 import { cn } from "@/lib/utils";
+import Link from "next/link";
 
 export default function ProfilePage() {
   const { data: session, update } = useSession();
@@ -40,6 +42,7 @@ export default function ProfilePage() {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [resumeUrl, setResumeUrl] = useState<string | null>(null);
   const [resumeFilename, setResumeFilename] = useState<string | null>(null);
+  const [savedJobs, setSavedJobs] = useState<any[]>([]);
   const [isUploadingResume, setIsUploadingResume] = useState(false);
   const [isRenamingResume, setIsRenamingResume] = useState(false);
   const [newResumeName, setNewResumeName] = useState("");
@@ -59,6 +62,7 @@ export default function ProfilePage() {
           setAvatarUrl(data.data.user.avatarUrl || null);
           setResumeUrl(data.data.resumeUrl || null);
           setResumeFilename(data.data.resumeFilename || null);
+          setSavedJobs(data.data.user?.savedJobs || []);
         }
       } catch (e) {
         toast.error("Failed to load profile");
@@ -325,12 +329,15 @@ export default function ProfilePage() {
       </div>
 
       <Tabs defaultValue="profile" className="w-full space-y-6">
-        <TabsList className="grid w-full grid-cols-2 p-1 bg-slate-100/80 rounded-2xl h-12 sm:h-14">
+        <TabsList className="grid w-full grid-cols-3 p-1 bg-slate-100/80 rounded-2xl h-12 sm:h-14">
            <TabsTrigger value="profile" className="rounded-xl font-bold text-xs sm:text-sm h-full data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all">
               Edit Profile
            </TabsTrigger>
            <TabsTrigger value="visibility" className="rounded-xl font-bold text-xs sm:text-sm h-full data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all">
               Visibility & Stats
+           </TabsTrigger>
+           <TabsTrigger value="saved" className="rounded-xl font-bold text-xs sm:text-sm h-full data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all">
+              Saved Jobs
            </TabsTrigger>
         </TabsList>
 
@@ -494,6 +501,42 @@ export default function ProfilePage() {
                   </div>
                </CardContent>
             </Card>
+        </TabsContent>
+
+        {/* SAVED JOBS TAB */}
+        <TabsContent value="saved" className="space-y-6 outline-none">
+           <Card className="ios-card bg-white shadow-xl">
+               <CardHeader className="pb-4">
+                  <CardTitle className="text-xl font-black">Saved Jobs</CardTitle>
+                  <CardDescription>Jobs you've kept an eye on.</CardDescription>
+               </CardHeader>
+               <CardContent className="space-y-4">
+                  {savedJobs.length > 0 ? (
+                     <div className="grid gap-4">
+                        {savedJobs.map((item) => (
+                           <div key={item.job.id} className="p-4 rounded-2xl border border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:border-slate-300 transition-colors">
+                              <div className="flex flex-col">
+                                 <h4 className="font-bold text-slate-900">{item.job.title}</h4>
+                                 <div className="text-sm font-medium text-slate-500">{item.job.companyName}</div>
+                                 <div className="text-xs text-slate-400 mt-1 flex items-center gap-1">
+                                    <MapPin className="h-3 w-3" /> {item.job.location}
+                                 </div>
+                              </div>
+                              <Button asChild className="ios-button font-bold text-xs" variant="outline" size="sm">
+                                 <Link href={`/jobs/${item.job.id}`}>View Job</Link>
+                              </Button>
+                           </div>
+                        ))}
+                     </div>
+                  ) : (
+                     <div className="py-12 flex flex-col items-center justify-center text-slate-400">
+                        <Bookmark className="h-12 w-12 mb-3 opacity-20" />
+                        <p className="font-bold">No saved jobs yet.</p>
+                        <p className="text-sm">Browse jobs and save them for later.</p>
+                     </div>
+                  )}
+               </CardContent>
+           </Card>
         </TabsContent>
       </Tabs>
     </div>

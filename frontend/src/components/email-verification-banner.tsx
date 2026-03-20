@@ -7,7 +7,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 export function EmailVerificationBanner() {
-  const { data: session } = useSession();
+  const { data: session, update } = useSession();
   const [dismissed, setDismissed] = useState(false);
   const [resending, setResending] = useState(false);
 
@@ -22,10 +22,15 @@ export function EmailVerificationBanner() {
       const res = await fetch("/api/auth/resend-verification", {
         method: "POST",
       });
+      const data = await res.json();
       if (res.ok) {
         toast.success("Verification email sent! Check your inbox.");
+      } else if (res.status === 400 && data.message === "Email already verified") {
+        toast.success("Your email is already verified!");
+        setDismissed(true);
+        update({ emailVerified: true });
       } else {
-        toast.error("Failed to resend. Please try again later.");
+        toast.error(data.message || "Failed to resend. Please try again later.");
       }
     } catch {
       toast.error("Something went wrong.");

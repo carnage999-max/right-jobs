@@ -2,13 +2,19 @@ import { SharedThreeBg } from "@/components/shared-three-bg";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Users, ShieldCheck, Target, Rocket } from "lucide-react";
+import prisma from "@/lib/prisma";
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  const userCount = await prisma.user.count();
+  const jobCount = await prisma.job.count();
+  const applicationCount = await prisma.application.count();
+  const verifiedCount = await prisma.idVerification.count({ where: { status: "VERIFIED" } });
+
   const stats = [
-    { label: "Verified Users", value: "50k+" },
-    { label: "Serious Employers", value: "2.5k" },
-    { label: "Job Matches", value: "120k" },
-    { label: "Scams Blocked", value: "15k" },
+    { label: "Registered Users", value: `${userCount}+` },
+    { label: "Live Jobs", value: `${jobCount}` },
+    { label: "Job Applications", value: `${applicationCount}+` },
+    { label: "Verified Users", value: `${verifiedCount}` },
   ];
 
   return (
@@ -53,7 +59,7 @@ export default function AboutPage() {
             </div>
             <div className="relative aspect-square rounded-[3rem] overflow-hidden bg-slate-100 shadow-2xl">
                <img 
-                 src="https://images.unsplash.com/photo-1522071823991-b9671f9d7f1f?q=80&w=2070&auto=format&fit=crop" 
+                 src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=2071&auto=format&fit=crop" 
                  alt="Team working together" 
                  className="absolute inset-0 w-full h-full object-cover"
                />
@@ -96,7 +102,7 @@ export default function AboutPage() {
             <Button size="lg" className="bg-white text-primary hover:bg-slate-100 ios-button" asChild>
               <Link href="/jobs">Explore Opportunities</Link>
             </Button>
-            <Button size="lg" variant="outline" className="border-white/20 text-white hover:bg-white/10 ios-button" asChild>
+            <Button size="lg" variant="outline" className="bg-transparent border-white text-white hover:bg-white/10 hover:text-white ios-button" asChild>
               <Link href="/auth/signup">Join the Platform</Link>
             </Button>
           </div>

@@ -240,9 +240,13 @@ export const sendIssueReportEmail = async (
   attachments: { filename: string; content: string }[] = []
 ) => {
   try {
+    const toEmails = process.env.CONTACT_EMAIL 
+      ? process.env.CONTACT_EMAIL.split(',').map(e => e.trim()) 
+      : ["jamesezekiel039@gmail.com"];
+
     const { data, error } = await resend.emails.send({
       from: "Right Jobs <info@rightjob.net>",
-      to: "jamesezekiel039@gmail.com",
+      to: toEmails,
       subject: `RightJobs: System Issue Alert - ${userEmail}`,
       html: issueReportTemplate(userEmail, description),
       attachments: attachments,

@@ -9,6 +9,7 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
+    const session = await auth();
     
     const job = await prisma.job.findUnique({
       where: { id },
@@ -32,7 +33,15 @@ export async function GET(
       return NextResponse.json({ ok: false, message: "Job not found" }, { status: 404 });
     }
 
-    return NextResponse.json({ ok: true, job });
+    let isSaved = false;
+    if (session?.user) {
+      const savedJob = await prisma.savedJob.findUnique({
+        where: { userId_jobId: { userId: session.user.id, jobId: id } }
+      });
+      isSaved = !!savedJob;
+    }
+
+    return NextResponse.json({ ok: true, job, isSaved });
   } catch (error) {
     console.error("Fetch job detail error:", error);
     return NextResponse.json({ ok: false, message: "Failed to fetch job details" }, { status: 500 });

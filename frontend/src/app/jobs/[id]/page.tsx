@@ -47,6 +47,8 @@ export default function JobDetailsPage({ params }: { params: Promise<{ id: strin
   const [isApplying, setIsApplying] = useState(false);
   const [isApplied, setIsApplied] = useState(false);
   const [coverLetter, setCoverLetter] = useState("");
+  const [isSaved, setIsSaved] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     async function fetchJob() {
@@ -55,6 +57,7 @@ export default function JobDetailsPage({ params }: { params: Promise<{ id: strin
         const data = await response.json();
         if (data.ok) {
           setJob(data.job);
+          setIsSaved(data.isSaved || false);
         } else {
           toast.error(data.message || "Job not found");
           router.push("/jobs");
@@ -89,6 +92,38 @@ export default function JobDetailsPage({ params }: { params: Promise<{ id: strin
       toast.error("An unexpected error occurred. Please try again.");
     } finally {
       setIsApplying(false);
+    }
+  };
+
+  const handleSaveJob = async () => {
+    setIsSaving(true);
+    try {
+      if (isSaved) {
+        const response = await fetch(`/api/jobs/${resolvedParams.id}/save`, { method: "DELETE" });
+        if (response.ok) {
+          setIsSaved(false);
+          toast.success("Job removed from saved list");
+        } else {
+          toast.error("Failed to unsave job");
+        }
+      } else {
+        const response = await fetch(`/api/jobs/${resolvedParams.id}/save`, { method: "POST" });
+        if (response.ok) {
+          setIsSaved(true);
+          toast.success("Job saved successfully!");
+        } else {
+          const data = await response.json();
+          if (response.status === 401) {
+            toast.error("Please sign in to save jobs");
+          } else {
+            toast.error(data.message || "Failed to save job");
+          }
+        }
+      }
+    } catch (error) {
+      toast.error("An unexpected error occurred");
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -274,8 +309,18 @@ export default function JobDetailsPage({ params }: { params: Promise<{ id: strin
                        </DialogContent>
                     </Dialog>
                  )}
-                 <Button variant="ghost" className="w-full h-14 text-slate-500 font-bold hover:text-slate-900 transition-colors rounded-2xl">
-                    <Bookmark className="mr-2 h-5 w-5" /> Save Job for Later
+                 <Button 
+                    variant="ghost" 
+                    className="w-full h-14 text-slate-500 font-bold hover:text-slate-900 transition-colors rounded-2xl"
+                    onClick={handleSaveJob}
+                    disabled={isSaving}
+                 >
+                    {isSaving ? (
+                       <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                    ) : (
+                       <Bookmark className={`mr-2 h-5 w-5 ${isSaved ? "fill-current text-primary" : ""}`} /> 
+                    )}
+                    {isSaving ? "Saving..." : isSaved ? "Saved" : "Save Job for Later"}
                  </Button>
               </CardContent>
            </Card>
