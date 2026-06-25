@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Briefcase, ShieldCheck, Zap, ArrowRight, CheckCircle2 } from "lucide-react";
 import { WhySlider } from "@/components/why-slider";
-import { SharedThreeBg } from "@/components/shared-three-bg";
 import Image from "next/image";
 
 export default function LandingPage() {
@@ -11,7 +10,17 @@ export default function LandingPage() {
     <div className="flex flex-col">
       {/* Hero Section */}
       <section className="relative overflow-hidden pt-8 pb-24 lg:pt-12 lg:pb-32">
-        <SharedThreeBg variant="subtle" className="opacity-80" />
+        <video
+          className="absolute inset-0 h-full w-full object-cover"
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="auto"
+        >
+          <source src="/hero-video.mp4" type="video/mp4" />
+        </video>
+        <div className="absolute inset-0 bg-gradient-to-b from-white/88 via-white/76 to-white/90" />
         <div className="container mx-auto px-4 relative z-10">
           <div className="flex flex-col items-center text-center">
             {/* Full Image Visibility with Balanced Spacing */}
