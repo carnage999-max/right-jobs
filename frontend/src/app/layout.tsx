@@ -21,6 +21,7 @@ import { EmailVerificationBanner } from "@/components/email-verification-banner"
 import { ReportIssue } from "@/components/report-issue";
 
 export const metadata: Metadata = {
+  manifest: "/manifest.webmanifest",
   title: {
     default: "Right Jobs | Secure Production-Grade Job Platform",
     template: "%s | Right Jobs"
@@ -52,7 +53,15 @@ export const metadata: Metadata = {
   robots: {
     index: true,
     follow: true,
-  }
+  },
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/icon.png", type: "image/png", sizes: "512x512" },
+    ],
+    apple: [{ url: "/apple-icon.png", sizes: "180x180", type: "image/png" }],
+    shortcut: ["/favicon.ico"],
+  },
 };
 
 export default function RootLayout({
