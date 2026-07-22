@@ -1,11 +1,22 @@
 "use client";
 
 import { useState } from "react";
+import Script from "next/script";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+
+const TURNSTILE_SITE_KEY = "0x4AAAAAADDgOSr-SHaMQuQj";
+
+declare global {
+  interface Window {
+    turnstile?: {
+      reset: () => void;
+    };
+  }
+}
 
 export function ContactForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -17,15 +28,25 @@ export function ContactForm() {
     message: ""
   });
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    const turnstileToken = new FormData(e.currentTarget)
+      .get("cf-turnstile-response")
+      ?.toString();
+
+    if (!turnstileToken) {
+      toast.error("Please complete the security check before sending your message.");
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
       const response = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData)
+        body: JSON.stringify({ ...formData, turnstileToken })
       });
 
       const data = await response.json();
@@ -39,11 +60,14 @@ export function ContactForm() {
             subject: "General Inquiry",
             message: ""
         });
+        window.turnstile?.reset();
       } else {
         toast.error(data.message || "Failed to send message. Please try again.");
+        window.turnstile?.reset();
       }
-    } catch (error) {
+    } catch {
       toast.error("An error occurred while sending your message.");
+      window.turnstile?.reset();
     } finally {
       setIsSubmitting(false);
     }
@@ -51,6 +75,10 @@ export function ContactForm() {
 
   return (
     <div className="bg-white rounded-[2.5rem] border border-slate-200 p-8 lg:p-12 shadow-2xl shadow-slate-200/50">
+      <Script
+        src="https://challenges.cloudflare.com/turnstile/v0/api.js"
+        strategy="afterInteractive"
+      />
       <h2 className="text-2xl font-bold text-slate-900 mb-6">Send us a Message</h2>
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid md:grid-cols-2 gap-6">
@@ -110,6 +138,11 @@ export function ContactForm() {
             className="min-h-[150px] bg-slate-50 border-slate-200 rounded-xl p-4" 
           />
         </div>
+        <div
+          className="cf-turnstile"
+          data-sitekey={TURNSTILE_SITE_KEY}
+          data-action="turnstile-spin-v2"
+        />
         <Button 
           type="submit" 
           disabled={isSubmitting} 
