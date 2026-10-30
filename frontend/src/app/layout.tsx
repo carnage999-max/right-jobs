@@ -19,40 +19,52 @@ import { Providers } from "@/components/providers";
 import { ButtonClickEffect } from "@/components/button-click-effect";
 import { EmailVerificationBanner } from "@/components/email-verification-banner";
 import { ReportIssue } from "@/components/report-issue";
+import { Analytics } from "@/components/analytics";
+import { JsonLd } from "@/components/json-ld";
+import { SITE_NAME, SITE_TAGLINE, SITE_URL } from "@/lib/seo/site";
+
+const DESCRIPTION = `${SITE_TAGLINE} Browse open jobs from verified employers, apply in minutes, and hire with confidence on ${SITE_NAME}.`;
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   manifest: "/manifest.webmanifest",
+  applicationName: SITE_NAME,
   title: {
-    default: "Right Jobs | Secure Production-Grade Job Platform",
-    template: "%s | Right Jobs"
+    default: `${SITE_NAME} | ${SITE_TAGLINE}`,
+    template: `%s | ${SITE_NAME}`,
   },
-  description: "A high-performance job ecosystem featuring mandatory identity verification, secure MFA administration, and an iOS-inspired focus on trust and transparency.",
-  keywords: ["job board", "employment", "verified hiring", "secure careers", "production nextjs"],
-  authors: [{ name: "Right Jobs Engineering" }],
-  creator: "Right Jobs Team",
+  description: DESCRIPTION,
+  alternates: { canonical: "/" },
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://rightjob.net",
-    title: "Right Jobs | Find Your Next Opportunity Safely",
-    description: "The next generation of employment platforms with a 100% verified user base and administrative transparency.",
-    siteName: "Right Jobs",
-    images: [{
-      url: "/right-jobs-logo.png",
-      width: 1200,
-      height: 630,
-      alt: "Right Jobs Platform Preview"
-    }]
+    url: "/",
+    title: `${SITE_NAME} | ${SITE_TAGLINE}`,
+    description: DESCRIPTION,
+    siteName: SITE_NAME,
+    images: [
+      {
+        url: "/right-jobs-logo.png",
+        width: 1200,
+        height: 630,
+        alt: `${SITE_NAME}: ${SITE_TAGLINE}`,
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Right Jobs | Secure Career Marketplace",
-    description: "The most trusted way to find jobs and hire talent.",
+    title: `${SITE_NAME} | ${SITE_TAGLINE}`,
+    description: DESCRIPTION,
     images: ["/right-jobs-logo.png"],
   },
   robots: {
     index: true,
     follow: true,
+    googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1 },
+  },
+  verification: {
+    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || undefined,
+    other: process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION ? { "msvalidate.01": process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION } : undefined,
   },
   icons: {
     icon: [
@@ -82,6 +94,16 @@ export default function RootLayout({
           <ReportIssue />
           <Toaster />
         </Providers>
+        <Analytics gaId={process.env.NEXT_PUBLIC_GA_ID?.trim() || undefined} />
+        <JsonLd
+          data={{
+            "@context": "https://schema.org",
+            "@graph": [
+              { "@type": "Organization", "@id": `${SITE_URL}/#organization`, name: SITE_NAME, url: SITE_URL, logo: `${SITE_URL}/icon.png`, slogan: SITE_TAGLINE },
+              { "@type": "WebSite", "@id": `${SITE_URL}/#website`, url: SITE_URL, name: SITE_NAME, inLanguage: "en-US", publisher: { "@id": `${SITE_URL}/#organization` } },
+            ],
+          }}
+        />
       </body>
     </html>
   );
