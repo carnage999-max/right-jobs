@@ -18,7 +18,6 @@ export async function GET(
           select: {
             name: true,
             avatarUrl: true,
-            email: true,
             idVerification: {
               select: {
                 status: true,
